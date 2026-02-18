@@ -30,7 +30,7 @@ except Exception:
 
 ROOT = Path(__file__).resolve().parent.parent
 D1_PATH = ROOT / "data/Binance_BTCUSDT_D1.csv"
-LOG_JSON = ROOT / "public/log.json"
+LOG_JSON = ROOT / "log.json"
 
 
 @dataclass
@@ -404,7 +404,7 @@ def main() -> None:
         except Exception:
             pass
 
-    print("Updated: public/log.json")
+    print("Updated: log.json")
     print(msg)
 
 
