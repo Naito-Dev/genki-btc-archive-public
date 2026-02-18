@@ -293,7 +293,9 @@
         });
       }
 
-      fetch('/log.json?ts=' + Date.now())
+      var logUrl = new URL('log.json', window.location.href);
+      logUrl.searchParams.set('ts', String(Date.now()));
+      fetch(logUrl.toString())
         .then(function (r) { return r.json(); })
         .then(async function (log) {
           var entries = Array.isArray(log.entries) ? log.entries.slice() : [];
