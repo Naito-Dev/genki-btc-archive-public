@@ -30,7 +30,7 @@ except Exception:
 
 ROOT = Path(__file__).resolve().parent.parent
 D1_PATH = ROOT / "data/Binance_BTCUSDT_D1.csv"
-LOG_JSON = ROOT / "log.json"
+LOG_JSON = ROOT / "public/log.json"
 
 
 @dataclass
@@ -385,6 +385,11 @@ def main() -> None:
     on_actions = os.getenv("GITHUB_ACTIONS", "").strip().lower() == "true"
     log = load_log()
     start_date = str(log.get("start_date_utc") or "2026-02-17")
+    today_utc = _now_utc().date().isoformat()
+    latest = log.get("latest") if isinstance(log.get("latest"), dict) else {}
+    if latest.get("date") == today_utc:
+        print("No changes: today's UTC entry already exists.")
+        return
     state = build_daily_state(start_date)
     if dry_run:
         state.notes = "Daily DRY_RUN update."
@@ -404,7 +409,7 @@ def main() -> None:
         except Exception:
             pass
 
-    print("Updated: log.json")
+    print("Updated: public/log.json")
     print(msg)
 
 
