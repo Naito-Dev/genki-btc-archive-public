@@ -1,0 +1,48 @@
+{
+  "entries": [
+    {
+      "allocation": 0,
+      "allocation_changed": false,
+      "btc_price": 67087.59,
+      "confidence_score": null,
+      "data_source": "unavailable",
+      "date": "2026-02-18",
+      "day": "Day 1/30",
+      "hash": "5dfddb21d1b9c8d928c564e51f2d245202c6c135503fdd241164b3efe3e6ebdd",
+      "logic_version": "v1.0",
+      "notes": "Daily DRY_RUN update.",
+      "pnl_btc": null,
+      "position": "unknown",
+      "prev_hash": null,
+      "price_source": "bitget_spot",
+      "reason_summary": "MINIMAL_MODE: regime unavailable",
+      "regime": "unknown",
+      "status": "NO_TRADE",
+      "timestamp_utc": "2026-02-18T14:22:58Z",
+      "updated_at_utc": "2026-02-18T14:22:58Z"
+    }
+  ],
+  "last_updated_utc": "2026-02-18T14:22:58Z",
+  "latest": {
+    "allocation": 0,
+    "allocation_changed": false,
+    "btc_price": 67087.59,
+    "confidence_score": null,
+    "data_source": "unavailable",
+    "date": "2026-02-18",
+    "day": "Day 1/30",
+    "hash": "5dfddb21d1b9c8d928c564e51f2d245202c6c135503fdd241164b3efe3e6ebdd",
+    "logic_version": "v1.0",
+    "notes": "Daily DRY_RUN update.",
+    "pnl_btc": null,
+    "position": "unknown",
+    "prev_hash": null,
+    "price_source": "bitget_spot",
+    "reason_summary": "MINIMAL_MODE: regime unavailable",
+    "regime": "unknown",
+    "status": "NO_TRADE",
+    "timestamp_utc": "2026-02-18T14:22:58Z",
+    "updated_at_utc": "2026-02-18T14:22:58Z"
+  },
+  "start_date_utc": "2026-02-17"
+}
