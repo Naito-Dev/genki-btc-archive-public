@@ -8,19 +8,21 @@
       "data_source": "unavailable",
       "date": "2026-02-18",
       "day": "Day 1/30",
+      "hash": "aa93b2d597e946f3ce40ca3685ab3faba8e22efaee475f7ced3a2eb2a4a85dcf",
       "logic_version": "v1.0",
       "notes": "Daily DRY_RUN update.",
       "pnl_btc": null,
       "position": "unknown",
+      "prev_hash": null,
       "price_source": "fallback_15m",
       "reason_summary": "MINIMAL_MODE: regime unavailable",
       "regime": "unknown",
       "status": "DATA_STALE",
-      "timestamp_utc": "2026-02-18T12:28:24Z",
-      "updated_at_utc": "2026-02-18T12:28:24Z"
+      "timestamp_utc": "2026-02-18T12:31:48Z",
+      "updated_at_utc": "2026-02-18T12:31:48Z"
     }
   ],
-  "last_updated_utc": "2026-02-18T12:28:24Z",
+  "last_updated_utc": "2026-02-18T12:31:48Z",
   "latest": {
     "allocation": 0,
     "allocation_changed": false,
@@ -29,15 +31,17 @@
     "data_source": "unavailable",
     "date": "2026-02-18",
     "day": "Day 1/30",
+    "hash": "aa93b2d597e946f3ce40ca3685ab3faba8e22efaee475f7ced3a2eb2a4a85dcf",
     "logic_version": "v1.0",
     "notes": "Daily DRY_RUN update.",
     "pnl_btc": null,
     "position": "unknown",
+    "prev_hash": null,
     "price_source": "fallback_15m",
     "reason_summary": "MINIMAL_MODE: regime unavailable",
     "regime": "unknown",
     "status": "DATA_STALE",
-    "timestamp_utc": "2026-02-18T12:28:24Z",
-    "updated_at_utc": "2026-02-18T12:28:24Z"
+    "timestamp_utc": "2026-02-18T12:31:48Z",
+    "updated_at_utc": "2026-02-18T12:31:48Z"
   }
 }
