@@ -209,9 +209,14 @@
         var prev = null;
         for (var i = 0; i < entries.length; i++) {
           var e = entries[i];
-          var body = canonical(e) + '|' + (e.prev_hash || '');
+          var prevHash = (e.prev_hash == null ? null : String(e.prev_hash));
+          var body = canonical(e) + '|' + (prevHash || '');
           var computed = await sha256Hex(body);
-          if (e.prev_hash !== prev) return { ok: false, idx: i, reason: 'prev_hash mismatch' };
+          if (i === 0) {
+            if (prevHash !== null) return { ok: false, idx: i, reason: 'genesis prev_hash must be null' };
+          } else if (prevHash !== prev) {
+            return { ok: false, idx: i, reason: 'prev_hash mismatch' };
+          }
           if (e.hash !== computed) return { ok: false, idx: i, reason: 'hash mismatch' };
           prev = e.hash || null;
         }

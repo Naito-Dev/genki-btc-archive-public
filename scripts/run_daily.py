@@ -4,10 +4,11 @@ from __future__ import annotations
 import json
 import os
 import hashlib
+import statistics
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Callable
 from urllib import parse, request
 
 try:
@@ -147,6 +148,97 @@ def _fetch_binance_price(symbol: str = "BTC/USDT") -> float:
     return float(price)
 
 
+def _fetch_coinbase_price(symbol: str = "BTC/USDT") -> float:
+    compact = _to_compact_symbol(symbol)
+    if compact.endswith("USDT"):
+        compact = compact[:-4] + "USD"
+    pair = f"{compact[:-3]}-{compact[-3:]}"  # BTC-USD
+    url = f"https://api.exchange.coinbase.com/products/{pair}/ticker"
+    data = _http_get_json(url)
+    price = data.get("price")
+    if price is None:
+        raise RuntimeError(f"coinbase missing price for {pair}")
+    return float(price)
+
+
+def _fetch_kraken_price(symbol: str = "BTC/USDT") -> float:
+    compact = _to_compact_symbol(symbol)
+    if compact.endswith("USDT"):
+        compact = compact[:-4] + "USD"
+    pair = f"{compact[:-3]}{compact[-3:]}"  # BTCUSD
+    url = f"https://api.kraken.com/0/public/Ticker?pair={pair}"
+    data = _http_get_json(url)
+    result = data.get("result") or {}
+    if not isinstance(result, dict) or not result:
+        raise RuntimeError(f"kraken empty result for {pair}")
+    first = next(iter(result.values()))
+    c = first.get("c") if isinstance(first, dict) else None
+    if not c or not isinstance(c, list) or not c[0]:
+        raise RuntimeError(f"kraken missing close for {pair}")
+    return float(c[0])
+
+
+def _fetch_bitstamp_price(symbol: str = "BTC/USDT") -> float:
+    compact = _to_compact_symbol(symbol)
+    if compact.endswith("USDT"):
+        compact = compact[:-4] + "USD"
+    pair = f"{compact[:-3].lower()}{compact[-3:].lower()}"  # btcusd
+    url = f"https://www.bitstamp.net/api/v2/ticker/{pair}/"
+    data = _http_get_json(url)
+    last = data.get("last")
+    if last is None:
+        raise RuntimeError(f"bitstamp missing last for {pair}")
+    return float(last)
+
+
+def _fetch_coingecko_price(symbol: str = "BTC/USDT") -> float:
+    compact = _to_compact_symbol(symbol)
+    if compact != "BTCUSDT":
+        raise RuntimeError(f"coingecko unsupported symbol {compact}")
+    url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+    data = _http_get_json(url)
+    btc = data.get("bitcoin") or {}
+    price = btc.get("usd")
+    if price is None:
+        raise RuntimeError("coingecko missing bitcoin.usd")
+    return float(price)
+
+
+def _fetch_live_consensus_price(symbol: str = "BTC/USDT") -> tuple[float, str]:
+    sources: list[tuple[str, Callable[[str], float]]] = [
+        ("bitget_spot", _fetch_bitget_price),
+        ("binance_spot", _fetch_binance_price),
+        ("coinbase_spot", _fetch_coinbase_price),
+        ("kraken_spot", _fetch_kraken_price),
+        ("bitstamp_spot", _fetch_bitstamp_price),
+        ("coingecko_index", _fetch_coingecko_price),
+    ]
+
+    prices: list[tuple[str, float]] = []
+    errors: list[str] = []
+    for name, fn in sources:
+        try:
+            v = fn(symbol)
+            if v > 0:
+                prices.append((name, float(v)))
+        except Exception as e:
+            errors.append(f"{name}:{type(e).__name__}")
+
+    if len(prices) < 3:
+        raise RuntimeError(f"consensus insufficient sources (<3). errors={','.join(errors)}")
+
+    raw_vals = [p for _, p in prices]
+    med = statistics.median(raw_vals)
+    tol = 0.008
+    inliers = [(n, p) for n, p in prices if abs(p - med) / med <= tol]
+    if len(inliers) < 3:
+        raise RuntimeError("consensus rejected: fewer than 3 inliers within ±0.8%")
+
+    final_med = statistics.median([p for _, p in inliers])
+    src = "consensus:" + ",".join(n for n, _ in inliers)
+    return final_med, src
+
+
 def _send_telegram(msg: str) -> None:
     token = os.getenv("TELEGRAM_TOKEN", "").strip()
     chat_id = os.getenv("TELEGRAM_CHAT_ID", "").strip() or os.getenv("TELEGRAM_CHATID", "").strip()
@@ -172,20 +264,13 @@ def build_daily_state(start_date_utc: str) -> DailyState:
 
     symbol = os.getenv("BITGET_SYMBOL", "BTC/USDT")
     try:
-        price = _fetch_bitget_price(symbol)
-        price_source = "bitget_spot"
+        price, price_source = _fetch_live_consensus_price(symbol)
         status = "NO_TRADE"
     except Exception as e:
-        print(f"[Genki BTC Archive] bitget price fetch failed: {type(e).__name__}: {e}")
-        try:
-            price = _fetch_binance_price(symbol)
-            price_source = "binance_spot"
-            status = "NO_TRADE"
-        except Exception as e2:
-            print(f"[Genki BTC Archive] binance price fetch failed: {type(e2).__name__}: {e2}")
-            price = None
-            price_source = "unavailable"
-            status = "API_ERROR"
+        print(f"[Genki BTC Archive] live price consensus failed: {type(e).__name__}: {e}")
+        price = None
+        price_source = "unavailable"
+        status = "API_ERROR"
 
     try:
         if vm is None:
@@ -300,6 +385,7 @@ def main() -> None:
     log = load_log()
     start_date = str(log.get("start_date_utc") or "2026-02-17")
     state = build_daily_state(start_date)
+    state.notes = "Daily DRY_RUN update." if dry_run else "Daily live update (Actions)."
     log = upsert_today(log, state)
     save_log(log)
 
