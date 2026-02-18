@@ -382,10 +382,14 @@ def upsert_today(log: dict, state: DailyState) -> dict:
 
 def main() -> None:
     dry_run = os.getenv("DRY_RUN", "1").strip() != "0"
+    on_actions = os.getenv("GITHUB_ACTIONS", "").strip().lower() == "true"
     log = load_log()
     start_date = str(log.get("start_date_utc") or "2026-02-17")
     state = build_daily_state(start_date)
-    state.notes = "Daily DRY_RUN update." if dry_run else "Daily live update (Actions)."
+    if dry_run:
+        state.notes = "Daily DRY_RUN update."
+    else:
+        state.notes = "Daily live update (Actions)." if on_actions else "Daily live update (manual)."
     log = upsert_today(log, state)
     save_log(log)
 
