@@ -5,6 +5,7 @@ import json
 import os
 import hashlib
 import statistics
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,8 +16,6 @@ try:
     import pandas as pd  # type: ignore
 except Exception:
     pd = None  # type: ignore
-
-import sys
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -336,10 +335,33 @@ def load_log() -> dict:
 
 def save_log(data: dict) -> None:
     LOG_JSON.parent.mkdir(parents=True, exist_ok=True)
-    LOG_JSON.write_text(
+    tmp_path = LOG_JSON.with_suffix(LOG_JSON.suffix + ".tmp")
+    tmp_path.write_text(
         json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    os.replace(tmp_path, LOG_JSON)
+
+
+def _validate_chain(entries: list[dict]) -> tuple[bool, str]:
+    ordered = sorted(entries, key=lambda x: x.get("date", ""))
+    prev = None
+    for i, e in enumerate(ordered):
+        prev_hash = e.get("prev_hash")
+        if i == 0:
+            if prev_hash is not None:
+                return False, "genesis prev_hash must be null"
+        else:
+            if prev_hash != prev:
+                return False, "prev_hash mismatch"
+
+        clean = {k: v for k, v in e.items() if k not in ("hash", "prev_hash")}
+        body = json.dumps(clean, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        expected = _sha256_hex(body + "|" + (prev_hash or ""))
+        if e.get("hash") != expected:
+            return False, "hash mismatch"
+        prev = e.get("hash")
+    return True, ""
 
 
 def upsert_today(log: dict, state: DailyState) -> dict:
@@ -420,6 +442,12 @@ def main() -> None:
     else:
         state.notes = "Daily live update (Actions)." if on_actions else "Daily live update (manual)."
     log = upsert_today(log, state)
+
+    ok, reason = _validate_chain(log.get("entries", []))
+    if not ok:
+        print(f"[Genki BTC Archive] chain validation failed: {reason}", file=sys.stderr)
+        raise SystemExit(2)
+
     save_log(log)
 
     msg = (
