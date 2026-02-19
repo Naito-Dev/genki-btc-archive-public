@@ -30,7 +30,7 @@
     .hero p { margin: 0; color: var(--muted); }
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 14px;
       margin-top: 20px;
     }
@@ -138,6 +138,11 @@
         <div class="value" data-kpi-chain>—</div>
         <div class="tiny" data-kpi-chain-note></div>
       </article>
+      <article class="card">
+        <div class="label">Portfolio Snapshot</div>
+        <div class="value" data-kpi-equity>—</div>
+        <div class="tiny" data-kpi-pnl></div>
+      </article>
     </section>
 
     <section class="panel card">
@@ -179,6 +184,8 @@
         status: document.querySelector('[data-kpi-status]'),
         chain: document.querySelector('[data-kpi-chain]'),
         chainNote: document.querySelector('[data-kpi-chain-note]'),
+        equity: document.querySelector('[data-kpi-equity]'),
+        pnl: document.querySelector('[data-kpi-pnl]'),
         rows: document.querySelector('[data-rows]'),
         proof: document.querySelector('[data-proof]'),
         copyProof: document.querySelector('[data-copy-proof]'),
@@ -235,7 +242,7 @@
             '<div>' + allocBadge + '</div>' +
             '<div>' + fmtPrice(e.btc_price) + '</div>' +
             '<div class="' + statusClass + '">' + (e.status || 'N/A') + '</div>' +
-            '<div>' + (e.reason_summary || '—') + '</div>';
+            '<div>' + (e.position || 'N/A') + ' | ' + (e.reason_summary || '—') + '</div>';
           els.rows.appendChild(row);
         });
       }
@@ -313,6 +320,12 @@
           els.priceSource.textContent = 'Source: ' + (latest.price_source || 'unavailable');
           els.allocation.textContent = (latest.allocation != null ? latest.allocation + '%' : 'N/A');
           els.status.textContent = 'Status: ' + (latest.status || 'N/A');
+          els.equity.textContent = (typeof latest.equity_usd === 'number')
+            ? ('$' + latest.equity_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
+            : 'N/A';
+          els.pnl.textContent = 'PnL: ' + ((typeof latest.pnl_usd === 'number')
+            ? ('$' + latest.pnl_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
+            : 'N/A') + ' | Position: ' + (latest.position || 'N/A');
 
           renderRows(entries);
           renderChart(entries);

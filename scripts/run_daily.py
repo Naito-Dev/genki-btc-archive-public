@@ -47,6 +47,9 @@ class DailyState:
     data_source: str
     price_source: str
     status: str
+    position: str = "unknown"
+    equity_usd: Optional[float] = None
+    pnl_usd: Optional[float] = None
     pnl_btc: Optional[float] = None
 
 
@@ -68,6 +71,16 @@ def _round_or_none(value: Optional[float], digits: int) -> Optional[float]:
     if value is None:
         return None
     return round(float(value), digits)
+
+
+def _env_float(name: str) -> Optional[float]:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return None
+    try:
+        return float(raw)
+    except Exception:
+        return None
 
 
 def _sha256_hex(s: str) -> str:
@@ -257,6 +270,7 @@ def build_daily_state(start_date_utc: str) -> DailyState:
 
     allocation = 0
     trigger = "MINIMAL_MODE: regime unavailable"
+    position = "CASH"
     price: Optional[float] = None
     data_source = "unavailable"
     price_source = "unavailable"
@@ -281,6 +295,7 @@ def build_daily_state(start_date_utc: str) -> DailyState:
             raise RuntimeError("Regime table is empty")
         latest = regime.iloc[-1]
         allocation = _allocation_from_weight(float(latest["target_weight"]))
+        position = "CASH" if allocation == 0 else "LONG"
         trigger = _regime_reason(latest)
         data_source = "csv"
 
@@ -302,6 +317,9 @@ def build_daily_state(start_date_utc: str) -> DailyState:
         data_source=data_source,
         price_source=price_source,
         status=status,
+        position=position,
+        equity_usd=_env_float("EQUITY_USD"),
+        pnl_usd=_env_float("PNL_USD"),
         pnl_btc=None,
     )
 
@@ -345,7 +363,9 @@ def upsert_today(log: dict, state: DailyState) -> dict:
         "regime": "unknown",
         "allocation": state.allocation,
         "logic_version": os.getenv("LOGIC_VERSION", "v1.0"),
-        "position": "unknown",
+        "position": state.position,
+        "equity_usd": _round_or_none(state.equity_usd, 2),
+        "pnl_usd": _round_or_none(state.pnl_usd, 2),
         "pnl_btc": _round_or_none(state.pnl_btc, 8),
         "reason_summary": state.trigger,
         "confidence_score": None,
