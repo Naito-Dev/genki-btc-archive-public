@@ -358,7 +358,10 @@ def upsert_today(log: dict, state: DailyState) -> dict:
 
     if not is_new_day:
         cur_idx = next((i for i, e in enumerate(entries) if e.get("date") == state.date_utc), None)
-        prev_hash = entries[cur_idx].get("hash") if cur_idx is not None else None
+        if cur_idx is None or cur_idx == 0:
+            prev_hash = None
+        else:
+            prev_hash = entries[cur_idx - 1].get("hash")
     else:
         prev_hash = entries[-1].get("hash") if entries else None
     payload["prev_hash"] = prev_hash
