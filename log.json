@@ -30,9 +30,10 @@
       "confidence_score": null,
       "data_source": "unavailable",
       "date": "2026-02-19",
+      "date_jst": "2026-02-19",
       "day": "Day 2/30",
       "equity_usd": 80.01,
-      "hash": "d61f0d623d79c2894a71a189a2ed7092721a1bf426afdb2a0b0a1f0cdb4279fa",
+      "hash": "f9fe9c468c0ff0d65ec7125128bb8448365766651843ac9febcc87060b6f6834",
       "logic_version": "v1.0",
       "notes": "Daily live update (manual).",
       "pnl_btc": null,
@@ -41,13 +42,13 @@
       "prev_hash": "363c975df8061f7cb009f6ae7c9501071ca7de827365712dcc6a3e0fddc01c1b",
       "price_source": "unavailable",
       "reason_summary": "MINIMAL_MODE: regime unavailable",
-      "regime": "unknown",
+      "regime": "bear",
       "status": "API_ERROR",
-      "timestamp_utc": "2026-02-19T05:20:52Z",
-      "updated_at_utc": "2026-02-19T05:20:52Z"
+      "timestamp_utc": "2026-02-19T08:22:22Z",
+      "updated_at_utc": "2026-02-19T08:22:22Z"
     }
   ],
-  "last_updated_utc": "2026-02-19T05:20:52Z",
+  "last_updated_utc": "2026-02-19T08:22:22Z",
   "latest": {
     "allocation": 0,
     "allocation_changed": false,
@@ -57,9 +58,10 @@
     "confidence_score": null,
     "data_source": "unavailable",
     "date": "2026-02-19",
+    "date_jst": "2026-02-19",
     "day": "Day 2/30",
     "equity_usd": 80.01,
-    "hash": "d61f0d623d79c2894a71a189a2ed7092721a1bf426afdb2a0b0a1f0cdb4279fa",
+    "hash": "f9fe9c468c0ff0d65ec7125128bb8448365766651843ac9febcc87060b6f6834",
     "logic_version": "v1.0",
     "notes": "Daily live update (manual).",
     "pnl_btc": null,
@@ -68,9 +70,9 @@
     "prev_hash": "363c975df8061f7cb009f6ae7c9501071ca7de827365712dcc6a3e0fddc01c1b",
     "price_source": "unavailable",
     "reason_summary": "MINIMAL_MODE: regime unavailable",
-    "regime": "unknown",
+    "regime": "bear",
     "status": "API_ERROR",
-    "timestamp_utc": "2026-02-19T05:20:52Z",
-    "updated_at_utc": "2026-02-19T05:20:52Z"
+    "timestamp_utc": "2026-02-19T08:22:22Z",
+    "updated_at_utc": "2026-02-19T08:22:22Z"
   }
 }

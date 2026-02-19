@@ -7,7 +7,7 @@ import hashlib
 import statistics
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any, Optional, Callable
 from urllib import parse, request
@@ -29,7 +29,8 @@ except Exception:
 
 ROOT = Path(__file__).resolve().parent.parent
 D1_PATH = ROOT / "data/Binance_BTCUSDT_D1.csv"
-LOG_JSON = ROOT / "public/log.json"
+LOG_JSON = ROOT / "log.json"
+LOGS_DIR = ROOT / "logs"
 
 
 @dataclass
@@ -86,6 +87,19 @@ def _position_from_btc_ratio(btc_ratio: Optional[float]) -> Optional[str]:
     if btc_ratio is None:
         return None
     return "CASH" if btc_ratio < 0.01 else "LONG"
+
+
+def _date_jst_from_utc_date(date_utc: str) -> str:
+    dt = datetime.fromisoformat(date_utc).replace(tzinfo=timezone.utc)
+    return (dt + timedelta(hours=9)).date().isoformat()
+
+
+def _regime_from_allocation(allocation: int) -> str:
+    if allocation <= 0:
+        return "bear"
+    if allocation == 30:
+        return "neutral"
+    return "bull"
 
 
 def _sha256_hex(s: str) -> str:
@@ -360,6 +374,17 @@ def save_log(data: dict) -> None:
     os.replace(tmp_path, LOG_JSON)
 
 
+def save_daily_file(entry: dict, date_utc: str) -> None:
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    out = LOGS_DIR / f"{date_utc}.json"
+    tmp = out.with_suffix(".json.tmp")
+    tmp.write_text(
+        json.dumps(entry, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    os.replace(tmp, out)
+
+
 def _validate_chain(entries: list[dict]) -> tuple[bool, str]:
     ordered = sorted(entries, key=lambda x: x.get("date", ""))
     prev = None
@@ -395,11 +420,12 @@ def upsert_today(log: dict, state: DailyState) -> dict:
 
     payload = {
         "date": state.date_utc,
+        "date_jst": _date_jst_from_utc_date(state.date_utc),
         "timestamp_utc": state.timestamp_utc,
         "data_source": state.data_source,
         "price_source": state.price_source,
         "btc_price": _round_or_none(state.btc_price_ref, 2),
-        "regime": "unknown",
+        "regime": _regime_from_allocation(state.allocation),
         "allocation": state.allocation,
         "logic_version": os.getenv("LOGIC_VERSION", "v1.0"),
         "position": state.position,
@@ -468,6 +494,8 @@ def main() -> None:
         raise SystemExit(2)
 
     save_log(log)
+    if isinstance(log.get("latest"), dict):
+        save_daily_file(log["latest"], state.date_utc)
 
     msg = (
         f"[Genki BTC Archive] {state.date_utc} | {state.day} | allocation={state.allocation}% | "
@@ -480,7 +508,7 @@ def main() -> None:
         except Exception:
             pass
 
-    print("Updated: public/log.json")
+    print("Updated: log.json")
     print(msg)
 
 
