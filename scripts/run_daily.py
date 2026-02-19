@@ -82,6 +82,12 @@ def _env_float(name: str) -> Optional[float]:
         return None
 
 
+def _position_from_btc_ratio(btc_ratio: Optional[float]) -> Optional[str]:
+    if btc_ratio is None:
+        return None
+    return "CASH" if btc_ratio < 0.01 else "LONG"
+
+
 def _sha256_hex(s: str) -> str:
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
@@ -302,6 +308,17 @@ def build_daily_state(start_date_utc: str) -> DailyState:
         # btc_price remains null unless live API succeeds.
     except Exception:
         pass
+
+    # Optional reconciliation using live balance snapshot inputs.
+    # If provided, this overrides position with a 1% BTC-ratio tolerance band.
+    btc_units = _env_float("BTC_UNITS")
+    usdt_units = _env_float("USDT_UNITS")
+    if price is not None and btc_units is not None and usdt_units is not None:
+        total = btc_units * price + usdt_units
+        if total > 0:
+            ratio_position = _position_from_btc_ratio((btc_units * price) / total)
+            if ratio_position is not None:
+                position = ratio_position
 
     return DailyState(
         date_utc=today.isoformat(),
