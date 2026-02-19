@@ -203,19 +203,36 @@
         return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
       }
 
+      function deepSort(value) {
+        if (Array.isArray(value)) {
+          return value.map(deepSort);
+        }
+        if (value && typeof value === 'object') {
+          var out = {};
+          Object.keys(value).sort().forEach(function (k) {
+            out[k] = deepSort(value[k]);
+          });
+          return out;
+        }
+        return value;
+      }
+
       function canonical(entry) {
         var clean = {};
-        Object.keys(entry).sort().forEach(function (k) {
+        Object.keys(entry).forEach(function (k) {
           if (k === 'hash' || k === 'prev_hash') return;
           clean[k] = entry[k];
         });
-        return JSON.stringify(clean);
+        return JSON.stringify(deepSort(clean));
       }
 
       async function validateChain(entries) {
+        var ordered = entries.slice().sort(function (a, b) {
+          return String(a.date || '').localeCompare(String(b.date || ''));
+        });
         var prev = null;
-        for (var i = 0; i < entries.length; i++) {
-          var e = entries[i];
+        for (var i = 0; i < ordered.length; i++) {
+          var e = ordered[i];
           var prevHash = (e.prev_hash == null ? null : String(e.prev_hash));
           var body = canonical(e) + '|' + (prevHash || '');
           var computed = await sha256Hex(body);
