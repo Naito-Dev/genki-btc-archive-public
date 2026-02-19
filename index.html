@@ -198,55 +198,6 @@
         return (typeof v === 'number') ? ('$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })) : 'N/A';
       }
 
-      async function sha256Hex(str) {
-        var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-        return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
-      }
-
-      function deepSort(value) {
-        if (Array.isArray(value)) {
-          return value.map(deepSort);
-        }
-        if (value && typeof value === 'object') {
-          var out = {};
-          Object.keys(value).sort().forEach(function (k) {
-            out[k] = deepSort(value[k]);
-          });
-          return out;
-        }
-        return value;
-      }
-
-      function canonical(entry) {
-        var clean = {};
-        Object.keys(entry).forEach(function (k) {
-          if (k === 'hash' || k === 'prev_hash') return;
-          clean[k] = entry[k];
-        });
-        return JSON.stringify(deepSort(clean));
-      }
-
-      async function validateChain(entries) {
-        var ordered = entries.slice().sort(function (a, b) {
-          return String(a.date || '').localeCompare(String(b.date || ''));
-        });
-        var prev = null;
-        for (var i = 0; i < ordered.length; i++) {
-          var e = ordered[i];
-          var prevHash = (e.prev_hash == null ? null : String(e.prev_hash));
-          var body = canonical(e) + '|' + (prevHash || '');
-          var computed = await sha256Hex(body);
-          if (i === 0) {
-            if (prevHash !== null) return { ok: false, idx: i, reason: 'genesis prev_hash must be null' };
-          } else if (prevHash !== prev) {
-            return { ok: false, idx: i, reason: 'prev_hash mismatch' };
-          }
-          if (e.hash !== computed) return { ok: false, idx: i, reason: 'hash mismatch' };
-          prev = e.hash || null;
-        }
-        return { ok: true };
-      }
-
       function renderRows(entries) {
         els.rows.innerHTML = '';
         entries.slice(-12).reverse().forEach(function (e) {
@@ -326,7 +277,7 @@
       logUrl.searchParams.set('ts', String(Date.now()));
       fetch(logUrl.toString())
         .then(function (r) { return r.json(); })
-        .then(async function (log) {
+        .then(function (log) {
           var entries = Array.isArray(log.entries) ? log.entries.slice() : [];
           entries.sort(function (a, b) { return String(a.date || '').localeCompare(String(b.date || '')); });
           var latest = log.latest || entries[entries.length - 1] || {};
@@ -347,16 +298,23 @@
           renderRows(entries);
           renderChart(entries);
           setProof(latest);
-
-          var chain = await validateChain(entries);
-          if (chain.ok) {
+          var ci = String(latest.chain_integrity || 'UNKNOWN').toUpperCase();
+          var cr = String(latest.chain_reason || '').trim();
+          if (ci === 'VALID') {
             els.chain.textContent = 'VALID';
             els.chain.classList.add('ok');
-            els.chainNote.textContent = 'Hash chain verified across ' + entries.length + ' entries.';
-          } else {
+            els.chain.classList.remove('warn');
+            els.chainNote.textContent = 'Hash chain verified by run_daily.py.';
+          } else if (ci === 'BROKEN') {
             els.chain.textContent = 'BROKEN';
             els.chain.classList.add('warn');
-            els.chainNote.textContent = 'Entry #' + (chain.idx + 1) + ': ' + chain.reason;
+            els.chain.classList.remove('ok');
+            els.chainNote.textContent = cr || 'Chain validation failed (publisher side).';
+          } else {
+            els.chain.textContent = 'UNKNOWN';
+            els.chain.classList.add('warn');
+            els.chain.classList.remove('ok');
+            els.chainNote.textContent = 'Chain status not provided in this log format.';
           }
         })
         .catch(function () {

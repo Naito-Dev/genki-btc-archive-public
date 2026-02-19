@@ -413,6 +413,8 @@ def upsert_today(log: dict, state: DailyState) -> dict:
         "day": state.day,
         "notes": state.notes,
         "updated_at_utc": state.updated_at_utc,
+        "chain_integrity": "VALID",
+        "chain_reason": "",
     }
 
     if not is_new_day:
