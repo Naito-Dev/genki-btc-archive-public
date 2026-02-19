@@ -406,11 +406,12 @@ def upsert_today(log: dict, state: DailyState) -> dict:
 def main() -> None:
     dry_run = os.getenv("DRY_RUN", "1").strip() != "0"
     on_actions = os.getenv("GITHUB_ACTIONS", "").strip().lower() == "true"
+    force_today = os.getenv("FORCE_TODAY", "0").strip() == "1"
     log = load_log()
     start_date = str(log.get("start_date_utc") or "2026-02-17")
     today_utc = _now_utc().date().isoformat()
     latest = log.get("latest") if isinstance(log.get("latest"), dict) else {}
-    if latest.get("date") == today_utc:
+    if latest.get("date") == today_utc and not force_today:
         print("No changes: today's UTC entry already exists.")
         return
     state = build_daily_state(start_date)
