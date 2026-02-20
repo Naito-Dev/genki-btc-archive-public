@@ -301,13 +301,13 @@
           var targetPct = (targetRatio != null) ? Math.round(targetRatio * 100) : null;
           var targetPos = (targetPct === 0) ? 'CASH' : 'LONG';
           var actualRatio = (typeof latest.actual_btc_ratio === 'number') ? latest.actual_btc_ratio : null;
-          var actualPct = (actualRatio != null) ? (actualRatio * 100).toFixed(1) : 'N/A';
-          var actualPos = latest.actual_position || 'N/A';
+          var actualPct = (actualRatio != null) ? (actualRatio * 100).toFixed(1) : 'UNKNOWN';
+          var actualPos = latest.actual_position || latest.position || 'UNKNOWN';
           var mismatch = (targetRatio != null && actualRatio != null && Math.abs(targetRatio - actualRatio) >= 0.01);
           els.pnl.textContent = 'PnL: ' + ((typeof latest.pnl_usd === 'number')
             ? ('$' + latest.pnl_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
             : 'N/A') +
-            ' | Target: ' + (targetPct != null ? (targetPct + '% (' + targetPos + ')') : 'N/A') +
+            ' | Target: ' + (targetPct != null ? (targetPct + '% (' + targetPos + ')') : 'UNKNOWN') +
             ' | Actual: ' + actualPct + '% (' + actualPos + ')' +
             (mismatch ? ' | MISMATCH' : '') +
             ' | Snapshot: ' + (snapStatus || 'UNKNOWN');
