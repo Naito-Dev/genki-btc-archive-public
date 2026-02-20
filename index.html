@@ -70,7 +70,7 @@
     .rows { margin-top: 12px; display: grid; gap: 8px; }
     .row {
       display: grid;
-      grid-template-columns: 110px 100px 130px 140px 1fr;
+      grid-template-columns: 140px 140px 160px 1fr;
       gap: 10px;
       align-items: center;
       padding: 10px 12px;
@@ -78,6 +78,15 @@
       border-radius: 10px;
       font-size: 13px;
       background: #0a1825;
+    }
+    .row.head {
+      background: transparent;
+      border-style: dashed;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      font-size: 11px;
+      font-weight: 700;
     }
     .badge {
       display: inline-block;
@@ -170,7 +179,7 @@
     </section>
 
     <section class="panel card">
-      <h2>Recent Daily Records</h2>
+      <h2>Recent Verified Decisions</h2>
       <div class="rows" data-rows></div>
     </section>
 
@@ -211,19 +220,51 @@
         return (typeof v === 'number') ? ('$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })) : 'N/A';
       }
 
+      function fmtDecisionPrice(v) {
+        return (typeof v === 'number') ? ('$' + Math.floor(v).toLocaleString()) : '—';
+      }
+
+      function normalizePosition(e) {
+        var p = String(e.position || '').toUpperCase();
+        if (p === 'LONG') return 'LONG';
+        if (p === 'CASH') return 'CASH';
+        if (String(e.status || '').toUpperCase() === 'NO_TRADE') return 'NO_TRADE';
+        return 'NO_TRADE';
+      }
+
+      function trustText(e) {
+        var snap = String(e.snapshot_status || '').toUpperCase();
+        var src = String(e.balance_source || '');
+        var ps = String(e.price_source || '');
+        var st = String(e.status || '');
+        if (snap === 'SYNCED' && src === 'BITGET_READONLY' && ps !== 'cache_stale' && st !== 'DATA_STALE') {
+          return '✓ Verified';
+        }
+        if (ps === 'cache_stale' || st === 'DATA_STALE') {
+          return '⚠ Price stale';
+        }
+        return '✗ Data issue';
+      }
+
       function renderRows(entries) {
         els.rows.innerHTML = '';
+        var header = document.createElement('div');
+        header.className = 'row head';
+        header.innerHTML =
+          '<div>DATE</div>' +
+          '<div>POSITION</div>' +
+          '<div>BTC PRICE</div>' +
+          '<div>TRUST</div>';
+        els.rows.appendChild(header);
         entries.slice(-12).reverse().forEach(function (e) {
           var row = document.createElement('div');
           row.className = 'row';
-          var allocBadge = '<span class="badge">' + (e.allocation != null ? e.allocation + '%' : 'N/A') + '</span>';
-          var statusClass = (e.status === 'TRADED' || e.status === 'NO_TRADE') ? 'ok' : 'warn';
+          var trust = trustText(e);
           row.innerHTML =
             '<div><strong>' + (e.date || 'N/A') + '</strong></div>' +
-            '<div>' + allocBadge + '</div>' +
-            '<div>' + fmtPrice(e.btc_price) + '</div>' +
-            '<div class="' + statusClass + '">' + (e.status || 'N/A') + '</div>' +
-            '<div>' + (e.position || 'N/A') + ' | ' + (e.reason_summary || '—') + '</div>';
+            '<div>' + normalizePosition(e) + '</div>' +
+            '<div>' + fmtDecisionPrice(e.btc_price) + '</div>' +
+            '<div>' + trust + '</div>';
           els.rows.appendChild(row);
         });
       }
@@ -288,7 +329,7 @@
 
       var logUrl = new URL('log.json', window.location.href);
       logUrl.searchParams.set('ts', String(Date.now()));
-      fetch(logUrl.toString())
+      fetch(logUrl.toString(), { cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (log) {
           var entries = Array.isArray(log.entries) ? log.entries.slice() : [];
