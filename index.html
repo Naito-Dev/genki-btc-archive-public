@@ -309,6 +309,10 @@
             : latest.equity_usd;
           var eqTrusted = (snapStatus === 'SYNCED' && snapSource === 'BITGET_READONLY' && !stalePrice && typeof snapEq === 'number');
           var trusted = (snapStatus === 'SYNCED' && snapSource === 'BITGET_READONLY' && !stalePrice);
+          var trustReason = 'OK';
+          if (snapStatus !== 'SYNCED') trustReason = 'BALANCE_PENDING';
+          else if (snapSource !== 'BITGET_READONLY') trustReason = 'SOURCE_MISMATCH';
+          else if (stalePrice) trustReason = 'PRICE_STALE';
           if (trusted) {
             els.trustBanner.style.display = 'none';
             els.trustBanner.textContent = '';
@@ -319,7 +323,7 @@
           }
           els.equity.textContent = eqTrusted
             ? ('$' + snapEq.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
-            : 'SYNC_PENDING';
+            : 'NOT TRUSTED';
           var targetRatio = (typeof latest.target_btc_ratio === 'number') ? latest.target_btc_ratio : null;
           var targetPct = (targetRatio != null) ? Math.round(targetRatio * 100) : null;
           var targetPos = (targetPct === 0) ? 'CASH' : 'LONG';
@@ -333,7 +337,8 @@
             ' | Target: ' + (targetPct != null ? (targetPct + '% (' + targetPos + ')') : 'UNKNOWN') +
             ' | Actual: ' + actualPct + '% (' + actualPos + ')' +
             (mismatch ? ' | MISMATCH' : '') +
-            ' | Snapshot: ' + (snapStatus || 'UNKNOWN');
+            ' | Snapshot: ' + (snapStatus || 'UNKNOWN') +
+            ' | Reason: ' + trustReason;
 
           renderRows(entries);
           renderChart(entries);
