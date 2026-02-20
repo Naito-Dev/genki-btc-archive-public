@@ -120,6 +120,28 @@
       font-size: 12px;
     }
     .foot { margin-top: 16px; color: var(--muted); font-size: 12px; }
+    .pro-card {
+      margin-top: 10px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #0a1825;
+    }
+    .pro-title { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
+    .pro-list { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    .pro-list li { margin: 6px 0; }
+    .btn-lock {
+      margin-top: 10px;
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 7px 12px;
+      background: #143149;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+    }
     @media (max-width: 960px) {
       .grid { grid-template-columns: 1fr 1fr; }
       .row { grid-template-columns: 1fr 1fr; }
@@ -181,6 +203,15 @@
     <section class="panel card">
       <h2>Recent Verified Decisions</h2>
       <div class="rows" data-rows></div>
+      <div class="pro-card" data-pro-card>
+        <p class="pro-title">Pro Details (Locked)</p>
+        <ul class="pro-list" data-pro-list>
+          <li>Target BTC%: Locked</li>
+          <li>Regime rationale: Locked</li>
+          <li>Next trigger: Locked</li>
+        </ul>
+        <span class="btn-lock">Unlock Pro</span>
+      </div>
     </section>
 
     <section class="panel card">
@@ -213,8 +244,10 @@
         chartLine: document.querySelector('[data-chart-line]'),
         chartDots: document.querySelector('[data-chart-dots]'),
         chartNote: document.querySelector('[data-chart-note]'),
-        trustBanner: document.querySelector('[data-trust-banner]')
+        trustBanner: document.querySelector('[data-trust-banner]'),
+        proList: document.querySelector('[data-pro-list]')
       };
+      var PRO_UNLOCKED = false;
 
       function fmtPrice(v) {
         return (typeof v === 'number') ? ('$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })) : 'N/A';
@@ -225,11 +258,25 @@
       }
 
       function normalizePosition(e) {
-        var p = String(e.position || '').toUpperCase();
-        if (p === 'LONG') return 'LONG';
-        if (p === 'CASH') return 'CASH';
-        if (String(e.status || '').toUpperCase() === 'NO_TRADE') return 'NO_TRADE';
-        return 'NO_TRADE';
+        var rawStatus = String(e.status || '').toUpperCase();
+        var rawPos = String(e.position || '').toUpperCase();
+        var percent = null;
+        if (typeof e.target_btc_ratio === 'number' && isFinite(e.target_btc_ratio)) {
+          percent = Math.round(e.target_btc_ratio * 100);
+        } else if (typeof e.allocation === 'number' && isFinite(e.allocation)) {
+          percent = Math.round(e.allocation);
+        }
+        var label = 'UNKNOWN';
+        if (rawStatus === 'NO_TRADE') {
+          label = 'NO_TRADE';
+        } else if (typeof percent === 'number') {
+          label = percent > 0 ? 'LONG' : 'CASH';
+        } else if (rawPos === 'LONG' || rawPos === 'CASH') {
+          label = rawPos;
+        } else if (rawPos === 'NO_TRADE') {
+          label = 'NO_TRADE';
+        }
+        return typeof percent === 'number' ? (label + ' (' + percent + '%)') : label;
       }
 
       function trustText(e) {
@@ -267,6 +314,29 @@
             '<div>' + trust + '</div>';
           els.rows.appendChild(row);
         });
+      }
+
+      function renderPro(latest) {
+        if (!els.proList) return;
+        if (!PRO_UNLOCKED) {
+          els.proList.innerHTML =
+            '<li>Target BTC%: Locked</li>' +
+            '<li>Regime rationale: Locked</li>' +
+            '<li>Next trigger: Locked</li>';
+          return;
+        }
+        var target = 'N/A';
+        if (typeof latest.target_btc_ratio === 'number') {
+          target = Math.round(latest.target_btc_ratio * 100) + '%';
+        } else if (typeof latest.allocation === 'number') {
+          target = Math.round(latest.allocation) + '%';
+        }
+        var regime = String(latest.regime || latest.reason_summary || 'No rationale available');
+        var trigger = String(latest.trigger || 'Waiting for confirmation');
+        els.proList.innerHTML =
+          '<li>Target BTC%: ' + target + '</li>' +
+          '<li>Regime rationale: ' + regime + '</li>' +
+          '<li>Next trigger: ' + trigger + '</li>';
       }
 
       function renderChart(entries) {
@@ -383,6 +453,7 @@
 
           renderRows(entries);
           renderChart(entries);
+          renderPro(latest);
           setProof(latest);
           var ci = String(latest.chain_integrity || 'UNKNOWN').toUpperCase();
           var cr = String(latest.chain_reason || '').trim();
