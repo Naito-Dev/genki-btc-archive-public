@@ -44,6 +44,17 @@
     .value { margin-top: 6px; font-size: 26px; font-weight: 700; line-height: 1.1; }
     .tiny { color: var(--muted); font-size: 12px; margin-top: 8px; }
     .panel { margin-top: 16px; }
+    .banner {
+      margin-top: 14px;
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid #6a4f00;
+      background: #3a2d00;
+      color: #ffe08a;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+    }
     .panel h2 { margin: 0 0 10px; font-size: 20px; }
     .chart {
       margin-top: 8px;
@@ -115,6 +126,7 @@
     <section class="hero">
       <h1>Genki BTC Archive</h1>
       <p>Live verification dashboard. Hash-chained daily records. Not investment advice.</p>
+      <div class="banner" data-trust-banner>NOT PUBLISHED TODAY — data not trusted.</div>
     </section>
 
     <section class="grid" aria-label="key metrics">
@@ -191,7 +203,8 @@
         copyProof: document.querySelector('[data-copy-proof]'),
         chartLine: document.querySelector('[data-chart-line]'),
         chartDots: document.querySelector('[data-chart-dots]'),
-        chartNote: document.querySelector('[data-chart-note]')
+        chartNote: document.querySelector('[data-chart-note]'),
+        trustBanner: document.querySelector('[data-trust-banner]')
       };
 
       function fmtPrice(v) {
@@ -290,10 +303,20 @@
           els.status.textContent = 'Status: ' + (latest.status || 'N/A');
           var snapStatus = String(latest.snapshot_status || '').toUpperCase();
           var snapSource = String(latest.balance_source || '');
+          var stalePrice = (latest.price_source === 'cache_stale' || latest.status === 'DATA_STALE');
           var snapEq = (latest.portfolio_snapshot && typeof latest.portfolio_snapshot.equity_usd === 'number')
             ? latest.portfolio_snapshot.equity_usd
             : latest.equity_usd;
-          var eqTrusted = (snapStatus === 'SYNCED' && snapSource === 'BITGET_READONLY' && typeof snapEq === 'number');
+          var eqTrusted = (snapStatus === 'SYNCED' && snapSource === 'BITGET_READONLY' && !stalePrice && typeof snapEq === 'number');
+          var trusted = (snapStatus === 'SYNCED' && snapSource === 'BITGET_READONLY' && !stalePrice);
+          if (trusted) {
+            els.trustBanner.style.display = 'none';
+            els.trustBanner.textContent = '';
+          } else {
+            els.trustBanner.style.display = 'block';
+            els.trustBanner.textContent = 'NOT PUBLISHED TODAY — data not trusted (' +
+              [snapStatus || 'UNKNOWN', (latest.price_source || 'unknown')].join(' / ') + ').';
+          }
           els.equity.textContent = eqTrusted
             ? ('$' + snapEq.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
             : 'SYNC_PENDING';
@@ -335,6 +358,8 @@
           }
         })
         .catch(function () {
+          els.trustBanner.style.display = 'block';
+          els.trustBanner.textContent = 'NOT PUBLISHED TODAY — data not trusted (load error).';
           els.price.textContent = 'N/A';
           els.chain.textContent = 'ERROR';
           els.chain.classList.add('warn');
