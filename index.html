@@ -259,24 +259,20 @@
 
       function normalizePosition(e) {
         var rawStatus = String(e.status || '').toUpperCase();
-        var rawPos = String(e.position || '').toUpperCase();
         var percent = null;
         if (typeof e.target_btc_ratio === 'number' && isFinite(e.target_btc_ratio)) {
           percent = Math.round(e.target_btc_ratio * 100);
         } else if (typeof e.allocation === 'number' && isFinite(e.allocation)) {
           percent = Math.round(e.allocation);
         }
-        var label = 'UNKNOWN';
         if (rawStatus === 'NO_TRADE') {
-          label = 'NO_TRADE';
-        } else if (typeof percent === 'number') {
-          label = percent > 0 ? 'LONG' : 'CASH';
-        } else if (rawPos === 'LONG' || rawPos === 'CASH') {
-          label = rawPos;
-        } else if (rawPos === 'NO_TRADE') {
-          label = 'NO_TRADE';
+          return 'NO_TRADE';
         }
-        return typeof percent === 'number' ? (label + ' (' + percent + '%)') : label;
+        if (typeof percent === 'number') {
+          if (percent <= 0) return 'CASH';
+          return 'LONG (BTC ' + percent + '%)';
+        }
+        return 'UNKNOWN';
       }
 
       function trustText(e) {
@@ -299,7 +295,7 @@
         header.className = 'row head';
         header.innerHTML =
           '<div>DATE</div>' +
-          '<div>POSITION</div>' +
+          '<div>SIGNAL</div>' +
           '<div>BTC PRICE</div>' +
           '<div>TRUST</div>';
         els.rows.appendChild(header);
