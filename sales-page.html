@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarketEdge | BTCホルダー向けリスク管理戦略</title>
+  <style>
+    :root {
+      --bg: #07131f;
+      --bg2: #0f2131;
+      --ink: #f3f7fb;
+      --muted: #adc3d8;
+      --line: #22435d;
+      --accent: #2be28a;
+      --accent2: #ffb74d;
+      --card: rgba(8, 25, 39, 0.82);
+      --danger: #ff7a7a;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Avenir Next", "Hiragino Sans", "Noto Sans JP", sans-serif;
+      background:
+        radial-gradient(1000px 500px at 90% -5%, rgba(43, 226, 138, 0.15), transparent 60%),
+        radial-gradient(1200px 600px at -10% 0%, rgba(255, 183, 77, 0.14), transparent 55%),
+        linear-gradient(165deg, var(--bg), var(--bg2));
+      line-height: 1.6;
+    }
+
+    .wrap { width: min(1100px, 92vw); margin: 0 auto; }
+    .hero { padding: 88px 0 56px; }
+    .eyebrow {
+      display: inline-block;
+      border: 1px solid var(--line);
+      padding: 6px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(34px, 6vw, 64px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      max-width: 920px;
+    }
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      max-width: 860px;
+      font-size: clamp(16px, 2.2vw, 21px);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 30px 0 0;
+    }
+    .metric {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      backdrop-filter: blur(6px);
+    }
+    .metric .v {
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .metric .k { color: var(--muted); font-size: 13px; }
+
+    section { padding: 34px 0; }
+    h2 {
+      margin: 0 0 14px;
+      font-size: clamp(24px, 3vw, 36px);
+      letter-spacing: -0.01em;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px;
+    }
+    ul { margin: 8px 0 0 20px; padding: 0; }
+    li { margin: 7px 0; }
+    .good { color: var(--accent); font-weight: 700; }
+    .warn { color: var(--danger); font-weight: 700; }
+    .small { color: var(--muted); font-size: 13px; }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+      margin-top: 6px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th { color: var(--muted); font-weight: 600; }
+    .form-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 10px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .field input, .field select {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .status { color: var(--accent); font-size: 13px; margin-top: 8px; min-height: 18px; }
+    .blurred {
+      filter: blur(7px);
+      user-select: none;
+      pointer-events: none;
+      transition: filter .2s ease;
+    }
+
+    .cta {
+      margin: 16px 0 80px;
+      padding: 28px;
+      border-radius: 18px;
+      background: linear-gradient(130deg, rgba(43, 226, 138, 0.16), rgba(255, 183, 77, 0.12));
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+    .btn {
+      text-decoration: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      display: inline-block;
+    }
+    .btn.primary { background: var(--accent); color: #042013; }
+    .btn.secondary { border: 1px solid var(--line); color: var(--ink); }
+
+    @media (max-width: 920px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .hero { padding-top: 64px; }
+      .metrics { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <span class="eyebrow">BTCホルダー向け・守って増やす運用ルール</span>
+      <h1>暴落で資産を削られない。<br>上昇局面だけを狙う、MarketEdge戦略。</h1>
+      <p class="lead">
+        ただ持ち続けるだけでは、-70%級ドローダウンを耐える必要があります。MarketEdgeは、相場構造が崩れた局面を機械的に回避し、
+        必要なときだけBTCエクスポージャーを取る「プロ仕様の防御型ルール」です。
+      </p>
+      <p class="small">現在は実運用で検証中。β参加は待機リストから。</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="v">TBD</div><div class="k">最終資産倍率（再検証中）</div></div>
+        <div class="metric"><div class="v">TBD</div><div class="k">CAGR（再検証中）</div></div>
+        <div class="metric"><div class="v">TBD</div><div class="k">最大DD（再検証中）</div></div>
+        <div class="metric"><div class="v">Live</div><div class="k">日次公開ログで実運用検証中</div></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="wrap grid-2">
+        <div class="card">
+          <h2>何に効くのか</h2>
+          <ul>
+            <li><strong>暴落耐性:</strong> 弱気局面ではBTC配分を抑える防御型ルールを採用。</li>
+            <li><strong>感情排除:</strong> MA構造と執行ルールで、裁量判断を最小化。</li>
+            <li><strong>コスト耐性:</strong> コスト感応度の数値は現在、実装同一性を含めて再検証中。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>BTCホルダーのメリット</h2>
+          <ul>
+            <li>ガチホの最大弱点である<span class="warn">深い含み損期間</span>を圧縮。</li>
+            <li>「売る/買う」の迷いをルール化し、再現性を確保。</li>
+            <li>資産曲線の安定化により、継続運用しやすくなる。</li>
+          </ul>
+          <p class="small">※ 投資助言ではありません。過去成績は将来を保証しません。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- EVIDENCE_SECTION_START -->
+    <section>
+      <div class="wrap card">
+        <h2>Evidence &amp; Robustness（検証根拠）</h2>
+        <p>
+          バックテストKPIは、現行の実運用コードとの同一性を含めた再現性確認のため、一時的に非表示（TBD）にしています。
+          この期間は、日次のLive verificationログを公開して透明性を担保します。
+        </p>
+        <p>
+          再検証完了後は、evidenceファイルとコミットハッシュの対応を明示した上で数値を再掲します。
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>戦略</th>
+                <th>CAGR</th>
+                <th>MaxDD</th>
+                <th>Sharpe</th>
+                <th>MAR</th>
+                <th>Exposure</th>
+                <th>Worst Month</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>BTC Buy&amp;Hold</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+              <tr><td>MarketEdge（往復0.24%）</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+              <tr><td>MarketEdge（往復1.00%）</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small">
+          KPI数値は再検証完了までTBD表示。公開再開時は同一条件の証拠ファイルと紐づけます。
+        </p>
+        <p>
+          <img src="/marketedge_walkforward_composite.png" alt="Walk-forward OOS合成エクイティ" style="width:100%;border:1px solid var(--line);border-radius:12px;margin-top:14px;">
+        </p>
+        <p class="small">
+          注釈: UTC固定、半開区間 [start, end)、execution = next_bar_open。詳細前提は再検証完了後に確定版を提示します。
+        </p>
+      </div>
+    </section>
+    <!-- EVIDENCE_SECTION_END -->
+
+    <section>
+      <div class="wrap card">
+        <h2>Live Verification（実運用トラッキング）</h2>
+        <p class="small">
+          開始日（UTC）: <span data-live-start>2026-02-17T00:00:00Z</span> |
+          経過日数: <span data-live-day>1</span> |
+          現在アロケーション: <span class="blurred" data-allocation>70%</span> |
+          現在エクイティ: <span data-live-equity>非公開</span> |
+          最終更新: <span data-live-updated>--</span>
+        </p>
+        <p><a class="btn secondary" href="/log.html">デイリーログ</a></p>
+        <h3>Latest Weekly Summary</h3>
+        <pre class="small" data-latest-weekly>Loading...</pre>
+        <p class="small">This is an ongoing verification log. Not an offer to sell.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>β待機リストに登録</h2>
+        <p class="small">内容：機関向けデッキ＋サンプル取引ログCSV＋手法メモ</p>
+        <form class="deck-form" action="#" method="post">
+          <div class="form-grid">
+            <label class="field">メールアドレス（必須）
+              <input type="email" name="email" required>
+            </label>
+            <label class="field">お名前（任意）
+              <input type="text" name="name">
+            </label>
+            <label class="field">用途（任意）
+              <select name="use_case">
+                <option value="">選択してください</option>
+                <option>Managed account</option>
+                <option>Treasury</option>
+                <option>Subscription</option>
+              </select>
+            </label>
+          </div>
+          <div class="btns">
+            <button class="btn primary" type="submit">β待機リストに登録</button>
+          </div>
+          <div class="status" data-status></div>
+        </form>
+        <p class="small"><a href="#" data-export-leads>リードを書き出す（JSON）</a></p>
+        <div class="btns" data-intro-call style="display:none;">
+          <a class="btn secondary" href="#">3分の事前質問（テキスト）を入力</a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>Beta Cohort（β枠）</h2>
+        <p class="small">枠数: 10席。</p>
+        <p class="small">開始: 実運用トラッキング60日後（Day 61）。</p>
+        <p class="small">参加条件: 待機リスト登録 + 3分の事前質問（テキスト）。</p>
+        <p class="small">提供内容: 週次サマリー更新 + デッキ + サンプル取引ログ。</p>
+        <p class="small">β期間中は有償販売なし（No payment during beta）。</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>β終了後プラン</h2>
+        <p class="small">月額: 49,800円（目安: US$329）</p>
+        <p class="small">初期枠: 10名限定</p>
+        <p class="small">開始条件: 60日実運用検証完了後に検討</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>Revenue Target</h2>
+        <p class="small">計画目標: 月60万円</p>
+        <p class="small">参考価格: 月49,800円（目安US$329）</p>
+        <p class="small">参考必要数: 13名（49,800×13=647,400円、検証完了後）</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>ストレステスト結果（往復コスト増加）</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>往復コスト</th>
+                <th>Final Equity</th>
+                <th>CAGR</th>
+                <th>Max Drawdown</th>
+                <th>Trades</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>0.24%</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+              <tr><td>0.50%</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+              <tr><td>0.60%</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+              <tr><td>0.80%</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+              <tr><td>1.00%</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap cta">
+        <h2>今の相場で必要なのは「当てる技術」より「死なない設計」</h2>
+        <p>
+          MarketEdgeは、BTCの上昇機会を取りながら、崩壊局面で生存するための実装可能な運用フレームです。
+          検証済みロジックをベースに、API連携・監視・通知まで含めて運用可能な形で提供できます。
+        </p>
+        <p class="small">追加資料</p>
+        <div class="btns">
+          <a class="btn secondary" href="#">β待機リストに登録</a>
+          <a class="btn secondary" href="#">β待機リストに登録</a>
+        </div>
+      </div>
+      <div class="wrap small">
+        バックテストKPIは現行実装との同一性確認が完了するまで公開保留（TBD）です。
+      </div>
+    </section>
+  </main>
+  <script>
+    (function () {
+      var forms = document.querySelectorAll('.deck-form');
+      var isJa = (document.documentElement.lang || '').toLowerCase().startsWith('ja');
+      var pageLang = isJa ? 'ja' : 'en';
+      var successMsg = isJa
+        ? '登録しました。60日間の実運用ログが揃い次第、β招待を送ります。'
+        : 'You’re on the list. We’ll invite the first cohort after 60 days of live tracking.';
+      var savedLocalMsg = isJa ? 'ローカル保存のみ完了（サーバー未接続）' : 'Saved locally (server unavailable).';
+      var invalidMsg = isJa ? '有効なメールアドレスを入力してください。' : 'Please enter a valid email address.';
+      var exportOkMsg = isJa ? 'エクスポートしました。' : 'Exported.';
+      var exportErrMsg = isJa ? 'エクスポートに失敗しました。' : 'Export failed.';
+      var betaUnlocked = localStorage.getItem('beta_unlocked') === '1';
+
+      function setLiveMeta() {
+        var startEl = document.querySelector('[data-live-start]');
+        var dayEl = document.querySelector('[data-live-day]');
+        var updateEl = document.querySelector('[data-live-updated]');
+        if (!startEl || !dayEl || !updateEl) return;
+        var start = new Date(String(startEl.textContent || '').trim());
+        var now = new Date();
+        var diffDays = Math.floor((now.getTime() - start.getTime()) / 86400000) + 1;
+        dayEl.textContent = String(Math.max(1, diffDays));
+        updateEl.textContent = now.toISOString();
+      }
+
+      function applyUnlock() {
+        if (!betaUnlocked) return;
+        document.querySelectorAll('[data-allocation].blurred').forEach(function (el) {
+          el.classList.remove('blurred');
+        });
+      }
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      function readLeads() {
+        var raw = localStorage.getItem('marketedge_leads');
+        if (!raw) return [];
+        try {
+          var parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveLeadServer(lead) {
+        return fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lead)
+        }).then(function (r) { return r.ok; }).catch(function () { return false; });
+      }
+
+      function loadLatestWeeklySummary() {
+        var out = document.querySelector('[data-latest-weekly]');
+        if (!out) return;
+        fetch('/log.json?ts=' + Date.now())
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var entries = Array.isArray(data.entries) ? data.entries.slice() : [];
+            if (!entries.length) {
+              out.textContent = isJa ? 'まだ生成されていません' : 'Not generated yet.';
+              return;
+            }
+            entries.sort(function (a, b) { return String(a.date_utc || '').localeCompare(String(b.date_utc || '')); });
+            var items = entries.slice(-7);
+            var first = items[0].date_utc;
+            var last = items[items.length - 1].date_utc;
+            var changes = 0;
+            for (var i = 1; i < items.length; i++) {
+              if (String(items[i].allocation) !== String(items[i - 1].allocation)) changes++;
+            }
+            var currentAlloc = items[items.length - 1].allocation;
+            var notes = items
+              .filter(function (x) { return String(x.notes || '').trim(); })
+              .map(function (x) { return '- ' + x.date_utc + ': ' + String(x.notes || '').trim(); });
+
+            var lines = isJa
+              ? [
+                  'Weekly Summary',
+                  '対象期間 (UTC): ' + first + ' -> ' + last,
+                  'アロケーション変更回数: ' + changes,
+                  '現在アロケーション: ' + (currentAlloc != null ? currentAlloc : 'N/A'),
+                  'Notes:',
+                  notes.length ? notes.join('\n') : '- なし'
+                ]
+              : [
+                  'Weekly Summary',
+                  'Covered dates (UTC): ' + first + ' -> ' + last,
+                  'Allocation changes count: ' + changes,
+                  'Current allocation: ' + (currentAlloc != null ? currentAlloc : 'N/A'),
+                  'Notes:',
+                  notes.length ? notes.join('\n') : '- None'
+                ];
+            out.textContent = lines.join('\n');
+          })
+          .catch(function () {
+            out.textContent = isJa ? '読み込みに失敗しました' : 'Unable to load summary.';
+          });
+      }
+
+      setLiveMeta();
+      applyUnlock();
+      loadLatestWeeklySummary();
+
+      forms.forEach(function (form) {
+        if (form.dataset.bound === '1') return;
+        form.dataset.bound = '1';
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var fd = new FormData(form);
+          var email = String(fd.get('email') || '').trim();
+          var name = String(fd.get('name') || '').trim();
+          var useCase = String(fd.get('use_case') || '').trim();
+          var status = form.querySelector('[data-status]');
+          var call = form.parentElement.querySelector('[data-intro-call]');
+
+          if (!email || !isValidEmail(email)) {
+            if (status) status.textContent = invalidMsg;
+            if (call) call.style.display = 'none';
+            setTimeout(function () {
+              if (status) status.textContent = '';
+            }, 3000);
+            return;
+          }
+
+          var lead = {
+            timestamp_utc: new Date().toISOString(),
+            email: email,
+            name: name,
+            use_case: useCase,
+            page_lang: pageLang
+          };
+          var leads = readLeads();
+          leads.push(lead);
+          localStorage.setItem('marketedge_leads', JSON.stringify(leads));
+          localStorage.setItem('beta_unlocked', '1');
+          betaUnlocked = true;
+          applyUnlock();
+
+          saveLeadServer(lead).then(function (ok) {
+            if (status) status.textContent = ok ? successMsg : savedLocalMsg;
+            setTimeout(function () {
+              if (status) status.textContent = '';
+            }, 3000);
+          });
+          if (call) call.style.display = 'block';
+        });
+
+        var exportLink = form.parentElement.querySelector('[data-export-leads]');
+        if (exportLink && exportLink.dataset.bound !== '1') {
+          exportLink.dataset.bound = '1';
+          exportLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            var status = form.querySelector('[data-status]');
+            var payload = localStorage.getItem('marketedge_leads') || '[]';
+
+            function done(ok) {
+              if (status) status.textContent = ok ? exportOkMsg : exportErrMsg;
+              setTimeout(function () {
+                if (status) status.textContent = '';
+              }, 3000);
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(payload).then(
+                function () { done(true); },
+                function () { done(false); }
+              );
+              return;
+            }
+
+            try {
+              var ta = document.createElement('textarea');
+              ta.value = payload;
+              ta.style.position = 'fixed';
+              ta.style.opacity = '0';
+              document.body.appendChild(ta);
+              ta.focus();
+              ta.select();
+              var ok = document.execCommand('copy');
+              document.body.removeChild(ta);
+              done(ok);
+            } catch (err) {
+              done(false);
+            }
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
