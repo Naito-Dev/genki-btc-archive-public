@@ -275,7 +275,7 @@
 
       var logUrl = new URL('log.json', window.location.href);
       logUrl.searchParams.set('ts', String(Date.now()));
-      fetch(logUrl.toString(), { cache: "no-store" })
+      fetch(logUrl.toString())
         .then(function (r) { return r.json(); })
         .then(function (log) {
           var entries = Array.isArray(log.entries) ? log.entries.slice() : [];
@@ -285,15 +285,32 @@
           els.date.textContent = latest.date || 'N/A';
           els.updated.textContent = latest.updated_at_utc ? ('Updated: ' + latest.updated_at_utc) : 'Updated: N/A';
           els.price.textContent = fmtPrice(latest.btc_price);
-          els.priceSource.textContent = 'Source: ' + (latest.price_source || 'unavailable') + ((latest.price_source === 'cache_stale') ? ' STALE' : '');
+          els.priceSource.textContent = 'Source: ' + (latest.price_source || 'unavailable');
           els.allocation.textContent = (latest.allocation != null ? latest.allocation + '%' : 'N/A');
           els.status.textContent = 'Status: ' + (latest.status || 'N/A');
-          els.equity.textContent = (typeof latest.equity_usd === 'number')
-            ? ('$' + latest.equity_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
-            : 'N/A';
+          var snapStatus = String(latest.snapshot_status || '').toUpperCase();
+          var snapSource = String(latest.balance_source || '');
+          var snapEq = (latest.portfolio_snapshot && typeof latest.portfolio_snapshot.equity_usd === 'number')
+            ? latest.portfolio_snapshot.equity_usd
+            : latest.equity_usd;
+          var eqTrusted = (snapStatus === 'SYNCED' && snapSource === 'BITGET_READONLY' && typeof snapEq === 'number');
+          els.equity.textContent = eqTrusted
+            ? ('$' + snapEq.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
+            : 'SYNC_PENDING';
+          var targetRatio = (typeof latest.target_btc_ratio === 'number') ? latest.target_btc_ratio : null;
+          var targetPct = (targetRatio != null) ? Math.round(targetRatio * 100) : null;
+          var targetPos = (targetPct === 0) ? 'CASH' : 'LONG';
+          var actualRatio = (typeof latest.actual_btc_ratio === 'number') ? latest.actual_btc_ratio : null;
+          var actualPct = (actualRatio != null) ? (actualRatio * 100).toFixed(1) : 'N/A';
+          var actualPos = latest.actual_position || 'N/A';
+          var mismatch = (targetRatio != null && actualRatio != null && Math.abs(targetRatio - actualRatio) >= 0.01);
           els.pnl.textContent = 'PnL: ' + ((typeof latest.pnl_usd === 'number')
             ? ('$' + latest.pnl_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
-            : 'N/A') + ' | Position: ' + (latest.position || 'N/A');
+            : 'N/A') +
+            ' | Target: ' + (targetPct != null ? (targetPct + '% (' + targetPos + ')') : 'N/A') +
+            ' | Actual: ' + actualPct + '% (' + actualPos + ')' +
+            (mismatch ? ' | MISMATCH' : '') +
+            ' | Snapshot: ' + (snapStatus || 'UNKNOWN');
 
           renderRows(entries);
           renderChart(entries);
