@@ -275,7 +275,7 @@
 
       var logUrl = new URL('log.json', window.location.href);
       logUrl.searchParams.set('ts', String(Date.now()));
-      fetch(logUrl.toString())
+      fetch(logUrl.toString(), { cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (log) {
           var entries = Array.isArray(log.entries) ? log.entries.slice() : [];
@@ -285,7 +285,7 @@
           els.date.textContent = latest.date || 'N/A';
           els.updated.textContent = latest.updated_at_utc ? ('Updated: ' + latest.updated_at_utc) : 'Updated: N/A';
           els.price.textContent = fmtPrice(latest.btc_price);
-          els.priceSource.textContent = 'Source: ' + (latest.price_source || 'unavailable');
+          els.priceSource.textContent = 'Source: ' + (latest.price_source || 'unavailable') + ((latest.price_source === 'cache_stale') ? ' STALE' : '');
           els.allocation.textContent = (latest.allocation != null ? latest.allocation + '%' : 'N/A');
           els.status.textContent = 'Status: ' + (latest.status || 'N/A');
           els.equity.textContent = (typeof latest.equity_usd === 'number')
