@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarketEdge | Defensive BTC Allocation Engine</title>
+  <style>
+    :root {
+      --bg: #0b1118;
+      --bg2: #101b27;
+      --ink: #edf3fb;
+      --muted: #a8bed3;
+      --line: #273c52;
+      --accent: #38e3aa;
+      --accent2: #f9c45a;
+      --card: rgba(10, 22, 34, 0.86);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+      background:
+        radial-gradient(1200px 640px at 95% -5%, rgba(56, 227, 170, 0.16), transparent 60%),
+        radial-gradient(900px 420px at -10% 5%, rgba(249, 196, 90, 0.14), transparent 58%),
+        linear-gradient(160deg, var(--bg), var(--bg2));
+      line-height: 1.6;
+    }
+    .wrap { width: min(1120px, 92vw); margin: 0 auto; }
+    .hero { padding: 86px 0 54px; }
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(36px, 6vw, 64px);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      max-width: 950px;
+    }
+    .lead {
+      margin: 0;
+      max-width: 900px;
+      color: var(--muted);
+      font-size: clamp(16px, 2.1vw, 22px);
+    }
+    .kpis {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .kpi {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .kpi .v { font-size: 24px; font-weight: 800; line-height: 1.05; }
+    .kpi .k { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+    section { padding: 26px 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 18px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 22px;
+    }
+    h2 { margin: 0 0 12px; font-size: clamp(24px, 3vw, 34px); }
+    ul { margin: 8px 0 0 18px; padding: 0; }
+    li { margin: 6px 0; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .small { color: var(--muted); font-size: 13px; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; min-width: 660px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 10px 8px; text-align: left; font-size: 14px; }
+    th { color: var(--muted); font-weight: 600; }
+    .form-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 10px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .field input, .field select {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .status { color: var(--accent); font-size: 13px; margin-top: 8px; min-height: 18px; }
+    .blurred {
+      filter: blur(7px);
+      user-select: none;
+      pointer-events: none;
+      transition: filter .2s ease;
+    }
+    .cta {
+      margin: 12px 0 78px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 18px;
+      padding: 26px;
+      background: linear-gradient(125deg, rgba(56,227,170,0.16), rgba(249,196,90,0.13));
+    }
+    .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .btn {
+      display: inline-block;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 11px 16px;
+    }
+    .btn.primary { background: var(--accent); color: #06261a; }
+    .btn.secondary { border: 1px solid var(--line); color: var(--ink); }
+
+    @media (max-width: 980px) {
+      .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero { padding-top: 64px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <span class="tag">Institutional-grade risk control for BTC holders</span>
+      <h1>Capture upside.<br>Avoid structural breakdowns.</h1>
+      <p class="lead">
+        MarketEdge is a rules-based BTC allocation engine designed for one objective:
+        preserve capital through major market breakdowns while staying exposed when structure is healthy.
+      </p>
+      <p class="small">Currently in live verification. Beta access via waitlist.</p>
+      <div class="kpis">
+        <div class="kpi"><div class="v">15.17x</div><div class="k">Final Equity (1.00 to 15.1732)</div></div>
+        <div class="kpi"><div class="v">41.02%</div><div class="k">CAGR</div></div>
+        <div class="kpi"><div class="v">-19.79%</div><div class="k">Max Drawdown</div></div>
+        <div class="kpi"><div class="v">1.52</div><div class="k">Sharpe Ratio (rf=0)</div></div>
+        <div class="kpi"><div class="v">11.80%</div><div class="k">Avg Exposure</div></div>
+        <div class="kpi"><div class="v">Live</div><div class="k">Daily public verification log</div></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="wrap grid">
+        <article class="card">
+          <h2>Why it matters</h2>
+          <ul>
+            <li>Buy-and-hold BTC can experience deep multi-year drawdowns.</li>
+            <li>MarketEdge uses deterministic MA-structure and trigger logic to reduce exposure in broken regimes.</li>
+            <li>Current focus: live verification with daily public logs and hash-linked records.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Auditability first</h2>
+          <ul>
+            <li>Full strategy code available.</li>
+            <li>Executed trades are exported with timestamps, side, price, notional, and costs.</li>
+            <li>Backtest KPIs are currently under reproducibility re-validation.</li>
+          </ul>
+          <p class="small">
+            Files: <span class="mono">output/marketedge_report.md</span> and <span class="mono">output/marketedge_trades.csv</span>
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- EVIDENCE_SECTION_START -->
+    <section>
+      <div class="wrap card">
+        <h2>Evidence &amp; Robustness</h2>
+        <p>
+          Backtest KPIs below are sourced from reproducibility evidence and synchronized with the current execution logic.
+          We publish live verification logs and proof data daily.
+        </p>
+        <p>
+          Audit Status: comparison.status = MATCH (Backtest &amp; Live Execution Logic fully synchronized.
+          Reference Commit: ea16dd...9030d)
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>CAGR</th>
+                <th>MaxDD</th>
+                <th>Sharpe</th>
+                <th>MAR</th>
+                <th>Exposure</th>
+                <th>Worst Month</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>BTC Buy&amp;Hold</td><td>27.53%</td><td>-77.23%</td><td>0.70</td><td>0.36</td><td>100.00%</td><td>-37.29%</td></tr>
+              <tr><td>MarketEdge (0.24% RT)</td><td>41.02%</td><td>-19.79%</td><td>1.52</td><td>2.07</td><td>11.80%</td><td>-4.25% (2021-04)</td></tr>
+              <tr><td>MarketEdge (1.00% RT)</td><td>34.79%</td><td>-19.89%</td><td>1.33</td><td>1.75</td><td>11.80%</td><td>-5.56%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small">Source files: output/tradetest_inventory_summary.json, output/marketedge_benchmark_table.csv, evidence/repro/*/results.json.</p>
+        <p>
+          <img src="/marketedge_walkforward_composite.png" alt="Walk-forward composite OOS equity curve" style="width:100%;border:1px solid var(--line);border-radius:12px;margin-top:14px;">
+        </p>
+        <p class="small">
+          Footnotes: UTC timestamps, half-open windows [start, end), execution = next_bar_open, and data source assumptions are under re-validation.
+        </p>
+      </div>
+    </section>
+    <!-- EVIDENCE_SECTION_END -->
+
+    <section>
+      <div class="wrap card">
+        <h2>Live Verification (Real-money tracking)</h2>
+        <p class="small">
+          Start date (UTC): <span data-live-start>2026-02-17T00:00:00Z</span> |
+          Day count: <span data-live-day>1</span> |
+          Current allocation: <span class="blurred" data-allocation>70%</span> |
+          Current equity: <span data-live-equity>Not disclosed</span> |
+          Last update: <span data-live-updated>--</span>
+        </p>
+        <p><a class="btn secondary" href="/log.html">Daily log</a></p>
+        <h3>Latest Weekly Summary</h3>
+        <pre class="small" data-latest-weekly>Loading...</pre>
+        <p class="small">This is an ongoing verification log. Not an offer to sell.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>Join the beta waitlist</h2>
+        <p class="small">Includes: Institutional deck + sample trade log (CSV) + methodology notes.</p>
+        <form class="deck-form" action="#" method="post">
+          <div class="form-grid">
+            <label class="field">Email (required)
+              <input type="email" name="email" required>
+            </label>
+            <label class="field">Name (optional)
+              <input type="text" name="name">
+            </label>
+            <label class="field">Use case (optional)
+              <select name="use_case">
+                <option value="">Select</option>
+                <option>Managed account</option>
+                <option>Treasury</option>
+                <option>Subscription</option>
+              </select>
+            </label>
+          </div>
+          <div class="btns">
+            <button class="btn primary" type="submit">Join the beta waitlist</button>
+          </div>
+          <div class="status" data-status></div>
+        </form>
+        <p class="small"><a href="#" data-export-leads>Export leads (JSON)</a></p>
+        <div class="btns" data-intro-call style="display:none;">
+          <a class="btn secondary" href="#">Complete 3-min Intake (text)</a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>Beta Cohort</h2>
+        <p class="small">Cohort size: 10 seats.</p>
+        <p class="small">Start: after 60 days of live tracking (Day 61).</p>
+        <p class="small">Eligibility: waitlist + one 3-min intake (text).</p>
+        <p class="small">What you get: weekly summary updates + deck + sample trade log.</p>
+        <p class="small">No payment during beta.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>Post-Beta Plan</h2>
+        <p class="small">Monthly subscription: US$329</p>
+        <p class="small">Seats: limited (initial 10)</p>
+        <p class="small">Activation: considered after verified 60-day live track</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>Revenue Target</h2>
+        <p class="small">Planning target: ¥600,000/month</p>
+        <p class="small">Reference price: ¥49,800/month (US$329)</p>
+        <p class="small">Reference needed: 13 subscribers (≈¥647,400/month), post-verification only</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>Cost stress test (Round-trip friction)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Round-trip Cost</th>
+                <th>Final Equity</th>
+                <th>CAGR</th>
+                <th>Max Drawdown</th>
+                <th>Trades</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>0.24%</td><td>15.1732</td><td>41.02%</td><td>-19.79%</td><td>360</td></tr>
+              <tr><td>0.50%</td><td>13.4311</td><td>38.86%</td><td>-19.82%</td><td>362</td></tr>
+              <tr><td>0.60%</td><td>12.8149</td><td>38.04%</td><td>-19.83%</td><td>367</td></tr>
+              <tr><td>0.80%</td><td>11.6649</td><td>36.41%</td><td>-19.86%</td><td>375</td></tr>
+              <tr><td>1.00%</td><td>10.6167</td><td>34.79%</td><td>-19.89%</td><td>378</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap cta">
+        <h2>Built for allocators who care about survival and compounding</h2>
+        <p>
+          If you are evaluating defensive BTC overlays for a managed account, treasury sleeve, or quant subscription product,
+          MarketEdge provides transparent logic, reproducible evidence, and implementation-ready controls.
+        </p>
+        <p class="small">Additional resources</p>
+        <div class="btns">
+          <a class="btn secondary" href="#">Join the beta waitlist</a>
+          <a class="btn secondary" href="#">Join the beta waitlist</a>
+        </div>
+      </div>
+      <div class="wrap small">
+        Backtest KPI publication is paused until full re-validation with current execution code is complete. Historical performance does not guarantee future results.
+      </div>
+    </section>
+  </main>
+  <script>
+    (function () {
+      var forms = document.querySelectorAll('.deck-form');
+      var isJa = (document.documentElement.lang || '').toLowerCase().startsWith('ja');
+      var pageLang = isJa ? 'ja' : 'en';
+      var successMsg = isJa
+        ? '登録しました。60日間の実運用ログが揃い次第、β招待を送ります。'
+        : 'You’re on the list. We’ll invite the first cohort after 60 days of live tracking.';
+      var savedLocalMsg = isJa ? 'ローカル保存のみ完了（サーバー未接続）' : 'Saved locally (server unavailable).';
+      var invalidMsg = isJa ? '有効なメールアドレスを入力してください。' : 'Please enter a valid email address.';
+      var exportOkMsg = isJa ? 'エクスポートしました。' : 'Exported.';
+      var exportErrMsg = isJa ? 'エクスポートに失敗しました。' : 'Export failed.';
+      var betaUnlocked = localStorage.getItem('beta_unlocked') === '1';
+
+      function setLiveMeta() {
+        var startEl = document.querySelector('[data-live-start]');
+        var dayEl = document.querySelector('[data-live-day]');
+        var updateEl = document.querySelector('[data-live-updated]');
+        if (!startEl || !dayEl || !updateEl) return;
+        var start = new Date(String(startEl.textContent || '').trim());
+        var now = new Date();
+        var diffDays = Math.floor((now.getTime() - start.getTime()) / 86400000) + 1;
+        dayEl.textContent = String(Math.max(1, diffDays));
+        updateEl.textContent = now.toISOString();
+      }
+
+      function applyUnlock() {
+        if (!betaUnlocked) return;
+        document.querySelectorAll('[data-allocation].blurred').forEach(function (el) {
+          el.classList.remove('blurred');
+        });
+      }
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      function readLeads() {
+        var raw = localStorage.getItem('marketedge_leads');
+        if (!raw) return [];
+        try {
+          var parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveLeadServer(lead) {
+        return fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lead)
+        }).then(function (r) { return r.ok; }).catch(function () { return false; });
+      }
+
+      function loadLatestWeeklySummary() {
+        var out = document.querySelector('[data-latest-weekly]');
+        if (!out) return;
+        function pickDate(x) {
+          return String((x && (x.date_utc || x.date)) || '');
+        }
+        fetch('/log.json?ts=' + Date.now())
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var entries = Array.isArray(data.entries) ? data.entries.slice() : [];
+            if (!entries.length) {
+              out.textContent = isJa ? 'まだ生成されていません' : 'Not generated yet.';
+              return;
+            }
+            entries.sort(function (a, b) { return pickDate(a).localeCompare(pickDate(b)); });
+            var items = entries.slice(-7);
+            var first = pickDate(items[0]);
+            var last = pickDate(items[items.length - 1]);
+            var changes = 0;
+            for (var i = 1; i < items.length; i++) {
+              if (String(items[i].allocation) !== String(items[i - 1].allocation)) changes++;
+            }
+            var currentAlloc = items[items.length - 1].allocation;
+            var notes = items
+              .filter(function (x) { return String(x.notes || '').trim(); })
+              .map(function (x) { return '- ' + pickDate(x) + ': ' + String(x.notes || '').trim(); });
+
+            var lines = isJa
+              ? [
+                  'Weekly Summary',
+                  '対象期間 (UTC): ' + first + ' -> ' + last,
+                  'アロケーション変更回数: ' + changes,
+                  '現在アロケーション: ' + (currentAlloc != null ? currentAlloc : 'N/A'),
+                  'Notes:',
+                  notes.length ? notes.join('\n') : '- なし'
+                ]
+              : [
+                  'Weekly Summary',
+                  'Covered dates (UTC): ' + first + ' -> ' + last,
+                  'Allocation changes count: ' + changes,
+                  'Current allocation: ' + (currentAlloc != null ? currentAlloc : 'N/A'),
+                  'Notes:',
+                  notes.length ? notes.join('\n') : '- None'
+                ];
+            out.textContent = lines.join('\n');
+          })
+          .catch(function () {
+            out.textContent = isJa ? '読み込みに失敗しました' : 'Unable to load summary.';
+          });
+      }
+
+      setLiveMeta();
+      applyUnlock();
+      loadLatestWeeklySummary();
+
+      forms.forEach(function (form) {
+        if (form.dataset.bound === '1') return;
+        form.dataset.bound = '1';
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var fd = new FormData(form);
+          var email = String(fd.get('email') || '').trim();
+          var name = String(fd.get('name') || '').trim();
+          var useCase = String(fd.get('use_case') || '').trim();
+          var status = form.querySelector('[data-status]');
+          var call = form.parentElement.querySelector('[data-intro-call]');
+
+          if (!email || !isValidEmail(email)) {
+            if (status) status.textContent = invalidMsg;
+            if (call) call.style.display = 'none';
+            setTimeout(function () {
+              if (status) status.textContent = '';
+            }, 3000);
+            return;
+          }
+
+          var lead = {
+            timestamp_utc: new Date().toISOString(),
+            email: email,
+            name: name,
+            use_case: useCase,
+            page_lang: pageLang
+          };
+          var leads = readLeads();
+          leads.push(lead);
+          localStorage.setItem('marketedge_leads', JSON.stringify(leads));
+          localStorage.setItem('beta_unlocked', '1');
+          betaUnlocked = true;
+          applyUnlock();
+
+          saveLeadServer(lead).then(function (ok) {
+            if (status) status.textContent = ok ? successMsg : savedLocalMsg;
+            setTimeout(function () {
+              if (status) status.textContent = '';
+            }, 3000);
+          });
+          if (call) call.style.display = 'block';
+        });
+
+        var exportLink = form.parentElement.querySelector('[data-export-leads]');
+        if (exportLink && exportLink.dataset.bound !== '1') {
+          exportLink.dataset.bound = '1';
+          exportLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            var status = form.querySelector('[data-status]');
+            var payload = localStorage.getItem('marketedge_leads') || '[]';
+
+            function done(ok) {
+              if (status) status.textContent = ok ? exportOkMsg : exportErrMsg;
+              setTimeout(function () {
+                if (status) status.textContent = '';
+              }, 3000);
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(payload).then(
+                function () { done(true); },
+                function () { done(false); }
+              );
+              return;
+            }
+
+            try {
+              var ta = document.createElement('textarea');
+              ta.value = payload;
+              ta.style.position = 'fixed';
+              ta.style.opacity = '0';
+              document.body.appendChild(ta);
+              ta.focus();
+              ta.select();
+              var ok = document.execCommand('copy');
+              document.body.removeChild(ta);
+              done(ok);
+            } catch (err) {
+              done(false);
+            }
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
