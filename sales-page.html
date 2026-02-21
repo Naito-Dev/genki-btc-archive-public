@@ -441,6 +441,9 @@
       function loadLatestWeeklySummary() {
         var out = document.querySelector('[data-latest-weekly]');
         if (!out) return;
+        function pickDate(x) {
+          return String((x && (x.date_utc || x.date)) || '');
+        }
         fetch('/log.json?ts=' + Date.now())
           .then(function (r) { return r.json(); })
           .then(function (data) {
@@ -449,10 +452,10 @@
               out.textContent = isJa ? 'まだ生成されていません' : 'Not generated yet.';
               return;
             }
-            entries.sort(function (a, b) { return String(a.date_utc || '').localeCompare(String(b.date_utc || '')); });
+            entries.sort(function (a, b) { return pickDate(a).localeCompare(pickDate(b)); });
             var items = entries.slice(-7);
-            var first = items[0].date_utc;
-            var last = items[items.length - 1].date_utc;
+            var first = pickDate(items[0]);
+            var last = pickDate(items[items.length - 1]);
             var changes = 0;
             for (var i = 1; i < items.length; i++) {
               if (String(items[i].allocation) !== String(items[i - 1].allocation)) changes++;
@@ -460,7 +463,7 @@
             var currentAlloc = items[items.length - 1].allocation;
             var notes = items
               .filter(function (x) { return String(x.notes || '').trim(); })
-              .map(function (x) { return '- ' + x.date_utc + ': ' + String(x.notes || '').trim(); });
+              .map(function (x) { return '- ' + pickDate(x) + ': ' + String(x.notes || '').trim(); });
 
             var lines = isJa
               ? [
