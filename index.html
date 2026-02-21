@@ -268,8 +268,9 @@
       <div class="status-wrap">
         <article class="status-card">
           <p class="status-kicker">Today's Action Status</p>
-          <p class="status-main" data-kpi-action>CASH</p>
-          <div class="status-detail compact">Action signal only. Verification details are listed below.</div>
+          <p class="status-main" data-kpi-action>買わない</p>
+          <div class="status-detail compact" data-kpi-portfolio>いまの口座：BTC --% / 現金 --%</div>
+          <div class="status-detail compact" data-kpi-guidance>ひとこと：データを確認中です。</div>
           <div class="meta-strip">
             <span class="meta-pill" data-kpi-date>DATE: --</span>
             <span class="meta-pill" data-kpi-price>PRICE: --</span>
@@ -328,6 +329,8 @@
         pnl: document.querySelector('[data-kpi-pnl]'),
         phaseNote: document.querySelector('[data-phase-note]'),
         action: document.querySelector('[data-kpi-action]'),
+        portfolio: document.querySelector('[data-kpi-portfolio]'),
+        guidance: document.querySelector('[data-kpi-guidance]'),
         trustText: document.querySelector('[data-kpi-trust]'),
         date: document.querySelector('[data-kpi-date]'),
         price: document.querySelector('[data-kpi-price]'),
@@ -364,6 +367,20 @@
         var p = String(e.position || '').toUpperCase();
         if (p === 'LONG' || p === 'CASH') return p;
         return (String(e.status || '').toUpperCase() === 'NO_TRADE') ? 'NO_TRADE' : 'NO_TRADE';
+      }
+
+      function actionLabel(pos) {
+        var p = String(pos || 'NO_TRADE').toUpperCase();
+        if (p === 'CASH') return '買わない';
+        if (p === 'LONG') return '持つ';
+        return '様子見';
+      }
+
+      function guidanceLabel(pos) {
+        var p = String(pos || 'NO_TRADE').toUpperCase();
+        if (p === 'CASH') return '今は守りを優先しています';
+        if (p === 'LONG') return '上昇が崩れていないため保有継続です';
+        return '大きな変更はありません';
       }
 
       function trustState(e) {
@@ -488,7 +505,7 @@
         if (pos === 'LONG') els.action.classList.add('long');
         else if (pos === 'CASH') els.action.classList.add('cash');
         else els.action.classList.add('no-trade');
-        els.action.textContent = pos;
+        els.action.textContent = actionLabel(pos);
       }
 
       var url = new URL('log.json', window.location.href);
@@ -506,6 +523,8 @@
           var fallbackEq = findLastVerifiedEquity(entries);
           var eqTrusted = trust.trusted && typeof snapEq === 'number';
           var action = normalizePosition(latest);
+          var targetRatio = (typeof latest.target_btc_ratio === 'number') ? latest.target_btc_ratio : null;
+          var actualRatio = (typeof latest.actual_btc_ratio === 'number') ? latest.actual_btc_ratio : null;
           var pnlUsd = (typeof latest.pnl_usd === 'number') ? latest.pnl_usd : null;
           var pnlPct = (eqTrusted && pnlUsd !== null && (snapEq - pnlUsd) > 0)
             ? (pnlUsd / (snapEq - pnlUsd) * 100)
@@ -534,8 +553,19 @@
           }
           applyAction(action);
 
-          var targetRatio = (typeof latest.target_btc_ratio === 'number') ? latest.target_btc_ratio : null;
-          var actualRatio = (typeof latest.actual_btc_ratio === 'number') ? latest.actual_btc_ratio : null;
+          if (els.portfolio) {
+            if (actualRatio != null) {
+              var btcPct = Math.max(0, Math.min(100, actualRatio * 100));
+              var cashPct = Math.max(0, 100 - btcPct);
+              els.portfolio.textContent = 'いまの口座：BTC ' + btcPct.toFixed(1) + '% / 現金 ' + cashPct.toFixed(1) + '%';
+            } else {
+              els.portfolio.textContent = 'いまの口座：BTC --% / 現金 --%';
+            }
+          }
+          if (els.guidance) {
+            els.guidance.textContent = 'ひとこと：' + guidanceLabel(action);
+          }
+
           var detail = [];
           detail.push('Target: ' + (targetRatio != null ? Math.round(targetRatio * 100) + '%' : 'N/A'));
           detail.push('Actual: ' + (actualRatio != null ? (actualRatio * 100).toFixed(1) + '%' : 'N/A'));
