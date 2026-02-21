@@ -272,7 +272,7 @@
             <span class="meta-pill" data-kpi-updated>UPDATED: --</span>
           </div>
         </article>
-        <a class="cta" href="sales-page-en.html">Protect Your BTC - Join Beta</a>
+        <a class="cta" href="sales-page-en.html">Get daily BTC risk signal</a>
       </div>
     </section>
 
@@ -375,7 +375,7 @@
           return { trusted: false, label: 'UNVERIFIED (price stale)', reason: 'PRICE_STALE' };
         }
         if (snap !== 'SYNCED') {
-          return { trusted: false, label: 'UNVERIFIED (snapshot pending)', reason: 'BALANCE_PENDING' };
+          return { trusted: false, label: 'Verification status: pending snapshot sync', reason: 'BALANCE_PENDING' };
         }
         if (src !== 'BITGET_READONLY') {
           return { trusted: false, label: 'UNVERIFIED (source mismatch)', reason: 'SOURCE_MISMATCH' };
@@ -490,7 +490,7 @@
             ? ((pnlUsd >= 0 ? '+' : '') + fmtUsd(pnlUsd).replace('$', '$') + (pnlPct !== null ? (' / ' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%') : ''))
             : ('Status: ' + (latest.status || 'N/A'));
           if (!eqTrusted) {
-            els.phaseNote.textContent = 'UNVERIFIED — awaiting trusted balance + fresh price';
+            els.phaseNote.textContent = 'Updating latest balance snapshot';
           } else if (typeof snapEq === 'number' && snapEq <= 300) {
             els.phaseNote.textContent = 'Phase 1: $100 Live Testing';
           } else {
