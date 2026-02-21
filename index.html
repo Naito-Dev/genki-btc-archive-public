@@ -256,8 +256,9 @@
       <p class="subtitle">Premium BTC risk-control dashboard with full audit transparency.</p>
 
       <div class="equity-label">Current Portfolio Equity (USD)</div>
-      <p class="equity-value" data-kpi-equity>$0.00</p>
+      <p class="equity-value" data-kpi-equity>UNVERIFIED</p>
       <p class="pnl-value" data-kpi-pnl>Start baseline pending</p>
+      <p class="subtitle" data-phase-note>Live tracking active</p>
 
       <div class="status-wrap">
         <article class="status-card">
@@ -320,6 +321,7 @@
       var els = {
         equity: document.querySelector('[data-kpi-equity]'),
         pnl: document.querySelector('[data-kpi-pnl]'),
+        phaseNote: document.querySelector('[data-phase-note]'),
         action: document.querySelector('[data-kpi-action]'),
         actionDetail: document.querySelector('[data-kpi-action-detail]'),
         truthBanner: document.querySelector('[data-truth-banner]'),
@@ -487,6 +489,13 @@
           els.pnl.textContent = (pnlUsd !== null)
             ? ((pnlUsd >= 0 ? '+' : '') + fmtUsd(pnlUsd).replace('$', '$') + (pnlPct !== null ? (' / ' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%') : ''))
             : ('Status: ' + (latest.status || 'N/A'));
+          if (!eqTrusted) {
+            els.phaseNote.textContent = 'UNVERIFIED — awaiting trusted balance + fresh price';
+          } else if (typeof snapEq === 'number' && snapEq <= 300) {
+            els.phaseNote.textContent = 'Phase 1: $100 Live Testing';
+          } else {
+            els.phaseNote.textContent = 'Live tracking active';
+          }
           applyAction(action);
 
           var targetRatio = (typeof latest.target_btc_ratio === 'number') ? latest.target_btc_ratio : null;
