@@ -3,152 +3,249 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Genki BTC Archive — Live Verification</title>
+  <title>Genki BTC Archive — Portfolio Control</title>
   <style>
     :root {
-      --bg: #071018;
-      --panel: #0f1f2d;
-      --ink: #e9f2f8;
-      --muted: #9cb4c7;
-      --line: #274158;
-      --ok: #3ddc97;
-      --warn: #f7c948;
-      --accent: #4db8ff;
+      --bg: #071325;
+      --bg-soft: #0e2038;
+      --panel: #0f1f33;
+      --panel-2: #112742;
+      --line: #243d5f;
+      --ink: #f4f7fb;
+      --muted: #9cb0c9;
+      --gold: #d7b56d;
+      --gold-2: #f0cd7f;
+      --ok: #2dd881;
+      --bad: #ef5b5b;
+      --warn: #f5bf59;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
       color: var(--ink);
+      font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
       background:
-        radial-gradient(1200px 600px at 20% -10%, #12314a 0%, transparent 60%),
-        radial-gradient(900px 500px at 100% 0%, #1f3f30 0%, transparent 55%),
+        radial-gradient(900px 520px at -10% -10%, #1f3558 0%, transparent 60%),
+        radial-gradient(1000px 600px at 110% 0%, #1c2f4f 0%, transparent 62%),
         var(--bg);
+      letter-spacing: 0.01em;
     }
-    .wrap { width: min(1100px, 92vw); margin: 40px auto 72px; }
-    .hero h1 { margin: 0 0 8px; font-size: clamp(28px, 4vw, 44px); line-height: 1.1; }
-    .hero p { margin: 0; color: var(--muted); }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 20px;
+    .wrap {
+      width: min(980px, 92vw);
+      margin: 0 auto;
+      padding: 24px 0 60px;
     }
-    .card {
-      background: color-mix(in srgb, var(--panel) 92%, #ffffff 8%);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 16px;
+    .hero {
+      text-align: center;
+      padding: 26px 18px;
+      border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--line) 76%);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(17,39,66,0.95), rgba(10,24,43,0.95));
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
     }
-    .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
-    .value { margin-top: 6px; font-size: 26px; font-weight: 700; line-height: 1.1; }
-    .tiny { color: var(--muted); font-size: 12px; margin-top: 8px; }
-    .panel { margin-top: 16px; }
-    .banner {
-      margin-top: 14px;
-      border-radius: 10px;
-      padding: 10px 12px;
-      border: 1px solid #6a4f00;
-      background: #3a2d00;
-      color: #ffe08a;
+    .hero h1 {
+      margin: 0 0 8px;
+      color: var(--gold-2);
+      font-size: clamp(20px, 4.6vw, 30px);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .hero .subtitle {
+      margin: 0 0 20px;
+      color: var(--muted);
       font-size: 13px;
+    }
+    .equity-label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .equity-value {
+      font-size: clamp(42px, 12vw, 84px);
+      line-height: 1;
+      font-weight: 800;
+      margin: 0 0 12px;
+      color: var(--ink);
+    }
+    .pnl-value {
+      font-size: clamp(16px, 3.8vw, 24px);
+      color: var(--gold-2);
       font-weight: 600;
+      margin: 0;
+    }
+    .status-wrap {
+      margin-top: 16px;
+      display: grid;
+      gap: 14px;
+    }
+    .status-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: linear-gradient(160deg, rgba(17,39,66,0.92), rgba(10,24,43,0.96));
+    }
+    .status-kicker {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin: 0 0 6px;
+    }
+    .status-main {
+      margin: 0;
+      font-size: clamp(34px, 10vw, 56px);
+      font-weight: 800;
+      line-height: 1;
+    }
+    .status-main.long { color: var(--ok); }
+    .status-main.cash, .status-main.no-trade { color: var(--bad); }
+    .status-detail {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .cta {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      margin-top: 4px;
+      border-radius: 14px;
+      padding: 16px 18px;
+      background: linear-gradient(100deg, #b4883c, #e0be76);
+      color: #162033;
+      font-weight: 800;
+      font-size: clamp(16px, 4.2vw, 20px);
+      border: 1px solid #f0d38d;
+      box-shadow: 0 10px 22px rgba(209, 164, 78, 0.28);
+    }
+    .truth-banner {
+      margin-top: 12px;
+      border-radius: 12px;
+      border: 1px solid #684f20;
+      background: #2e2412;
+      color: #ffe19d;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
       display: none;
     }
-    .panel h2 { margin: 0 0 10px; font-size: 20px; }
-    .chart {
-      margin-top: 8px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px;
-      background: #0a1825;
+    .meta-strip {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 12px;
     }
-    svg { width: 100%; height: 210px; display: block; }
-    .axis { stroke: #39556d; stroke-width: 1; }
-    .line { fill: none; stroke: var(--accent); stroke-width: 2.5; }
-    .dot { fill: #bfe4ff; }
-    .rows { margin-top: 12px; display: grid; gap: 8px; }
-    .row {
+    .meta-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      background: rgba(15,31,51,0.72);
+    }
+    .tech {
+      margin-top: 24px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(10,24,43,0.8);
+      font-size: 12px;
+    }
+    .tech h2 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .tech-grid {
       display: grid;
-      grid-template-columns: 140px 140px 160px 1fr;
       gap: 10px;
-      align-items: center;
-      padding: 10px 12px;
+      grid-template-columns: 1fr;
+    }
+    .tech-card {
       border: 1px solid var(--line);
       border-radius: 10px;
+      padding: 10px;
+      background: rgba(15,31,51,0.75);
+    }
+    .tiny-label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 11px;
+    }
+    .tiny-value {
+      margin-top: 4px;
       font-size: 13px;
-      background: #0a1825;
+      font-weight: 700;
+    }
+    .rows { margin-top: 10px; display: grid; gap: 6px; }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 3px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px 9px;
+      background: rgba(11,24,43,0.75);
     }
     .row.head {
       background: transparent;
       border-style: dashed;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: .04em;
-      font-size: 11px;
+      letter-spacing: 0.05em;
+      font-size: 10px;
       font-weight: 700;
     }
-    .badge {
-      display: inline-block;
+    .chart {
+      margin-top: 8px;
       border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 2px 10px;
-      font-size: 12px;
+      border-radius: 10px;
+      padding: 8px;
+      background: rgba(11,24,43,0.75);
+    }
+    svg { width: 100%; height: 160px; display: block; }
+    .axis { stroke: #2f4a69; stroke-width: 1; }
+    .line { fill: none; stroke: var(--gold-2); stroke-width: 2; }
+    .dot { fill: #efe0b8; }
+    pre {
+      margin: 8px 0 0;
+      white-space: pre-wrap;
+      font-size: 11px;
+      line-height: 1.35;
+      color: #d9e6f4;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      background: rgba(11,24,43,0.75);
+    }
+    .btn {
+      margin-top: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(16,36,61,0.92);
       color: var(--ink);
+      padding: 7px 10px;
+      font-size: 11px;
+      cursor: pointer;
     }
     .ok { color: var(--ok); }
     .warn { color: var(--warn); }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-    .btn {
-      border: 1px solid var(--line);
-      background: #143149;
-      color: var(--ink);
-      border-radius: 10px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-    pre {
-      margin: 12px 0 0;
-      white-space: pre-wrap;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 12px;
-      min-height: 44px;
-      background: #0a1825;
-      color: #d9e8f5;
-      font-size: 12px;
-    }
-    .foot { margin-top: 16px; color: var(--muted); font-size: 12px; }
-    .pro-card {
-      margin-top: 10px;
-      border: 1px dashed var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      background: #0a1825;
-    }
-    .pro-title { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
-    .pro-list { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
-    .pro-list li { margin: 6px 0; }
-    .btn-lock {
-      margin-top: 10px;
-      display: inline-block;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 7px 12px;
-      background: #143149;
-      color: var(--ink);
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-    }
-    @media (max-width: 960px) {
-      .grid { grid-template-columns: 1fr 1fr; }
-      .row { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 640px) {
-      .grid { grid-template-columns: 1fr; }
-      .row { grid-template-columns: 1fr; }
+    .err { color: var(--bad); }
+    @media (min-width: 760px) {
+      .status-wrap { grid-template-columns: 2fr 1fr; }
+      .cta { margin-top: 0; display: flex; align-items: center; justify-content: center; }
+      .tech-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .row { grid-template-columns: 120px 140px 120px 1fr; align-items: center; }
+      .row.head { grid-template-columns: 120px 140px 120px 1fr; }
     }
   </style>
 </head>
@@ -156,190 +253,160 @@
   <main class="wrap">
     <section class="hero">
       <h1>Genki BTC Archive</h1>
-      <p>Live verification dashboard. Hash-chained daily records. Not investment advice.</p>
-      <div class="banner" data-trust-banner>NOT PUBLISHED TODAY — data not trusted.</div>
-    </section>
+      <p class="subtitle">Premium BTC risk-control dashboard with full audit transparency.</p>
 
-    <section class="grid" aria-label="key metrics">
-      <article class="card">
-        <div class="label">Latest Date (UTC)</div>
-        <div class="value" data-kpi-date>—</div>
-        <div class="tiny" data-kpi-updated></div>
-      </article>
-      <article class="card">
-        <div class="label">BTC Price</div>
-        <div class="value" data-kpi-price>—</div>
-        <div class="tiny" data-kpi-price-source></div>
-      </article>
-      <article class="card">
-        <div class="label">Allocation</div>
-        <div class="value" data-kpi-allocation>—</div>
-        <div class="tiny" data-kpi-status></div>
-      </article>
-      <article class="card">
-        <div class="label">Chain Integrity</div>
-        <div class="value" data-kpi-chain>—</div>
-        <div class="tiny" data-kpi-chain-note></div>
-      </article>
-      <article class="card">
-        <div class="label">Portfolio Snapshot</div>
-        <div class="value" data-kpi-equity>—</div>
-        <div class="tiny" data-kpi-pnl></div>
-      </article>
-    </section>
+      <div class="equity-label">Current Portfolio Equity (USD)</div>
+      <p class="equity-value" data-kpi-equity>$0.00</p>
+      <p class="pnl-value" data-kpi-pnl>Start baseline pending</p>
 
-    <section class="panel card">
-      <h2>Price Trend (Latest 30 entries)</h2>
-      <div class="chart">
-        <svg viewBox="0 0 1000 210" preserveAspectRatio="none" data-chart-svg>
-          <line class="axis" x1="0" y1="200" x2="1000" y2="200"></line>
-          <polyline class="line" data-chart-line points=""></polyline>
-          <g data-chart-dots></g>
-        </svg>
-      </div>
-      <div class="tiny" data-chart-note>Loading...</div>
-    </section>
-
-    <section class="panel card">
-      <h2>Recent Verified Decisions</h2>
-      <div class="rows" data-rows></div>
-      <div class="pro-card" data-pro-card>
-        <p class="pro-title">Pro Details (Locked)</p>
-        <ul class="pro-list" data-pro-list>
-          <li>Target BTC%: Locked</li>
-          <li>Regime rationale: Locked</li>
-          <li>Next trigger: Locked</li>
-        </ul>
-        <span class="btn-lock">Unlock Pro</span>
+      <div class="status-wrap">
+        <article class="status-card">
+          <p class="status-kicker">Today's Action Status</p>
+          <p class="status-main" data-kpi-action>CASH</p>
+          <div class="status-detail" data-kpi-action-detail>Target and verification details are loading.</div>
+          <div class="truth-banner" data-truth-banner>UNVERIFIED (loading)</div>
+          <div class="meta-strip">
+            <span class="meta-pill" data-kpi-date>DATE: --</span>
+            <span class="meta-pill" data-kpi-price>PRICE: --</span>
+            <span class="meta-pill" data-kpi-updated>UPDATED: --</span>
+          </div>
+        </article>
+        <a class="cta" href="sales-page-en.html">Protect Your BTC - Join Beta</a>
       </div>
     </section>
 
-    <section class="panel card">
-      <h2>Proof Block</h2>
-      <div class="actions">
+    <section class="tech">
+      <h2>Technical & Audit Data</h2>
+      <div class="tech-grid">
+        <article class="tech-card">
+          <div class="tiny-label">Chain Integrity</div>
+          <div class="tiny-value" data-kpi-chain>UNKNOWN</div>
+          <div class="tiny-label" data-kpi-chain-note>Waiting for chain verification.</div>
+        </article>
+        <article class="tech-card">
+          <div class="tiny-label">Allocation / Status</div>
+          <div class="tiny-value" data-kpi-allocation>--</div>
+          <div class="tiny-label" data-kpi-status>--</div>
+        </article>
+      </div>
+
+      <article class="tech-card" style="margin-top:10px;">
+        <div class="tiny-label">Price Trend (Latest 30 entries)</div>
+        <div class="chart">
+          <svg viewBox="0 0 1000 160" preserveAspectRatio="none">
+            <line class="axis" x1="0" y1="150" x2="1000" y2="150"></line>
+            <polyline class="line" data-chart-line points=""></polyline>
+            <g data-chart-dots></g>
+          </svg>
+        </div>
+        <div class="tiny-label" data-chart-note>Loading chart...</div>
+      </article>
+
+      <article class="tech-card" style="margin-top:10px;">
+        <div class="tiny-label">Recent Verified Decisions</div>
+        <div class="rows" data-rows></div>
+      </article>
+
+      <article class="tech-card" style="margin-top:10px;">
+        <div class="tiny-label">Proof Block</div>
         <button type="button" class="btn" data-copy-proof>Copy Latest Proof</button>
-      </div>
-      <pre data-proof>Loading...</pre>
+        <pre data-proof>Loading...</pre>
+      </article>
     </section>
-
-    <p class="foot">Validation model: each entry hash is computed from canonical entry JSON + <code>|prev_hash</code> using SHA-256.</p>
   </main>
 
   <script>
     (function () {
       var els = {
+        equity: document.querySelector('[data-kpi-equity]'),
+        pnl: document.querySelector('[data-kpi-pnl]'),
+        action: document.querySelector('[data-kpi-action]'),
+        actionDetail: document.querySelector('[data-kpi-action-detail]'),
+        truthBanner: document.querySelector('[data-truth-banner]'),
         date: document.querySelector('[data-kpi-date]'),
-        updated: document.querySelector('[data-kpi-updated]'),
         price: document.querySelector('[data-kpi-price]'),
-        priceSource: document.querySelector('[data-kpi-price-source]'),
+        updated: document.querySelector('[data-kpi-updated]'),
         allocation: document.querySelector('[data-kpi-allocation]'),
         status: document.querySelector('[data-kpi-status]'),
         chain: document.querySelector('[data-kpi-chain]'),
         chainNote: document.querySelector('[data-kpi-chain-note]'),
-        equity: document.querySelector('[data-kpi-equity]'),
-        pnl: document.querySelector('[data-kpi-pnl]'),
         rows: document.querySelector('[data-rows]'),
         proof: document.querySelector('[data-proof]'),
         copyProof: document.querySelector('[data-copy-proof]'),
         chartLine: document.querySelector('[data-chart-line]'),
         chartDots: document.querySelector('[data-chart-dots]'),
-        chartNote: document.querySelector('[data-chart-note]'),
-        trustBanner: document.querySelector('[data-trust-banner]'),
-        proList: document.querySelector('[data-pro-list]')
+        chartNote: document.querySelector('[data-chart-note]')
       };
-      var PRO_UNLOCKED = false;
 
-      function fmtPrice(v) {
-        return (typeof v === 'number') ? ('$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })) : 'N/A';
+      function fmtUsd(v) {
+        return (typeof v === 'number')
+          ? ('$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
+          : 'N/A';
       }
 
-      function fmtDecisionPrice(v) {
-        return (typeof v === 'number') ? ('$' + Math.floor(v).toLocaleString()) : '—';
+      function fmtPrice(v) {
+        return (typeof v === 'number')
+          ? ('$' + Math.floor(v).toLocaleString())
+          : '—';
       }
 
       function normalizePosition(e) {
-        var rawStatus = String(e.status || '').toUpperCase();
-        var percent = null;
-        if (typeof e.target_btc_ratio === 'number' && isFinite(e.target_btc_ratio)) {
-          percent = Math.round(e.target_btc_ratio * 100);
-        } else if (typeof e.allocation === 'number' && isFinite(e.allocation)) {
-          percent = Math.round(e.allocation);
+        var targetRatio = (typeof e.target_btc_ratio === 'number') ? e.target_btc_ratio : null;
+        if (targetRatio != null) {
+          return targetRatio > 0 ? 'LONG' : 'CASH';
         }
-        if (rawStatus === 'NO_TRADE') {
-          return 'NO_TRADE';
-        }
-        if (typeof percent === 'number') {
-          if (percent <= 0) return 'CASH';
-          return 'LONG (BTC ' + percent + '%)';
-        }
-        return 'UNKNOWN';
+        var p = String(e.position || '').toUpperCase();
+        if (p === 'LONG' || p === 'CASH') return p;
+        return (String(e.status || '').toUpperCase() === 'NO_TRADE') ? 'NO_TRADE' : 'NO_TRADE';
       }
 
-      function trustText(e) {
+      function trustState(e) {
         var snap = String(e.snapshot_status || '').toUpperCase();
         var src = String(e.balance_source || '');
         var ps = String(e.price_source || '');
-        var st = String(e.status || '');
+        var st = String(e.status || '').toUpperCase();
+        if (st === 'API_ERROR') return { trusted: false, label: 'SYSTEM HALTED (API Error)', reason: 'API_ERROR' };
         if (snap === 'SYNCED' && src === 'BITGET_READONLY' && ps !== 'cache_stale' && st !== 'DATA_STALE') {
-          return '✓ Verified';
+          return { trusted: true, label: 'VERIFIED', reason: 'OK' };
         }
         if (ps === 'cache_stale' || st === 'DATA_STALE') {
-          return '⚠ Price stale';
+          return { trusted: false, label: 'UNVERIFIED (price stale)', reason: 'PRICE_STALE' };
         }
-        return '✗ Data issue';
+        if (snap !== 'SYNCED') {
+          return { trusted: false, label: 'UNVERIFIED (snapshot pending)', reason: 'BALANCE_PENDING' };
+        }
+        if (src !== 'BITGET_READONLY') {
+          return { trusted: false, label: 'UNVERIFIED (source mismatch)', reason: 'SOURCE_MISMATCH' };
+        }
+        return { trusted: false, label: 'UNVERIFIED (data issue)', reason: 'DATA_ISSUE' };
       }
 
       function renderRows(entries) {
         els.rows.innerHTML = '';
         var header = document.createElement('div');
         header.className = 'row head';
-        header.innerHTML =
-          '<div>DATE</div>' +
-          '<div>SIGNAL</div>' +
-          '<div>BTC PRICE</div>' +
-          '<div>TRUST</div>';
+        header.innerHTML = '<div>DATE</div><div>SIGNAL</div><div>PRICE</div><div>TRUST</div>';
         els.rows.appendChild(header);
-        entries.slice(-12).reverse().forEach(function (e) {
+
+        entries.slice(-10).reverse().forEach(function (e) {
+          var trust = trustState(e);
+          var pos = normalizePosition(e);
           var row = document.createElement('div');
           row.className = 'row';
-          var trust = trustText(e);
           row.innerHTML =
-            '<div><strong>' + (e.date || 'N/A') + '</strong></div>' +
-            '<div>' + normalizePosition(e) + '</div>' +
-            '<div>' + fmtDecisionPrice(e.btc_price) + '</div>' +
-            '<div>' + trust + '</div>';
+            '<div>' + (e.date || 'N/A') + '</div>' +
+            '<div>' + pos + '</div>' +
+            '<div>' + fmtPrice(e.btc_price) + '</div>' +
+            '<div>' + trust.label + '</div>';
           els.rows.appendChild(row);
         });
-      }
-
-      function renderPro(latest) {
-        if (!els.proList) return;
-        if (!PRO_UNLOCKED) {
-          els.proList.innerHTML =
-            '<li>Target BTC%: Locked</li>' +
-            '<li>Regime rationale: Locked</li>' +
-            '<li>Next trigger: Locked</li>';
-          return;
-        }
-        var target = 'N/A';
-        if (typeof latest.target_btc_ratio === 'number') {
-          target = Math.round(latest.target_btc_ratio * 100) + '%';
-        } else if (typeof latest.allocation === 'number') {
-          target = Math.round(latest.allocation) + '%';
-        }
-        var regime = String(latest.regime || latest.reason_summary || 'No rationale available');
-        var trigger = String(latest.trigger || 'Waiting for confirmation');
-        els.proList.innerHTML =
-          '<li>Target BTC%: ' + target + '</li>' +
-          '<li>Regime rationale: ' + regime + '</li>' +
-          '<li>Next trigger: ' + trigger + '</li>';
       }
 
       function renderChart(entries) {
         var points = entries
           .filter(function (e) { return typeof e.btc_price === 'number'; })
           .slice(-30)
-          .map(function (e) { return ({ date: e.date, price: e.btc_price }); });
+          .map(function (e) { return e.btc_price; });
 
         if (!points.length) {
           els.chartLine.setAttribute('points', '');
@@ -348,31 +415,26 @@
           return;
         }
 
-        var min = Math.min.apply(null, points.map(function (p) { return p.price; }));
-        var max = Math.max.apply(null, points.map(function (p) { return p.price; }));
+        var min = Math.min.apply(null, points);
+        var max = Math.max.apply(null, points);
         var span = Math.max(1, max - min);
         var stepX = points.length > 1 ? (1000 / (points.length - 1)) : 0;
-
         var poly = points.map(function (p, i) {
           var x = i * stepX;
-          var y = 200 - ((p.price - min) / span) * 180;
+          var y = 150 - ((p - min) / span) * 130;
           return x.toFixed(1) + ',' + y.toFixed(1);
         }).join(' ');
-
         els.chartLine.setAttribute('points', poly);
-
         els.chartDots.innerHTML = points.map(function (p, i) {
           var x = i * stepX;
-          var y = 200 - ((p.price - min) / span) * 180;
-          return '<circle class="dot" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2"></circle>';
+          var y = 150 - ((p - min) / span) * 130;
+          return '<circle class="dot" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="1.8"></circle>';
         }).join('');
-
-        els.chartNote.textContent =
-          'Range: ' + fmtPrice(min) + ' to ' + fmtPrice(max) + ' across ' + points.length + ' points.';
+        els.chartNote.textContent = 'Range: ' + fmtUsd(min) + ' to ' + fmtUsd(max) + ' (' + points.length + ' points)';
       }
 
       function setProof(latest) {
-        var text = [
+        els.proof.textContent = [
           'date: ' + (latest.date || 'N/A'),
           'allocation: ' + (latest.allocation != null ? latest.allocation + '%' : 'N/A'),
           'btc_price: ' + (latest.btc_price != null ? latest.btc_price : 'null'),
@@ -380,103 +442,94 @@
           'prev_hash: ' + (latest.prev_hash || 'null'),
           'hash: ' + (latest.hash || 'null')
         ].join('\n');
-        els.proof.textContent = text;
       }
 
       if (els.copyProof) {
         els.copyProof.addEventListener('click', function () {
-          var text = els.proof.textContent || '';
-          navigator.clipboard.writeText(text).then(function () {
+          navigator.clipboard.writeText(els.proof.textContent || '').then(function () {
             els.copyProof.textContent = 'Copied';
             setTimeout(function () { els.copyProof.textContent = 'Copy Latest Proof'; }, 1200);
           });
         });
       }
 
-      var logUrl = new URL('log.json', window.location.href);
-      logUrl.searchParams.set('ts', String(Date.now()));
-      fetch(logUrl.toString(), { cache: "no-store" })
+      function applyAction(position) {
+        els.action.classList.remove('long', 'cash', 'no-trade');
+        var pos = String(position || 'NO_TRADE').toUpperCase();
+        if (pos === 'LONG') els.action.classList.add('long');
+        else if (pos === 'CASH') els.action.classList.add('cash');
+        else els.action.classList.add('no-trade');
+        els.action.textContent = pos;
+      }
+
+      var url = new URL('log.json', window.location.href);
+      url.searchParams.set('ts', String(Date.now()));
+      fetch(url.toString(), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
         .then(function (log) {
           var entries = Array.isArray(log.entries) ? log.entries.slice() : [];
           entries.sort(function (a, b) { return String(a.date || '').localeCompare(String(b.date || '')); });
           var latest = log.latest || entries[entries.length - 1] || {};
 
-          els.date.textContent = latest.date || 'N/A';
-          els.updated.textContent = latest.updated_at_utc ? ('Updated: ' + latest.updated_at_utc) : 'Updated: N/A';
-          els.price.textContent = fmtPrice(latest.btc_price);
-          els.priceSource.textContent = 'Source: ' + (latest.price_source || 'unavailable');
-          els.allocation.textContent = (latest.allocation != null ? latest.allocation + '%' : 'N/A');
-          els.status.textContent = 'Status: ' + (latest.status || 'N/A');
-          var snapStatus = String(latest.snapshot_status || '').toUpperCase();
-          var snapSource = String(latest.balance_source || '');
+          var trust = trustState(latest);
           var stalePrice = (latest.price_source === 'cache_stale' || latest.status === 'DATA_STALE');
           var snapEq = (latest.portfolio_snapshot && typeof latest.portfolio_snapshot.equity_usd === 'number')
             ? latest.portfolio_snapshot.equity_usd
             : latest.equity_usd;
-          var eqTrusted = (snapStatus === 'SYNCED' && snapSource === 'BITGET_READONLY' && !stalePrice && typeof snapEq === 'number');
-          var trusted = (snapStatus === 'SYNCED' && snapSource === 'BITGET_READONLY' && !stalePrice);
-          var trustReason = 'OK';
-          if (snapStatus !== 'SYNCED') trustReason = 'BALANCE_PENDING';
-          else if (snapSource !== 'BITGET_READONLY') trustReason = 'SOURCE_MISMATCH';
-          else if (stalePrice) trustReason = 'PRICE_STALE';
-          if (trusted) {
-            els.trustBanner.style.display = 'none';
-            els.trustBanner.textContent = '';
-          } else {
-            els.trustBanner.style.display = 'block';
-            els.trustBanner.textContent = 'NOT PUBLISHED TODAY — data not trusted (' +
-              [snapStatus || 'UNKNOWN', (latest.price_source || 'unknown')].join(' / ') + ').';
-          }
-          els.equity.textContent = eqTrusted
-            ? ('$' + snapEq.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
-            : 'NOT TRUSTED';
+          var eqTrusted = trust.trusted && typeof snapEq === 'number';
+          var action = normalizePosition(latest);
+          var pnlUsd = (typeof latest.pnl_usd === 'number') ? latest.pnl_usd : null;
+          var pnlPct = (eqTrusted && pnlUsd !== null && (snapEq - pnlUsd) > 0)
+            ? (pnlUsd / (snapEq - pnlUsd) * 100)
+            : null;
+
+          els.equity.textContent = eqTrusted ? fmtUsd(snapEq) : trust.label;
+          els.pnl.textContent = (pnlUsd !== null)
+            ? ((pnlUsd >= 0 ? '+' : '') + fmtUsd(pnlUsd).replace('$', '$') + (pnlPct !== null ? (' / ' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%') : ''))
+            : ('Status: ' + (latest.status || 'N/A'));
+          applyAction(action);
+
           var targetRatio = (typeof latest.target_btc_ratio === 'number') ? latest.target_btc_ratio : null;
-          var targetPct = (targetRatio != null) ? Math.round(targetRatio * 100) : null;
-          var targetPos = (targetPct === 0) ? 'CASH' : 'LONG';
           var actualRatio = (typeof latest.actual_btc_ratio === 'number') ? latest.actual_btc_ratio : null;
-          var actualPct = (actualRatio != null) ? (actualRatio * 100).toFixed(1) : 'UNKNOWN';
-          var actualPos = latest.actual_position || latest.position || 'UNKNOWN';
-          var mismatch = (targetRatio != null && actualRatio != null && Math.abs(targetRatio - actualRatio) >= 0.01);
-          els.pnl.textContent = 'PnL: ' + ((typeof latest.pnl_usd === 'number')
-            ? ('$' + latest.pnl_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
-            : 'N/A') +
-            ' | Target: ' + (targetPct != null ? (targetPct + '% (' + targetPos + ')') : 'UNKNOWN') +
-            ' | Actual: ' + actualPct + '% (' + actualPos + ')' +
-            (mismatch ? ' | MISMATCH' : '') +
-            ' | Snapshot: ' + (snapStatus || 'UNKNOWN') +
-            ' | Reason: ' + trustReason;
+          var detail = [];
+          detail.push('Target: ' + (targetRatio != null ? Math.round(targetRatio * 100) + '%' : 'N/A'));
+          detail.push('Actual: ' + (actualRatio != null ? (actualRatio * 100).toFixed(1) + '%' : 'N/A'));
+          detail.push('Trust: ' + trust.reason);
+          els.actionDetail.textContent = detail.join(' | ');
+
+          if (trust.trusted) {
+            els.truthBanner.style.display = 'none';
+            els.truthBanner.textContent = '';
+          } else {
+            els.truthBanner.style.display = 'block';
+            els.truthBanner.textContent = trust.label;
+          }
+
+          els.date.textContent = 'DATE: ' + (latest.date || 'N/A');
+          els.price.textContent = 'PRICE: ' + fmtUsd(latest.btc_price);
+          els.updated.textContent = 'UPDATED: ' + (latest.updated_at_utc || 'N/A');
+          els.allocation.textContent = (latest.allocation != null ? latest.allocation + '%' : 'N/A');
+          els.status.textContent = (latest.status || 'N/A') + (stalePrice ? ' / PRICE_STALE' : '');
+
+          var ci = String(latest.chain_integrity || 'UNKNOWN').toUpperCase();
+          els.chain.textContent = ci;
+          els.chain.classList.remove('ok', 'warn', 'err');
+          if (ci === 'VALID') els.chain.classList.add('ok');
+          else if (ci === 'BROKEN') els.chain.classList.add('err');
+          else els.chain.classList.add('warn');
+          els.chainNote.textContent = String(latest.chain_reason || 'Chain status provided by run_daily.py.');
 
           renderRows(entries);
           renderChart(entries);
-          renderPro(latest);
           setProof(latest);
-          var ci = String(latest.chain_integrity || 'UNKNOWN').toUpperCase();
-          var cr = String(latest.chain_reason || '').trim();
-          if (ci === 'VALID') {
-            els.chain.textContent = 'VALID';
-            els.chain.classList.add('ok');
-            els.chain.classList.remove('warn');
-            els.chainNote.textContent = 'Hash chain verified by run_daily.py.';
-          } else if (ci === 'BROKEN') {
-            els.chain.textContent = 'BROKEN';
-            els.chain.classList.add('warn');
-            els.chain.classList.remove('ok');
-            els.chainNote.textContent = cr || 'Chain validation failed (publisher side).';
-          } else {
-            els.chain.textContent = 'UNKNOWN';
-            els.chain.classList.add('warn');
-            els.chain.classList.remove('ok');
-            els.chainNote.textContent = 'Chain status not provided in this log format.';
-          }
         })
         .catch(function () {
-          els.trustBanner.style.display = 'block';
-          els.trustBanner.textContent = 'NOT PUBLISHED TODAY — data not trusted (load error).';
-          els.price.textContent = 'N/A';
-          els.chain.textContent = 'ERROR';
-          els.chain.classList.add('warn');
-          els.chainNote.textContent = 'Unable to load log.json';
+          els.truthBanner.style.display = 'block';
+          els.truthBanner.textContent = 'SYSTEM HALTED (API Error)';
+          els.equity.textContent = 'SYSTEM HALTED (API Error)';
+          els.action.textContent = 'NO_TRADE';
+          els.action.classList.add('no-trade');
+          els.actionDetail.textContent = 'Unable to load log.json';
           els.proof.textContent = 'Unable to load proof block.';
         });
     })();
