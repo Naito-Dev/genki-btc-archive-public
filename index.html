@@ -268,9 +268,9 @@
       <div class="status-wrap">
         <article class="status-card">
           <p class="status-kicker">Today's Action Status</p>
-          <p class="status-main" data-kpi-action>買わない</p>
-          <div class="status-detail compact" data-kpi-portfolio>いまの口座：BTC --% / 現金 --%</div>
-          <div class="status-detail compact" data-kpi-guidance>ひとこと：データを確認中です。</div>
+          <p class="status-main" data-kpi-action>Hold Cash</p>
+          <div class="status-detail compact" data-kpi-portfolio>Current allocation: BTC --% / Cash --%</div>
+          <div class="status-detail compact" data-kpi-guidance>Guidance: Checking latest data.</div>
           <div class="meta-strip">
             <span class="meta-pill" data-kpi-date>DATE: --</span>
             <span class="meta-pill" data-kpi-price>PRICE: --</span>
@@ -371,16 +371,16 @@
 
       function actionLabel(pos) {
         var p = String(pos || 'NO_TRADE').toUpperCase();
-        if (p === 'CASH') return '買わない';
-        if (p === 'LONG') return '持つ';
-        return '様子見';
+        if (p === 'CASH') return 'Hold Cash';
+        if (p === 'LONG') return 'Hold BTC';
+        return 'Stand By';
       }
 
       function guidanceLabel(pos) {
         var p = String(pos || 'NO_TRADE').toUpperCase();
-        if (p === 'CASH') return '今は守りを優先しています';
-        if (p === 'LONG') return '上昇が崩れていないため保有継続です';
-        return '大きな変更はありません';
+        if (p === 'CASH') return 'Defensive stance: preserve cash.';
+        if (p === 'LONG') return 'Trend remains intact: continue holding BTC.';
+        return 'No major action today.';
       }
 
       function trustState(e) {
@@ -557,13 +557,13 @@
             if (actualRatio != null) {
               var btcPct = Math.max(0, Math.min(100, actualRatio * 100));
               var cashPct = Math.max(0, 100 - btcPct);
-              els.portfolio.textContent = 'いまの口座：BTC ' + btcPct.toFixed(1) + '% / 現金 ' + cashPct.toFixed(1) + '%';
+              els.portfolio.textContent = 'Current allocation: BTC ' + btcPct.toFixed(1) + '% / Cash ' + cashPct.toFixed(1) + '%';
             } else {
-              els.portfolio.textContent = 'いまの口座：BTC --% / 現金 --%';
+              els.portfolio.textContent = 'Current allocation: BTC --% / Cash --%';
             }
           }
           if (els.guidance) {
-            els.guidance.textContent = 'ひとこと：' + guidanceLabel(action);
+            els.guidance.textContent = 'Guidance: ' + guidanceLabel(action);
           }
 
           var detail = [];
