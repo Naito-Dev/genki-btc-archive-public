@@ -435,6 +435,29 @@
         els.chartNote.textContent = 'Range: ' + fmtUsd(min) + ' to ' + fmtUsd(max) + ' (' + points.length + ' points)';
       }
 
+      function pickNumericEquity(e) {
+        if (e && e.portfolio_snapshot && typeof e.portfolio_snapshot.equity_usd === 'number') {
+          return e.portfolio_snapshot.equity_usd;
+        }
+        if (e && typeof e.equity_usd === 'number') {
+          return e.equity_usd;
+        }
+        return null;
+      }
+
+      function findLastVerifiedEquity(entries) {
+        for (var i = entries.length - 1; i >= 0; i--) {
+          var e = entries[i] || {};
+          var snap = String(e.snapshot_status || '').toUpperCase();
+          var src = String(e.balance_source || '');
+          var eq = pickNumericEquity(e);
+          if (snap === 'SYNCED' && src === 'BITGET_READONLY' && typeof eq === 'number') {
+            return { equity: eq, date: e.date || null };
+          }
+        }
+        return null;
+      }
+
       function setProof(latest) {
         els.proof.textContent = [
           'date: ' + (latest.date || 'N/A'),
@@ -475,9 +498,8 @@
 
           var trust = trustState(latest);
           var stalePrice = (latest.price_source === 'cache_stale' || latest.status === 'DATA_STALE');
-          var snapEq = (latest.portfolio_snapshot && typeof latest.portfolio_snapshot.equity_usd === 'number')
-            ? latest.portfolio_snapshot.equity_usd
-            : latest.equity_usd;
+          var snapEq = pickNumericEquity(latest);
+          var fallbackEq = findLastVerifiedEquity(entries);
           var eqTrusted = trust.trusted && typeof snapEq === 'number';
           var action = normalizePosition(latest);
           var pnlUsd = (typeof latest.pnl_usd === 'number') ? latest.pnl_usd : null;
@@ -485,12 +507,22 @@
             ? (pnlUsd / (snapEq - pnlUsd) * 100)
             : null;
 
-          els.equity.textContent = eqTrusted ? fmtUsd(snapEq) : trust.label;
+          if (typeof snapEq === 'number') {
+            els.equity.textContent = fmtUsd(snapEq);
+          } else if (fallbackEq && typeof fallbackEq.equity === 'number') {
+            els.equity.textContent = fmtUsd(fallbackEq.equity);
+          } else {
+            els.equity.textContent = '$ ---.--';
+          }
           els.pnl.textContent = (pnlUsd !== null)
             ? ((pnlUsd >= 0 ? '+' : '') + fmtUsd(pnlUsd).replace('$', '$') + (pnlPct !== null ? (' / ' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%') : ''))
             : ('Status: ' + (latest.status || 'N/A'));
           if (!eqTrusted) {
-            els.phaseNote.textContent = 'Updating latest balance snapshot';
+            if (fallbackEq && fallbackEq.date) {
+              els.phaseNote.textContent = 'Latest verified equity shown from ' + fallbackEq.date + ' UTC';
+            } else {
+              els.phaseNote.textContent = 'Updating latest balance snapshot';
+            }
           } else if (typeof snapEq === 'number' && snapEq <= 300) {
             els.phaseNote.textContent = 'Phase 1: $100 Live Testing';
           } else {
