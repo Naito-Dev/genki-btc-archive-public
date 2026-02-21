@@ -108,6 +108,11 @@
       font-size: 13px;
       line-height: 1.45;
     }
+    .status-detail.compact {
+      margin-top: 6px;
+      font-size: 12px;
+      opacity: 0.85;
+    }
     .cta {
       display: inline-block;
       width: 100%;
@@ -264,8 +269,7 @@
         <article class="status-card">
           <p class="status-kicker">Today's Action Status</p>
           <p class="status-main" data-kpi-action>CASH</p>
-          <div class="status-detail" data-kpi-action-detail>Target and verification details are loading.</div>
-          <div class="truth-banner" data-truth-banner>UNVERIFIED (loading)</div>
+          <div class="status-detail compact">Action signal only. Verification details are listed below.</div>
           <div class="meta-strip">
             <span class="meta-pill" data-kpi-date>DATE: --</span>
             <span class="meta-pill" data-kpi-price>PRICE: --</span>
@@ -288,10 +292,11 @@
           <div class="tiny-label">Allocation / Status</div>
           <div class="tiny-value" data-kpi-allocation>--</div>
           <div class="tiny-label" data-kpi-status>--</div>
+          <div class="tiny-label" data-kpi-trust>Status detail loading</div>
         </article>
       </div>
 
-      <article class="tech-card" style="margin-top:10px;">
+      <article class="tech-card" style="margin-top:10px;display:none;" aria-hidden="true">
         <div class="tiny-label">Price Trend (Latest 30 entries)</div>
         <div class="chart">
           <svg viewBox="0 0 1000 160" preserveAspectRatio="none">
@@ -323,8 +328,7 @@
         pnl: document.querySelector('[data-kpi-pnl]'),
         phaseNote: document.querySelector('[data-phase-note]'),
         action: document.querySelector('[data-kpi-action]'),
-        actionDetail: document.querySelector('[data-kpi-action-detail]'),
-        truthBanner: document.querySelector('[data-truth-banner]'),
+        trustText: document.querySelector('[data-kpi-trust]'),
         date: document.querySelector('[data-kpi-date]'),
         price: document.querySelector('[data-kpi-price]'),
         updated: document.querySelector('[data-kpi-updated]'),
@@ -535,16 +539,8 @@
           var detail = [];
           detail.push('Target: ' + (targetRatio != null ? Math.round(targetRatio * 100) + '%' : 'N/A'));
           detail.push('Actual: ' + (actualRatio != null ? (actualRatio * 100).toFixed(1) + '%' : 'N/A'));
-          detail.push('Trust: ' + trust.reason);
-          els.actionDetail.textContent = detail.join(' | ');
-
-          if (trust.trusted) {
-            els.truthBanner.style.display = 'none';
-            els.truthBanner.textContent = '';
-          } else {
-            els.truthBanner.style.display = 'block';
-            els.truthBanner.textContent = trust.label;
-          }
+          detail.push('Trust: ' + trust.label);
+          els.trustText.textContent = detail.join(' | ');
 
           els.date.textContent = 'DATE: ' + (latest.date || 'N/A');
           els.price.textContent = 'PRICE: ' + fmtUsd(latest.btc_price);
@@ -565,12 +561,12 @@
           setProof(latest);
         })
         .catch(function () {
-          els.truthBanner.style.display = 'block';
-          els.truthBanner.textContent = 'SYSTEM HALTED (API Error)';
           els.equity.textContent = 'SYSTEM HALTED (API Error)';
           els.action.textContent = 'NO_TRADE';
           els.action.classList.add('no-trade');
-          els.actionDetail.textContent = 'Unable to load log.json';
+          if (els.trustText) {
+            els.trustText.textContent = 'Trust: SYSTEM HALTED (API Error)';
+          }
           els.proof.textContent = 'Unable to load proof block.';
         });
     })();
