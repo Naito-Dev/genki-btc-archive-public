@@ -7,90 +7,297 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: #eaf0ff;
+    }
+
+    .page {
+      min-height: 100svh;
+      background:
+        radial-gradient(120% 80% at 50% 0%, rgba(65,95,155,.25) 0%, rgba(8,18,43,0) 60%),
+        linear-gradient(180deg, #0b1633 0%, #05112a 100%);
+      padding: 16px;
+    }
+
+    .page > * {
+      max-width: 420px;
+      margin-inline: auto;
+    }
+
+    .hero-card {
+      background: linear-gradient(180deg, rgba(18,35,73,.95), rgba(10,25,55,.96));
+      border: 1px solid rgba(120, 165, 255, .22);
+      border-radius: 22px;
+      padding: 22px 18px 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.03);
+    }
+
+    .hero-header h1 {
+      margin: 0;
+      text-align: center;
+      font-weight: 900;
+      letter-spacing: .02em;
+      font-size: clamp(34px, 8vw, 46px);
+      line-height: .95;
+      color: #f4f7ff;
+    }
+
+    .hero-subtitle {
+      margin: 10px auto 0;
+      max-width: 310px;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.45;
+      color: rgba(230,238,255,.75);
+    }
+
+    .action-panel {
+      margin-top: 18px;
+      background: linear-gradient(180deg, rgba(14,28,60,.92), rgba(10,22,49,.94));
+      border: 1px solid rgba(100,150,240,.22);
+      border-radius: 20px;
+      padding: 18px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 290px;
+    }
+
+    .action-panel__label {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .10em;
+      color: rgba(236,243,255,.9);
+      text-transform: uppercase;
+    }
+
+    .action-panel__signal {
+      font-weight: 900;
+      font-size: clamp(56px, 15vw, 84px);
+      line-height: .88;
+      letter-spacing: -.02em;
+      color: #ff9b68;
+      text-shadow: 0 2px 10px rgba(255,133,70,.08);
+      margin-top: 2px;
+    }
+
+    .action-panel__meta {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .pill {
+      border: 1px solid rgba(180, 210, 255, .18);
+      background: rgba(10,17,34,.16);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 11px;
+      line-height: 1;
+      color: rgba(242,246,255,.95);
+      white-space: nowrap;
+    }
+
+    .pill--wide { margin-left: auto; }
+
+    .hero-bottom {
+      margin-top: 14px;
+      background: rgba(7,14,30,.55);
+      border-radius: 18px;
+      padding: 14px 14px 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(110px, .85fr);
+      gap: 12px;
+      align-items: end;
+    }
+
+    .hero-bottom__left { min-width: 0; }
+
+    .live-label {
+      font-size: 11px;
+      letter-spacing: .14em;
+      font-weight: 800;
+      color: rgba(235,242,255,.9);
+      margin-bottom: 6px;
+      white-space: nowrap;
+    }
+
+    .live-equity {
+      font-size: clamp(28px, 8vw, 40px);
+      line-height: .95;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      color: #f5f8ff;
+      white-space: nowrap;
+    }
+
+    .hero-bottom__right {
+      min-width: 110px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .alloc-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: baseline;
+      font-weight: 800;
+      color: #f2f6ff;
+      font-size: 14px;
+    }
+
+    .alloc-row span:last-child {
+      font-size: 16px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .hero-cta-row {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .hero-latest { min-width: 86px; }
+
+    .hero-latest__label {
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .12em;
+      font-weight: 800;
+      color: rgba(236,243,255,.85);
+      text-transform: uppercase;
+    }
+
+    .hero-latest__date {
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 1.05;
+      font-weight: 900;
+      color: #ffffff;
+      white-space: nowrap;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      border-radius: 999px;
+      padding: 0 18px;
+      text-decoration: none;
+      font-weight: 900;
+      font-size: 14px;
+      color: #0d1730;
+      background: linear-gradient(180deg, #f8e8a4 0%, #efcd5d 100%);
+      border: 1px solid rgba(255, 230, 140, .55);
+      box-shadow: 0 8px 24px rgba(240, 194, 62, .20);
+      white-space: nowrap;
+    }
+
+    .tech-card {
+      margin-top: 14px;
+      background: linear-gradient(180deg, rgba(12,26,56,.92), rgba(8,20,44,.94));
+      border: 1px solid rgba(100,150,240,.20);
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .tech-card__toggle {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 12px;
+      border: 1px solid rgba(100,150,240,.18);
+      background: rgba(8,17,37,.28);
+      color: #eef3ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .tech-card__content { margin-top: 10px; }
+
+    .tech-card__hint {
+      border-radius: 12px;
+      background: rgba(8,17,37,.20);
+      border: 1px dashed rgba(110,160,255,.18);
+      padding: 12px;
+      text-align: center;
+      color: rgba(230,238,255,.72);
+      font-size: 12px;
+    }
+
+    @media (max-width: 430px) {
+      .page { padding: 12px; }
+      .hero-card { padding: 18px 14px 14px; }
+      .action-panel { min-height: 260px; padding: 16px 14px 14px; }
+      .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
+      .hero-bottom { grid-template-columns: minmax(0,1fr) minmax(96px,.8fr); gap: 10px; padding: 12px 12px 10px; }
+      .hero-cta-row { grid-template-columns: 1fr; gap: 10px; }
+      .hero-latest { min-width: 0; }
+      .hero-cta { width: 100%; }
+    }
   </style>
 </head>
-<body class="bg-[#020617] min-h-screen flex items-center justify-center py-12 px-4">
+<body>
+  <main class="page">
+    <section class="hero-card">
+      <header class="hero-header">
+        <h1>BTC SIGNAL</h1>
+        <p class="hero-subtitle">Premium BTC risk-control dashboard with full audit transparency.</p>
+      </header>
 
-  <div class="w-full max-w-[392px]">
+      <section class="action-panel">
+        <div class="action-panel__label">GENKI'S ACTION</div>
+        <div class="action-panel__signal">Hold Cash</div>
 
-    <!-- Header -->
-    <div class="text-center mb-8">
-      <h1 class="text-[34px] font-black tracking-[3.5px] text-white">BTC SIGNAL</h1>
-    </div>
+        <div class="action-panel__meta">
+          <div class="pill">DATE: 2026-02-21</div>
+          <div class="pill">PRICE: $67,950.98</div>
+          <div class="pill pill--wide">UPDATED: 2026-02-21T15:04:29Z</div>
+        </div>
+      </section>
 
-    <!-- Main Card -->
-    <div class="bg-[#0f172a] rounded-[32px] p-6 shadow-[0_40px_80px_-25px_rgb(0,0,0)] border border-[#1e2937]">
-
-      <!-- Inner GENKI Card -->
-      <div class="bg-[#1a233a] rounded-3xl p-7 relative overflow-hidden">
-
-        <div class="uppercase text-[10.5px] font-semibold tracking-[2.8px] text-[#94a3b8]">GENKI'S ACTION</div>
-        
-        <div class="mt-4 text-[78px] leading-[64px] font-black tracking-[-1.8px] text-[#fb923c]">
-          Hold<br>Cash
+      <section class="hero-bottom">
+        <div class="hero-bottom__left">
+          <div class="live-label">LIVE TESTING:</div>
+          <div class="live-equity">$100.19</div>
         </div>
 
-        <!-- DATE / PRICE / UPDATED - 絶対右上配置 -->
-        <div class="absolute top-8 right-7 text-right text-[12.8px] leading-[1.25] font-medium text-[#e2e8f0]">
-          DATE: 2026-02-21<br>
-          PRICE: $67,950.98<br>
-          UPDATED: 2026-02-21 15:04:29
+        <div class="hero-bottom__right">
+          <div class="alloc-row"><span>BTC</span><span>20.2</span></div>
+          <div class="alloc-row"><span>Cash</span><span>79.8</span></div>
         </div>
-      </div>
+      </section>
 
-      <!-- LIVE TESTING -->
-      <div class="mt-8 px-3">
-        <div class="uppercase text-xs font-semibold tracking-[1.8px] text-[#64748b]">LIVE TESTING:</div>
-        
-        <div class="flex justify-between items-start mt-3">
-          <!-- 左側：金額 + P&L -->
-          <div>
-            <div class="text-[46px] font-semibold tabular-nums tracking-[-1px] text-white">$100.19</div>
-            <div class="mt-1 flex items-center gap-1.5">
-              <span class="text-emerald-400 text-[21px] font-semibold">+1.23%</span>
-              <span class="text-emerald-400 text-xs font-medium">(P&amp;L)</span>
-            </div>
-          </div>
-          
-          <!-- 右側：BTC / Cash -->
-          <div class="flex gap-10 text-right">
-            <div>
-              <div class="text-[11px] tracking-widest text-[#64748b]">BTC</div>
-              <div class="text-[29px] font-semibold tabular-nums text-white">20.2</div>
-            </div>
-            <div>
-              <div class="text-[11px] tracking-widest text-[#64748b]">Cash</div>
-              <div class="text-[29px] font-semibold tabular-nums text-white">79.8</div>
-            </div>
-          </div>
+      <section class="hero-cta-row">
+        <div class="hero-latest">
+          <div class="hero-latest__label">LATEST FROM</div>
+          <div class="hero-latest__date">2026-02-21</div>
         </div>
+        <a class="hero-cta" href="sales-page-en.html">Get daily BTC risk signal</a>
+      </section>
+    </section>
+
+    <section class="tech-card">
+      <button class="tech-card__toggle">Technical Analysis <span>⌄</span></button>
+      <div class="tech-card__content">
+        <div class="tech-card__hint">Details hidden. Tap to expand.</div>
       </div>
-
-      <!-- Button Area -->
-      <div class="mt-10 flex items-center justify-between px-2">
-        <div class="text-xs font-medium text-[#64748b]">LATEST FROM 2026-02-21</div>
-        <button class="bg-[#fcd34d] hover:bg-[#fbbf24] text-[#1e2937] font-semibold text-[15px] px-9 py-4 rounded-[9999px] shadow-[0_12px_50px_-8px_#fcd34d] active:scale-[0.97] transition-all">
-          Get daily BTC risk signal
-        </button>
-      </div>
-    </div>
-
-    <!-- Technical Analysis -->
-    <div class="mt-6 bg-[#0f172a] rounded-[32px] p-6 border border-[#1e2937]">
-      <div class="flex justify-between items-center">
-        <div class="text-[17px] font-semibold text-white">Technical Analysis</div>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-[#64748b]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-        </svg>
-      </div>
-      <div class="mt-1 text-[13px] text-[#64748b]">Details hidden. Tap to expand.</div>
-    </div>
-
-  </div>
-
-  <script>
-    tailwind.config = { content: ["*"] }
-  </script>
+    </section>
+  </main>
 </body>
 </html>
