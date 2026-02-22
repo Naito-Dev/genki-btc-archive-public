@@ -481,27 +481,33 @@
       return "Waiting";
     }
 
-    function getBaseEquity(log) {
+    function getBaseEquityDetails(log) {
       const latest = log?.latest || {};
       const latestBase = parseFiniteNumber(latest.base_equity);
-      if (latestBase !== null) return latestBase;
+      if (latestBase !== null) return { value: latestBase, source: "latest.base_equity" };
       const latestInit = parseFiniteNumber(latest.initial_capital);
-      if (latestInit !== null) return latestInit;
+      if (latestInit !== null) return { value: latestInit, source: "latest.initial_capital" };
       const logBase = parseFiniteNumber(log?.base_equity);
-      if (logBase !== null) return logBase;
+      if (logBase !== null) return { value: logBase, source: "log.base_equity" };
       const entries = Array.isArray(log?.entries) ? log.entries : [];
       for (const e of entries) {
         const b = parseFiniteNumber(e?.base_equity);
-        if (b !== null) return b;
+        if (b !== null) return { value: b, source: "entries[].base_equity" };
         const i = parseFiniteNumber(e?.initial_capital);
-        if (i !== null) return i;
+        if (i !== null) return { value: i, source: "entries[].initial_capital" };
       }
-      return null;
+      return { value: null, source: "none" };
+    }
+
+    function getBaseEquity(log) {
+      return getBaseEquityDetails(log).value;
     }
 
     function getSinceTestStart(log) {
       const start = toDateOnly(log?.start_date_utc);
       if (start) return start;
+      const latestStart = toDateOnly(log?.latest?.start_date_utc);
+      if (latestStart) return latestStart;
       const entries = Array.isArray(log?.entries) ? log.entries : [];
       const dates = entries.map((e) => toDateOnly(e?.date)).filter(Boolean).sort();
       if (dates.length) return dates[0];
@@ -570,16 +576,31 @@
 
       const equity = parseFiniteNumber(latest?.equity_usd);
       document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
-      document.getElementById("sinceStart").textContent = `Since test start: ${getSinceTestStart(log) || "-"}`;
+      const sinceStart = getSinceTestStart(log);
+      const sinceStartEl = document.getElementById("sinceStart");
+      if (sinceStart) {
+        sinceStartEl.textContent = `Since test start: ${sinceStart}`;
+        sinceStartEl.style.display = "block";
+      } else {
+        sinceStartEl.textContent = "";
+        sinceStartEl.style.display = "none";
+      }
 
       const pnl = resolvePnlPercent(log, latest);
       const pnlEl = document.getElementById("pnlPct");
       const pnlNoteEl = document.getElementById("pnlNote");
-      const resolvedBaseEquity = getBaseEquity(log);
-      const computedPnl = (equity !== null && parseFiniteNumber(resolvedBaseEquity) !== null && parseFiniteNumber(resolvedBaseEquity) > 0)
-        ? ((equity - parseFiniteNumber(resolvedBaseEquity)) / parseFiniteNumber(resolvedBaseEquity)) * 100
+      const baseDetails = getBaseEquityDetails(log);
+      const resolvedBaseEquity = parseFiniteNumber(baseDetails.value);
+      const computedPnl = (equity !== null && resolvedBaseEquity !== null && resolvedBaseEquity > 0)
+        ? ((equity - resolvedBaseEquity) / resolvedBaseEquity) * 100
         : null;
-      console.debug("[LIVE_TESTING_PNL]", { pnl_percent: latest?.pnl_percent, equity_usd: latest?.equity_usd, base_equity: resolvedBaseEquity, computedPnl });
+      console.debug("[LIVE_TESTING_PNL]", {
+        pnl_percent: latest?.pnl_percent,
+        equity_usd: latest?.equity_usd,
+        base_equity: resolvedBaseEquity,
+        base_source: baseDetails.source,
+        computedPnl
+      });
       if (pnl === null || !Number.isFinite(Number(pnl))) {
         pnlEl.textContent = "P/L unavailable";
         pnlEl.style.display = "block";
