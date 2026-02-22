@@ -31,17 +31,18 @@
       letter-spacing: 0.01em;
     }
     .wrap {
-      width: min(980px, 92vw);
+      width: min(1080px, 94vw);
       margin: 0 auto;
-      padding: 24px 0 60px;
+      padding: 36px 0 86px;
     }
-    .hero {
+    .hero,
+    .hero-panel {
       text-align: center;
-      padding: 26px 18px;
-      border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--line) 76%);
-      border-radius: 18px;
-      background: linear-gradient(145deg, rgba(17,39,66,0.95), rgba(10,24,43,0.95));
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
+      padding: 40px;
+      border: 1px solid #1F2937;
+      border-radius: 24px;
+      background: #0A0F1C;
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
     }
     .hero h1 {
       margin: 0 0 8px;
@@ -52,28 +53,29 @@
       text-transform: uppercase;
     }
     .hero .subtitle {
-      margin: 0 0 20px;
+      margin: 0 0 30px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 14px;
     }
     .equity-label {
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.14em;
       font-size: 12px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .equity-box {
-      margin-top: 12px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      background: linear-gradient(160deg, rgba(17,39,66,0.85), rgba(10,24,43,0.9));
+      margin-top: 18px;
+      border: 0;
+      border-radius: 0;
+      padding: 20px 0 0;
+      background: transparent;
     }
     .equity-value {
-      font-size: clamp(24px, 6.2vw, 42px);
+      font-size: clamp(48px, 10.5vw, 72px);
       line-height: 1;
-      font-weight: 800;
+      font-weight: 600;
+      letter-spacing: -0.035em;
       margin: 0 0 8px;
       color: var(--ink);
     }
@@ -84,15 +86,15 @@
       margin: 0;
     }
     .status-wrap {
-      margin-top: 16px;
+      margin-top: 24px;
       display: grid;
       gap: 14px;
     }
     .status-card {
       border: 1px solid var(--line);
       border-radius: 16px;
-      padding: 18px;
-      background: linear-gradient(160deg, rgba(17,39,66,0.92), rgba(10,24,43,0.96));
+      padding: 28px;
+      background: linear-gradient(160deg, rgba(17,39,66,0.55), rgba(10,24,43,0.62));
     }
     .status-kicker {
       font-size: 12px;
@@ -103,14 +105,14 @@
     }
     .status-main {
       margin: 0;
-      font-size: clamp(34px, 10vw, 56px);
+      font-size: clamp(38px, 11vw, 62px);
       font-weight: 800;
       line-height: 1;
     }
     .status-main.long { color: var(--ok); }
     .status-main.cash, .status-main.no-trade { color: var(--bad); }
     .status-detail {
-      margin-top: 10px;
+      margin-top: 14px;
       color: var(--muted);
       font-size: 13px;
       line-height: 1.45;
@@ -125,15 +127,21 @@
       width: 100%;
       text-align: center;
       text-decoration: none;
-      margin-top: 4px;
+      margin-top: 8px;
       border-radius: 14px;
-      padding: 16px 18px;
-      background: linear-gradient(100deg, #b4883c, #e0be76);
+      min-height: 52px;
+      padding: 16px 22px;
+      background: linear-gradient(90deg, #fbbf24, #eab308);
       color: #162033;
       font-weight: 800;
       font-size: clamp(16px, 4.2vw, 20px);
       border: 1px solid #f0d38d;
-      box-shadow: 0 10px 22px rgba(209, 164, 78, 0.28);
+      box-shadow: 0 0 30px rgb(245 158 11 / 0.5);
+      transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+    .cta:hover {
+      transform: scale(1.05) translateY(-1px);
+      box-shadow: 0 0 34px rgb(245 158 11 / 0.58);
     }
     .truth-banner {
       margin-top: 12px;
@@ -147,25 +155,27 @@
       display: none;
     }
     .meta-strip {
-      margin-top: 12px;
+      margin-top: 16px;
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
       justify-content: center;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
     }
     .meta-pill {
-      border: 1px solid var(--line);
+      border: 1px solid color-mix(in srgb, var(--line) 40%, transparent 60%);
       border-radius: 999px;
-      padding: 5px 10px;
-      background: rgba(15,31,51,0.72);
+      padding: 4px 10px;
+      background: transparent;
     }
     .tech {
-      margin-top: 24px;
+      margin-top: 34px;
       border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 14px;
+      padding: 20px;
       background: rgba(10,24,43,0.8);
       font-size: 12px;
     }
@@ -177,10 +187,10 @@
       color: var(--muted);
     }
     .audit-toggle {
-      border: 1px solid var(--line);
+      border: 1px solid color-mix(in srgb, var(--line) 55%, transparent 45%);
       border-radius: 10px;
-      background: rgba(11,24,43,0.78);
-      padding: 10px 12px;
+      background: rgba(11,24,43,0.66);
+      padding: 14px 16px;
     }
     .audit-toggle summary {
       cursor: pointer;
@@ -200,7 +210,7 @@
     }
     .audit-toggle[open] summary::before { content: "▾"; }
     .audit-body {
-      margin-top: 10px;
+      margin-top: 14px;
       min-width: 0;
     }
     .tech-grid {
@@ -212,7 +222,7 @@
     .tech-card {
       border: 1px solid var(--line);
       border-radius: 10px;
-      padding: 10px;
+      padding: 14px;
       background: rgba(15,31,51,0.75);
       min-width: 0;
       overflow: hidden;
@@ -235,7 +245,7 @@
       gap: 3px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 7px 9px;
+      padding: 10px 12px;
       background: rgba(11,24,43,0.75);
     }
     .row.head {
