@@ -8,11 +8,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
+    :root{
+      --bg-page: #050608;
+      --text-primary: #f2f5fb;
+      --text-secondary: #a8b3cf;
+      --wait-color: #e8a15f;
+      --wait-glow: rgba(232, 161, 95, 0.16);
+      --cta-bg-top: #f1dd93;
+      --cta-bg-bottom: #e8d27a;
+      --cta-text: #141826;
+    }
     body {
       margin: 0;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color: #eaf0ff;
-      background: #000;
+      color: var(--text-primary);
+      background: var(--bg-page);
     }
     .page {
       min-height: 100svh;
@@ -34,7 +44,7 @@
       line-height: .95;
       font-weight: 900;
       letter-spacing: .02em;
-      color: #f4f7ff;
+      color: var(--text-primary);
     }
     .hero-subtitle {
       margin: 10px auto 0;
@@ -42,7 +52,7 @@
       text-align: center;
       font-size: 12px;
       line-height: 1.45;
-      color: rgba(230,238,255,.75);
+      color: color-mix(in srgb, var(--text-secondary) 72%, white 28%);
     }
     .action-panel {
       margin-top: 18px;
@@ -76,8 +86,8 @@
       line-height: .88;
       font-weight: 900;
       letter-spacing: -.02em;
-      color: #ff9b68;
-      text-shadow: 0 2px 10px rgba(255,133,70,.08);
+      color: var(--wait-color);
+      text-shadow: 0 8px 24px var(--wait-glow);
       text-align: center;
       max-width: 100%;
       overflow-wrap: anywhere;
@@ -133,12 +143,16 @@
       padding: 7px 12px;
       font-size: 12px;
       font-weight: 800;
+      font-variant-numeric: tabular-nums lining-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
     }
     .meta-pill--updated {
       padding: 6px 11px;
       font-size: 11px;
       font-weight: 700;
       color: rgba(230,238,255,.78);
+      font-variant-numeric: tabular-nums lining-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
     }
     .hero-bottom {
       margin-top: 14px;
@@ -200,12 +214,16 @@
       color: #f5f8ff;
       white-space: nowrap;
       overflow-wrap: normal;
+      font-variant-numeric: tabular-nums lining-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
     }
     .pnl-pct {
       margin-top: 4px;
       font-size: 13px;
       font-weight: 800;
       white-space: nowrap;
+      font-variant-numeric: tabular-nums lining-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
     }
     .pnl-pct.positive { color: #34d399; }
     .pnl-pct.negative { color: #f87171; }
@@ -258,8 +276,8 @@
       text-decoration: none;
       font-size: 14px;
       font-weight: 900;
-      color: #0d1730;
-      background: linear-gradient(180deg, #f8e8a4 0%, #efcd5d 100%);
+      color: var(--cta-text);
+      background: linear-gradient(180deg, var(--cta-bg-top) 0%, var(--cta-bg-bottom) 100%);
       border: 1px solid rgba(255,230,140,.55);
       box-shadow: 0 8px 24px rgba(240,194,62,.2);
       white-space: nowrap;
