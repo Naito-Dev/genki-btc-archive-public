@@ -12,14 +12,19 @@
       --bg-page: #050608;
       --text-primary: #f2f5fb;
       --text-secondary: #a8b3cf;
-      --wait-color: #e8a15f;
-      --defensive-color: #8ea6d9;
-      --bullish-color: #58c98b;
-      --strong-bullish-color: #2fd58a;
-      --wait-glow: rgba(232, 161, 95, 0.16);
-      --cta-gold: #eab308;
-      --accent-gold: #facc15;
-      --cta-text: #141826;
+      --wait-color: #d79a52;
+      --defensive-color: #aeb7c6;
+      --bullish-color: #44c27a;
+      --strong-bullish-color: #22d39a;
+      --wait-glow: rgba(215, 154, 82, 0.16);
+      --defensive-glow: rgba(174, 183, 198, 0.14);
+      --bullish-glow: rgba(68, 194, 122, 0.15);
+      --strong-bullish-glow: rgba(34, 211, 154, 0.16);
+      --cta-gold: #d8b24a;
+      --cta-gold-hi: #e4c76a;
+      --cta-edge: #b98d2f;
+      --accent-gold: #d7be73;
+      --cta-text: #0b1020;
     }
     body {
       margin: 0;
@@ -101,9 +106,9 @@
       font-family: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
     }
     .action-panel__signal.state-wait { color: var(--wait-color); }
-    .action-panel__signal.state-defensive { color: var(--defensive-color); text-shadow: 0 8px 24px rgba(142, 166, 217, 0.16); }
-    .action-panel__signal.state-bullish { color: var(--bullish-color); text-shadow: 0 8px 24px rgba(88, 201, 139, 0.16); }
-    .action-panel__signal.state-strong-bullish { color: var(--strong-bullish-color); text-shadow: 0 8px 24px rgba(47, 213, 138, 0.18); }
+    .action-panel__signal.state-defensive { color: var(--defensive-color); text-shadow: 0 8px 24px var(--defensive-glow); }
+    .action-panel__signal.state-bullish { color: var(--bullish-color); text-shadow: 0 8px 24px var(--bullish-glow); }
+    .action-panel__signal.state-strong-bullish { color: var(--strong-bullish-color); text-shadow: 0 8px 24px var(--strong-bullish-glow); }
     .action-panel__trustPills {
       margin-top: 6px;
       display: flex;
@@ -119,9 +124,9 @@
       align-items: center;
       justify-content: center;
       border-radius: 999px;
-      border: 1px solid rgba(250, 204, 21, .22);
+      border: 1px solid rgba(178, 150, 79, .22);
       background: rgba(10,17,34,.12);
-      color: rgba(226,236,255,.78);
+      color: rgba(210,220,240,.72);
       white-space: nowrap;
       font-size: 10px;
       font-weight: 700;
@@ -143,16 +148,16 @@
       align-items: center;
       justify-content: center;
       border-radius: 999px;
-      border: 1px solid rgba(250, 204, 21, .25);
+      border: 1px solid rgba(176, 145, 72, .24);
       background: rgba(10,17,34,.16);
-      color: rgba(242,246,255,.95);
+      color: rgba(228,236,250,.88);
       white-space: nowrap;
     }
     .meta-pill--price {
       padding: 7px 12px;
       font-size: 12px;
       font-weight: 800;
-      color: var(--accent-gold);
+      color: rgba(231, 216, 168, .86);
       font-variant-numeric: tabular-nums lining-nums;
       font-feature-settings: "tnum" 1, "lnum" 1;
     }
@@ -287,9 +292,9 @@
       font-size: 14px;
       font-weight: 900;
       color: var(--cta-text);
-      background: var(--cta-gold);
-      border: 1px solid rgba(255,230,140,.55);
-      box-shadow: 0 8px 24px rgba(240,194,62,.2);
+      background: linear-gradient(180deg, var(--cta-gold-hi) 0%, var(--cta-gold) 100%);
+      border: 1px solid var(--cta-edge);
+      box-shadow: 0 8px 24px rgba(185, 141, 47, .22), inset 0 1px 0 rgba(255, 246, 204, .22);
       white-space: nowrap;
       width: 100%;
     }
