@@ -63,31 +63,18 @@
       font-size: 12px;
       margin-bottom: 8px;
     }
-    .equity-head {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      justify-content: center;
-      width: 100%;
-    }
-    .hero-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
+    .equity-box {
+      margin-top: 12px;
       border: 1px solid var(--line);
-      background: rgba(15,31,51,0.9);
-      font-size: 18px;
-      line-height: 1;
-      flex: 0 0 auto;
+      border-radius: 14px;
+      padding: 14px;
+      background: linear-gradient(160deg, rgba(17,39,66,0.85), rgba(10,24,43,0.9));
     }
     .equity-value {
-      font-size: clamp(42px, 12vw, 84px);
+      font-size: clamp(24px, 6.2vw, 42px);
       line-height: 1;
       font-weight: 800;
-      margin: 0 0 12px;
+      margin: 0 0 8px;
       color: var(--ink);
     }
     .pnl-value {
@@ -322,24 +309,21 @@
       <h1>BTC Signal</h1>
       <p class="subtitle">Premium BTC risk-control dashboard with full audit transparency.</p>
 
-      <div class="equity-label">Live Testing:</div>
-      <div class="equity-head">
-        <span class="hero-icon" data-kpi-icon aria-label="status icon">⏳</span>
-      </div>
-      <p class="equity-value" data-kpi-equity>$ ---.--</p>
-      <p class="pnl-value" data-kpi-pnl>Start baseline pending</p>
-      <p class="subtitle" data-phase-note>Live tracking active</p>
-
       <div class="status-wrap">
         <article class="status-card">
           <p class="status-kicker">Genki's Action</p>
           <p class="status-main" data-kpi-action>Hold Cash</p>
-          <div class="status-detail compact" data-kpi-portfolio>Current allocation: BTC --% / Cash --%</div>
-          <div class="status-detail compact" data-kpi-guidance>Guidance: Checking latest data.</div>
           <div class="meta-strip">
             <span class="meta-pill" data-kpi-date>DATE: --</span>
             <span class="meta-pill" data-kpi-price>PRICE: --</span>
             <span class="meta-pill" data-kpi-updated>UPDATED: --</span>
+          </div>
+          <div class="equity-box">
+            <div class="equity-label">Live Testing:</div>
+            <p class="equity-value" data-kpi-equity>$ ---.--</p>
+            <div class="status-detail compact" data-kpi-portfolio>Current allocation: BTC --% / Cash --%</div>
+            <p class="pnl-value" data-kpi-pnl>Start baseline pending</p>
+            <p class="subtitle" data-phase-note>Live tracking active</p>
           </div>
         </article>
         <a class="cta" href="sales-page-en.html">Get daily BTC risk signal</a>
@@ -398,10 +382,8 @@
         equity: document.querySelector('[data-kpi-equity]'),
         pnl: document.querySelector('[data-kpi-pnl]'),
         phaseNote: document.querySelector('[data-phase-note]'),
-        icon: document.querySelector('[data-kpi-icon]'),
         action: document.querySelector('[data-kpi-action]'),
         portfolio: document.querySelector('[data-kpi-portfolio]'),
-        guidance: document.querySelector('[data-kpi-guidance]'),
         trustText: document.querySelector('[data-kpi-trust]'),
         date: document.querySelector('[data-kpi-date]'),
         price: document.querySelector('[data-kpi-price]'),
@@ -647,18 +629,7 @@
               els.portfolio.textContent = 'Current allocation: BTC --% / Cash --%';
             }
           }
-          if (els.guidance) {
-            if (trust.reason === 'PRICE_STALE') {
-              els.guidance.textContent = 'Guidance: Price update in progress.';
-            } else if (!trust.trusted) {
-              els.guidance.textContent = 'Guidance: Verification in progress.';
-            } else {
-              els.guidance.textContent = 'Guidance: ' + guidanceLabel(action);
-            }
-          }
-          if (els.icon) {
-            els.icon.textContent = heroIcon(action, trust, pnlUsd);
-          }
+          // Guidance and top icon intentionally hidden for cleaner hero UX.
 
           var detail = [];
           detail.push('Target: ' + (targetRatio != null ? Math.round(targetRatio * 100) + '%' : 'N/A'));
