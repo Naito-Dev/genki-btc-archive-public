@@ -189,6 +189,33 @@
       text-transform: uppercase;
       color: var(--muted);
     }
+    .audit-toggle {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(11,24,43,0.78);
+      padding: 10px 12px;
+    }
+    .audit-toggle summary {
+      cursor: pointer;
+      list-style: none;
+      font-weight: 700;
+      color: var(--gold-2);
+      font-size: 13px;
+      outline: none;
+    }
+    .audit-toggle summary::-webkit-details-marker { display: none; }
+    .audit-toggle summary::before {
+      content: "▸";
+      display: inline-block;
+      margin-right: 8px;
+      color: var(--muted);
+      transform: translateY(-1px);
+    }
+    .audit-toggle[open] summary::before { content: "▾"; }
+    .audit-body {
+      margin-top: 10px;
+      min-width: 0;
+    }
     .tech-grid {
       display: grid;
       gap: 10px;
@@ -292,10 +319,10 @@
 <body>
   <main class="wrap">
     <section class="hero">
-      <h1>Genki BTC Archive</h1>
+      <h1>BTC Signal</h1>
       <p class="subtitle">Premium BTC risk-control dashboard with full audit transparency.</p>
 
-      <div class="equity-label">Current Portfolio Equity (USD)</div>
+      <div class="equity-label">Live Testing:</div>
       <div class="equity-head">
         <span class="hero-icon" data-kpi-icon aria-label="status icon">⏳</span>
       </div>
@@ -305,7 +332,7 @@
 
       <div class="status-wrap">
         <article class="status-card">
-          <p class="status-kicker">Today's Action Status</p>
+          <p class="status-kicker">Genki's Action</p>
           <p class="status-main" data-kpi-action>Hold Cash</p>
           <div class="status-detail compact" data-kpi-portfolio>Current allocation: BTC --% / Cash --%</div>
           <div class="status-detail compact" data-kpi-guidance>Guidance: Checking latest data.</div>
@@ -321,42 +348,47 @@
 
     <section class="tech">
       <h2>Technical & Audit Data</h2>
-      <div class="tech-grid">
-        <article class="tech-card">
-          <div class="tiny-label">Chain Integrity</div>
-          <div class="tiny-value" data-kpi-chain>UNKNOWN</div>
-          <div class="tiny-label" data-kpi-chain-note>Waiting for chain verification.</div>
-        </article>
-        <article class="tech-card">
-          <div class="tiny-label">Allocation / Status</div>
-          <div class="tiny-value" data-kpi-allocation>--</div>
-          <div class="tiny-label" data-kpi-status>--</div>
-          <div class="tiny-label" data-kpi-trust>Status detail loading</div>
-        </article>
-      </div>
+      <details class="audit-toggle">
+        <summary>View Technical Logs &amp; Audit Details</summary>
+        <div class="audit-body">
+          <div class="tech-grid">
+            <article class="tech-card">
+              <div class="tiny-label">Chain Integrity</div>
+              <div class="tiny-value" data-kpi-chain>UNKNOWN</div>
+              <div class="tiny-label" data-kpi-chain-note>Waiting for chain verification.</div>
+            </article>
+            <article class="tech-card">
+              <div class="tiny-label">Allocation / Status</div>
+              <div class="tiny-value" data-kpi-allocation>--</div>
+              <div class="tiny-label" data-kpi-status>--</div>
+              <div class="tiny-label" data-kpi-trust>Status detail loading</div>
+            </article>
+          </div>
 
-      <article class="tech-card" style="margin-top:10px;display:none;" aria-hidden="true">
-        <div class="tiny-label">Price Trend (Latest 30 entries)</div>
-        <div class="chart">
-          <svg viewBox="0 0 1000 160" preserveAspectRatio="none">
-            <line class="axis" x1="0" y1="150" x2="1000" y2="150"></line>
-            <polyline class="line" data-chart-line points=""></polyline>
-            <g data-chart-dots></g>
-          </svg>
+          <article class="tech-card" style="margin-top:10px;display:none;" aria-hidden="true">
+            <div class="tiny-label">Price Trend (Latest 30 entries)</div>
+            <div class="chart">
+              <svg viewBox="0 0 1000 160" preserveAspectRatio="none">
+                <line class="axis" x1="0" y1="150" x2="1000" y2="150"></line>
+                <polyline class="line" data-chart-line points=""></polyline>
+                <g data-chart-dots></g>
+              </svg>
+            </div>
+            <div class="tiny-label" data-chart-note>Loading chart...</div>
+          </article>
+
+          <article class="tech-card" style="margin-top:10px;">
+            <div class="tiny-label">Recent Verified Decisions</div>
+            <div class="rows" data-rows></div>
+          </article>
+
+          <article class="tech-card" style="margin-top:10px;">
+            <div class="tiny-label">Proof Block</div>
+            <button type="button" class="btn" data-copy-proof>Copy Latest Proof</button>
+            <pre data-proof>Loading...</pre>
+          </article>
         </div>
-        <div class="tiny-label" data-chart-note>Loading chart...</div>
-      </article>
-
-      <article class="tech-card" style="margin-top:10px;">
-        <div class="tiny-label">Recent Verified Decisions</div>
-        <div class="rows" data-rows></div>
-      </article>
-
-      <article class="tech-card" style="margin-top:10px;">
-        <div class="tiny-label">Proof Block</div>
-        <button type="button" class="btn" data-copy-proof>Copy Latest Proof</button>
-        <pre data-proof>Loading...</pre>
-      </article>
+      </details>
     </section>
   </main>
 
