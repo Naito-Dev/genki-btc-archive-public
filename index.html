@@ -86,14 +86,14 @@
       transform: translate(-2px, 4px);
     }
     .action-panel__trustPills {
-      margin-top: 10px;
+      margin-top: 6px;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       flex-wrap: wrap;
       gap: 6px;
-      padding: 0 8px;
-      min-height: 28px;
+      padding: 0;
+      min-height: 22px;
     }
     .trust-pill {
       display: inline-flex;
@@ -367,7 +367,7 @@
       .hero-card { padding: 18px 14px 14px; }
       .action-panel { min-height: 260px; padding: 16px 14px 84px; }
       .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
-      .action-panel__trustPills { margin-top: 8px; gap: 5px; }
+      .action-panel__trustPills { margin-top: 6px; gap: 5px; }
       .trust-pill { font-size: 10px; padding: 5px 8px; }
       .action-panel__metaDock {
         right: 14px;
@@ -391,12 +391,12 @@
 
       <section class="action-panel">
         <div class="action-panel__label">GENKI'S LATEST ACTION</div>
+        <div class="action-panel__trustPills">
+          <span class="trust-pill">MaxDD -19.79%</span>
+          <span class="trust-pill">CAGR 41.02%</span>
+        </div>
         <div class="action-panel__body">
           <div id="actionSignal" class="action-panel__signal">Wait</div>
-        </div>
-        <div class="action-panel__trustPills">
-          <span class="trust-pill">Live verified daily</span>
-          <span class="trust-pill">MaxDD -19.79%</span>
         </div>
         <div class="action-panel__metaDock">
           <div id="metaPrice" class="meta-pill meta-pill--price">BTC $67,950.98</div>
