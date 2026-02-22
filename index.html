@@ -5,46 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BTC SIGNAL</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       color: #eaf0ff;
-    }
-
-    .page {
-      min-height: 100svh;
       background:
         radial-gradient(120% 80% at 50% 0%, rgba(65,95,155,.25) 0%, rgba(8,18,43,0) 60%),
         linear-gradient(180deg, #0b1633 0%, #05112a 100%);
+    }
+    .page {
+      min-height: 100svh;
       padding: 16px;
-    }
-
-    .page > * {
       max-width: 420px;
-      margin-inline: auto;
+      margin: 0 auto;
     }
-
     .hero-card {
       background: linear-gradient(180deg, rgba(18,35,73,.95), rgba(10,25,55,.96));
-      border: 1px solid rgba(120, 165, 255, .22);
+      border: 1px solid rgba(120,165,255,.22);
       border-radius: 22px;
       padding: 22px 18px 18px;
       box-shadow: 0 10px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.03);
     }
-
     .hero-header h1 {
       margin: 0;
       text-align: center;
-      font-weight: 900;
-      letter-spacing: .02em;
       font-size: clamp(34px, 8vw, 46px);
       line-height: .95;
+      font-weight: 900;
+      letter-spacing: .02em;
       color: #f4f7ff;
     }
-
     .hero-subtitle {
       margin: 10px auto 0;
       max-width: 310px;
@@ -53,9 +46,9 @@
       line-height: 1.45;
       color: rgba(230,238,255,.75);
     }
-
     .action-panel {
       margin-top: 18px;
+      min-height: 290px;
       background: linear-gradient(180deg, rgba(14,28,60,.92), rgba(10,22,49,.94));
       border: 1px solid rgba(100,150,240,.22);
       border-radius: 20px;
@@ -63,9 +56,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      min-height: 290px;
     }
-
     .action-panel__label {
       font-size: 12px;
       font-weight: 800;
@@ -73,28 +64,31 @@
       color: rgba(236,243,255,.9);
       text-transform: uppercase;
     }
-
     .action-panel__signal {
-      font-weight: 900;
+      margin-top: 2px;
       font-size: clamp(56px, 15vw, 84px);
       line-height: .88;
+      font-weight: 900;
       letter-spacing: -.02em;
       color: #ff9b68;
       text-shadow: 0 2px 10px rgba(255,133,70,.08);
-      margin-top: 2px;
     }
-
-    .action-panel__meta {
+    .action-panel__summary {
       margin-top: auto;
+      font-size: 13px;
+      line-height: 1.4;
+      color: rgba(230,238,255,.82);
+    }
+    .action-panel__meta {
+      margin-top: 8px;
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       justify-content: flex-end;
       align-items: center;
     }
-
     .pill {
-      border: 1px solid rgba(180, 210, 255, .18);
+      border: 1px solid rgba(180,210,255,.18);
       background: rgba(10,17,34,.16);
       border-radius: 999px;
       padding: 6px 12px;
@@ -103,9 +97,7 @@
       color: rgba(242,246,255,.95);
       white-space: nowrap;
     }
-
     .pill--wide { margin-left: auto; }
-
     .hero-bottom {
       margin-top: 14px;
       background: rgba(7,14,30,.55);
@@ -116,59 +108,60 @@
       gap: 12px;
       align-items: end;
     }
-
-    .hero-bottom__left { min-width: 0; }
-
     .live-label {
+      margin-bottom: 6px;
       font-size: 11px;
       letter-spacing: .14em;
       font-weight: 800;
       color: rgba(235,242,255,.9);
-      margin-bottom: 6px;
       white-space: nowrap;
+      text-transform: uppercase;
     }
-
     .live-equity {
-      font-size: clamp(28px, 8vw, 40px);
-      line-height: .95;
+      font-size: clamp(28px, 7.2vw, 38px);
+      line-height: .98;
       font-weight: 900;
-      letter-spacing: -.02em;
+      letter-spacing: -.015em;
       color: #f5f8ff;
       white-space: nowrap;
+      overflow-wrap: normal;
     }
-
+    .pnl-pct {
+      margin-top: 5px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .pnl-pct.positive { color: #34d399; }
+    .pnl-pct.negative { color: #f87171; }
+    .pnl-pct.flat { color: #94a3b8; }
     .hero-bottom__right {
       min-width: 110px;
       display: grid;
       gap: 6px;
     }
-
     .alloc-row {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 8px;
       align-items: baseline;
+      font-size: 14px;
       font-weight: 800;
       color: #f2f6ff;
-      font-size: 14px;
     }
-
     .alloc-row span:last-child {
       font-size: 16px;
       font-weight: 900;
       white-space: nowrap;
     }
-
     .hero-cta-row {
       margin-top: 14px;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-columns: auto minmax(0,1fr);
       gap: 12px;
       align-items: center;
     }
-
     .hero-latest { min-width: 86px; }
-
     .hero-latest__label {
       font-size: 10px;
       line-height: 1;
@@ -177,68 +170,79 @@
       color: rgba(236,243,255,.85);
       text-transform: uppercase;
     }
-
     .hero-latest__date {
       margin-top: 6px;
       font-size: 13px;
       line-height: 1.05;
       font-weight: 900;
-      color: #ffffff;
+      color: #fff;
       white-space: nowrap;
     }
-
     .hero-cta {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       min-height: 52px;
-      border-radius: 999px;
       padding: 0 18px;
+      border-radius: 999px;
       text-decoration: none;
-      font-weight: 900;
       font-size: 14px;
+      font-weight: 900;
       color: #0d1730;
       background: linear-gradient(180deg, #f8e8a4 0%, #efcd5d 100%);
-      border: 1px solid rgba(255, 230, 140, .55);
-      box-shadow: 0 8px 24px rgba(240, 194, 62, .20);
+      border: 1px solid rgba(255,230,140,.55);
+      box-shadow: 0 8px 24px rgba(240,194,62,.2);
       white-space: nowrap;
     }
-
     .tech-card {
       margin-top: 14px;
       background: linear-gradient(180deg, rgba(12,26,56,.92), rgba(8,20,44,.94));
-      border: 1px solid rgba(100,150,240,.20);
+      border: 1px solid rgba(100,150,240,.2);
       border-radius: 18px;
       padding: 12px;
     }
-
     .tech-card__toggle {
       width: 100%;
       min-height: 48px;
-      border-radius: 12px;
       border: 1px solid rgba(100,150,240,.18);
+      border-radius: 12px;
       background: rgba(8,17,37,.28);
       color: #eef3ff;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 14px;
-      font-weight: 800;
       font-size: 13px;
+      font-weight: 800;
       cursor: pointer;
     }
-
-    .tech-card__content { margin-top: 10px; }
-
+    .tech-card__content {
+      margin-top: 10px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
     .tech-card__hint {
       border-radius: 12px;
-      background: rgba(8,17,37,.20);
+      background: rgba(8,17,37,.2);
       border: 1px dashed rgba(110,160,255,.18);
       padding: 12px;
       text-align: center;
       color: rgba(230,238,255,.72);
       font-size: 12px;
     }
+    .audit-grid {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .audit-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px;
+      font-size: 12px;
+      color: rgba(230,238,255,.82);
+    }
+    .audit-row .k { color: rgba(180,200,230,.92); text-transform: uppercase; letter-spacing: .04em; }
 
     @media (max-width: 430px) {
       .page { padding: 12px; }
@@ -247,8 +251,8 @@
       .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
       .hero-bottom { grid-template-columns: minmax(0,1fr) minmax(96px,.8fr); gap: 10px; padding: 12px 12px 10px; }
       .hero-cta-row { grid-template-columns: 1fr; gap: 10px; }
-      .hero-latest { min-width: 0; }
       .hero-cta { width: 100%; }
+      .audit-row { grid-template-columns: 1fr; gap: 2px; }
     }
   </style>
 </head>
@@ -261,43 +265,174 @@
       </header>
 
       <section class="action-panel">
-        <div class="action-panel__label">GENKI'S ACTION</div>
-        <div class="action-panel__signal">Hold Cash</div>
-
+        <div class="action-panel__label">GENKI'S LATEST ACTION</div>
+        <div id="actionSignal" class="action-panel__signal">Waiting</div>
+        <div id="portfolioSummary" class="action-panel__summary">Portfolio: Managed by rule-based allocation</div>
         <div class="action-panel__meta">
-          <div class="pill">DATE: 2026-02-21</div>
-          <div class="pill">PRICE: $67,950.98</div>
-          <div class="pill pill--wide">UPDATED: 2026-02-21T15:04:29Z</div>
+          <div id="pillDate" class="pill">DATE: -</div>
+          <div id="pillPrice" class="pill">PRICE: -</div>
+          <div id="pillUpdated" class="pill pill--wide">UPDATED: -</div>
         </div>
       </section>
 
       <section class="hero-bottom">
         <div class="hero-bottom__left">
           <div class="live-label">LIVE TESTING:</div>
-          <div class="live-equity">$100.19</div>
+          <div id="liveEquity" class="live-equity">-</div>
+          <div id="pnlPct" class="pnl-pct" style="display:none"></div>
         </div>
-
         <div class="hero-bottom__right">
-          <div class="alloc-row"><span>BTC</span><span>20.2</span></div>
-          <div class="alloc-row"><span>Cash</span><span>79.8</span></div>
+          <div class="alloc-row"><span>BTC</span><span id="btcPct">-</span></div>
+          <div class="alloc-row"><span>Cash</span><span id="cashPct">-</span></div>
         </div>
       </section>
 
       <section class="hero-cta-row">
         <div class="hero-latest">
           <div class="hero-latest__label">LATEST FROM</div>
-          <div class="hero-latest__date">2026-02-21</div>
+          <div id="latestDate" class="hero-latest__date">-</div>
         </div>
         <a class="hero-cta" href="sales-page-en.html">Get daily BTC risk signal</a>
       </section>
     </section>
 
     <section class="tech-card">
-      <button class="tech-card__toggle">Technical Analysis <span>⌄</span></button>
-      <div class="tech-card__content">
+      <button class="tech-card__toggle" type="button" onclick="toggleAudit()">Technical Analysis <span id="auditChevron">⌄</span></button>
+      <div id="auditContent" class="tech-card__content" style="display:none">
         <div class="tech-card__hint">Details hidden. Tap to expand.</div>
+        <div class="audit-grid" id="auditGrid"></div>
       </div>
     </section>
   </main>
+
+  <script>
+    function fmtUsd(v) {
+      if (v === null || v === undefined || Number.isNaN(Number(v))) return "-";
+      return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(v));
+    }
+
+    function fmtNum(v, d=1) {
+      if (v === null || v === undefined || Number.isNaN(Number(v))) return "-";
+      return Number(v).toFixed(d);
+    }
+
+    function parseDateAny(e) {
+      return e?.date_utc || e?.date || "-";
+    }
+
+    function normalizeRatio(raw, alloc) {
+      const r = Number(raw);
+      if (!Number.isNaN(r)) return r;
+      const a = Number(alloc);
+      if (Number.isNaN(a)) return null;
+      return a / 100;
+    }
+
+    function actionLabelFromTargetRatio(ratio) {
+      const r = Number(ratio);
+      if (Number.isNaN(r)) return "Waiting";
+      const eps = 0.0001;
+      if (Math.abs(r - 0.0) < eps) return "Wait";
+      if (Math.abs(r - 0.3) < eps) return "Defensive";
+      if (Math.abs(r - 0.7) < eps) return "Bullish";
+      if (Math.abs(r - 1.0) < eps) return "Strong Bullish";
+      return "Waiting";
+    }
+
+    function getBaseEquity(log) {
+      const latest = log?.latest || {};
+      if (typeof latest.base_equity === "number") return latest.base_equity;
+      if (typeof latest.initial_capital === "number") return latest.initial_capital;
+      const entries = Array.isArray(log?.entries) ? log.entries : [];
+      for (const e of entries) {
+        if (typeof e?.base_equity === "number") return e.base_equity;
+        if (typeof e?.initial_capital === "number") return e.initial_capital;
+      }
+      return null;
+    }
+
+    function resolvePnlPercent(log, latest) {
+      const p = Number(latest?.pnl_percent);
+      if (!Number.isNaN(p)) return p;
+      const eq = Number(latest?.equity_usd);
+      const base = Number(getBaseEquity(log));
+      if (!Number.isNaN(eq) && !Number.isNaN(base) && base > 0) {
+        return ((eq - base) / base) * 100;
+      }
+      return null;
+    }
+
+    function renderAudit(latest) {
+      const grid = document.getElementById("auditGrid");
+      const rows = [
+        ["status", latest?.status ?? "-"],
+        ["snapshot", latest?.snapshot_status ?? "-"],
+        ["source", latest?.balance_source ?? "-"],
+        ["price_source", latest?.price_source ?? "-"],
+        ["target_ratio", latest?.target_btc_ratio ?? "-"],
+        ["actual_ratio", latest?.actual_btc_ratio ?? "-"],
+        ["updated", latest?.updated_at_utc ?? "-"],
+      ];
+      grid.innerHTML = rows.map(([k,v]) => `<div class="audit-row"><div class="k">${k}</div><div>${String(v)}</div></div>`).join("");
+    }
+
+    function toggleAudit() {
+      const el = document.getElementById("auditContent");
+      const chev = document.getElementById("auditChevron");
+      const isHidden = el.style.display === "none";
+      el.style.display = isHidden ? "block" : "none";
+      chev.textContent = isHidden ? "⌃" : "⌄";
+    }
+
+    async function load() {
+      const res = await fetch(`log.json?ts=${Date.now()}`, { cache: "no-store" });
+      const log = await res.json();
+      const latest = log?.latest || {};
+      const ratio = normalizeRatio(latest?.target_btc_ratio, latest?.allocation);
+      const action = actionLabelFromTargetRatio(ratio);
+
+      document.getElementById("actionSignal").textContent = action;
+      document.getElementById("portfolioSummary").textContent = "Portfolio: Managed by rule-based allocation";
+
+      document.getElementById("pillDate").textContent = `DATE: ${parseDateAny(latest)}`;
+      document.getElementById("pillPrice").textContent = `PRICE: ${fmtUsd(latest?.btc_price)}`;
+      document.getElementById("pillUpdated").textContent = `UPDATED: ${latest?.updated_at_utc || "-"}`;
+
+      const equity = Number(latest?.equity_usd);
+      document.getElementById("liveEquity").textContent = Number.isNaN(equity) ? "-" : fmtUsd(equity);
+
+      const actual = Number(latest?.actual_btc_ratio);
+      if (!Number.isNaN(actual)) {
+        const btcPct = (actual * 100).toFixed(1);
+        const cashPct = (100 - actual * 100).toFixed(1);
+        document.getElementById("btcPct").textContent = btcPct;
+        document.getElementById("cashPct").textContent = cashPct;
+      } else {
+        document.getElementById("btcPct").textContent = "-";
+        document.getElementById("cashPct").textContent = "-";
+      }
+
+      const pnl = resolvePnlPercent(log, latest);
+      const pnlEl = document.getElementById("pnlPct");
+      if (pnl === null || Number.isNaN(Number(pnl))) {
+        pnlEl.style.display = "none";
+      } else {
+        const val = Number(pnl);
+        const sign = val > 0 ? "+" : "";
+        pnlEl.textContent = `(${sign}${val.toFixed(2)}%)`;
+        pnlEl.style.display = "block";
+        pnlEl.classList.remove("positive", "negative", "flat");
+        pnlEl.classList.add(val > 0 ? "positive" : val < 0 ? "negative" : "flat");
+      }
+
+      document.getElementById("latestDate").textContent = parseDateAny(latest);
+      renderAudit(latest);
+    }
+
+    load().catch((e) => {
+      console.error(e);
+      document.getElementById("actionSignal").textContent = "Waiting";
+    });
+  </script>
 </body>
 </html>
