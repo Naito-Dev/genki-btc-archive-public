@@ -55,7 +55,7 @@
       padding: 18px 16px 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
     .action-panel__label {
       font-size: 12px;
@@ -64,38 +64,43 @@
       color: rgba(236,243,255,.9);
       text-transform: uppercase;
     }
+    .action-panel__asof {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      color: rgba(220,232,255,.82);
+      text-transform: uppercase;
+    }
     .action-panel__signal {
-      margin-top: 2px;
+      margin-top: 8px;
       font-size: clamp(56px, 15vw, 84px);
       line-height: .88;
       font-weight: 900;
       letter-spacing: -.02em;
       color: #ff9b68;
       text-shadow: 0 2px 10px rgba(255,133,70,.08);
+      text-align: center;
     }
-    .action-panel__spacer {
-      margin-top: auto;
-      min-height: 2px;
-    }
-    .action-panel__meta {
+    .action-panel__price {
       margin-top: 8px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-end;
-      align-items: center;
-    }
-    .pill {
-      border: 1px solid rgba(180,210,255,.18);
-      background: rgba(10,17,34,.16);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 11px;
-      line-height: 1;
-      color: rgba(242,246,255,.95);
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 800;
+      color: rgba(237, 244, 255, .95);
+      text-align: center;
       white-space: nowrap;
     }
-    .pill--wide { margin-left: auto; }
+    .action-panel__updated {
+      margin-top: 4px;
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 600;
+      color: rgba(200, 216, 245, .62);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .hero-bottom {
       margin-top: 14px;
       background: rgba(7,14,30,.55);
@@ -235,6 +240,7 @@
       .hero-card { padding: 18px 14px 14px; }
       .action-panel { min-height: 260px; padding: 16px 14px 14px; }
       .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
+      .action-panel__price { font-size: 13px; }
       .hero-bottom { grid-template-columns: minmax(0,1fr); gap: 8px; padding: 12px 12px 10px; }
       .hero-cta-row { grid-template-columns: 1fr; gap: 10px; }
       .hero-cta { width: 100%; }
@@ -252,13 +258,10 @@
 
       <section class="action-panel">
         <div class="action-panel__label">GENKI'S LATEST ACTION</div>
-        <div id="actionSignal" class="action-panel__signal" style="text-align:center">Waiting</div>
-        <div class="action-panel__spacer"></div>
-        <div class="action-panel__meta">
-          <div id="pillDate" class="pill">DATE: -</div>
-          <div id="pillPrice" class="pill">PRICE: -</div>
-          <div id="pillUpdated" class="pill pill--wide">UPDATED: -</div>
-        </div>
+        <div id="actionAsOf" class="action-panel__asof">AS OF: -</div>
+        <div id="actionSignal" class="action-panel__signal">Waiting</div>
+        <div id="actionPrice" class="action-panel__price">BTC -</div>
+        <div id="actionUpdated" class="action-panel__updated">Updated -</div>
       </section>
 
       <section class="hero-bottom">
@@ -375,9 +378,9 @@
       const action = actionLabelFromTargetRatio(ratio);
 
       document.getElementById("actionSignal").textContent = action;
-      document.getElementById("pillDate").textContent = `DATE: ${parseDateAny(latest)}`;
-      document.getElementById("pillPrice").textContent = `PRICE: ${fmtUsd(latest?.btc_price)}`;
-      document.getElementById("pillUpdated").textContent = `UPDATED: ${latest?.updated_at_utc || "-"}`;
+      document.getElementById("actionAsOf").textContent = `AS OF: ${parseDateAny(latest)}`;
+      document.getElementById("actionPrice").textContent = `BTC ${fmtUsd(latest?.btc_price)}`;
+      document.getElementById("actionUpdated").textContent = `Updated ${latest?.updated_at_utc || "-"}`;
 
       const equity = Number(latest?.equity_usd);
       document.getElementById("liveEquity").textContent = Number.isNaN(equity) ? "-" : fmtUsd(equity);
