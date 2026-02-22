@@ -569,6 +569,7 @@
       const nameEl = document.getElementById('waitlistName');
       const submitBtn = document.getElementById('waitlistSubmitBtn');
       const statusEl = document.getElementById('waitlistStatus');
+      const WAITLIST_ENDPOINT = (window.WAITLIST_ENDPOINT || '').trim();
       if (!form || !emailEl || !submitBtn || !statusEl) return;
 
       function isValidEmail(v) {
@@ -579,7 +580,7 @@
         statusEl.textContent = msg || '';
       }
 
-      submitBtn.addEventListener('click', function () {
+      submitBtn.addEventListener('click', async function () {
         const email = String(emailEl.value || '').trim();
         const name = String((nameEl && nameEl.value) || '').trim();
         if (!isValidEmail(email)) {
@@ -591,21 +592,59 @@
         setStatus('Submitting...');
         submitBtn.textContent = 'Submitting...';
 
+        const payload = {
+          timestamp_utc: new Date().toISOString(),
+          email: email,
+          name: name || '',
+          use_case: 'Subscription',
+          page_lang: 'en',
+          source: 'sales-page-en'
+        };
+
+        if (!WAITLIST_ENDPOINT) {
+          console.error('[WAITLIST_SUBMIT]', { ok: false, reason: 'endpoint_missing', payload });
+          setStatus('Submission failed. Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Join the Beta Cohort Waitlist';
+          return;
+        }
+
         try {
-          const key = 'genki_waitlist_leads';
-          const leads = JSON.parse(localStorage.getItem(key) || '[]');
-          leads.push({
-            email: email,
-            name: name || null,
-            source: 'sales-page-en',
-            submitted_at_utc: new Date().toISOString()
+          const res = await fetch(WAITLIST_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
           });
-          localStorage.setItem(key, JSON.stringify(leads));
+          const bodyText = await res.text();
+          let bodyJson = null;
+          try { bodyJson = JSON.parse(bodyText); } catch (_) {}
+          const appOk = !!(bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true));
+          const accepted = res.ok && (appOk || !bodyJson);
+
+          console.debug('[WAITLIST_SUBMIT]', {
+            endpoint: WAITLIST_ENDPOINT,
+            status: res.status,
+            ok: accepted,
+            payload,
+            body: bodyJson || bodyText
+          });
+
+          if (!accepted) {
+            throw new Error('submit_not_accepted');
+          }
+
           setStatus('You are on the waitlist. We will notify you before public opening.');
           submitBtn.textContent = 'Submitted';
         } catch (_) {
-          setStatus('Saved locally. We will notify you before public opening.');
-          submitBtn.textContent = 'Submitted';
+          try {
+            const key = 'genki_waitlist_leads_failed';
+            const failed = JSON.parse(localStorage.getItem(key) || '[]');
+            failed.push(payload);
+            localStorage.setItem(key, JSON.stringify(failed));
+          } catch (__){}
+          setStatus('Submission failed. Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Join the Beta Cohort Waitlist';
         }
       });
     })();
