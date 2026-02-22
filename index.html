@@ -73,11 +73,9 @@
       color: #ff9b68;
       text-shadow: 0 2px 10px rgba(255,133,70,.08);
     }
-    .action-panel__summary {
+    .action-panel__spacer {
       margin-top: auto;
-      font-size: 13px;
-      line-height: 1.4;
-      color: rgba(230,238,255,.82);
+      min-height: 2px;
     }
     .action-panel__meta {
       margin-top: 8px;
@@ -104,8 +102,8 @@
       border-radius: 18px;
       padding: 14px 14px 12px;
       display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(110px, .85fr);
-      gap: 12px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
       align-items: end;
     }
     .live-label {
@@ -127,7 +125,7 @@
       overflow-wrap: normal;
     }
     .pnl-pct {
-      margin-top: 5px;
+      margin-top: 4px;
       font-size: 13px;
       font-weight: 800;
       white-space: nowrap;
@@ -135,23 +133,11 @@
     .pnl-pct.positive { color: #34d399; }
     .pnl-pct.negative { color: #f87171; }
     .pnl-pct.flat { color: #94a3b8; }
-    .hero-bottom__right {
-      min-width: 110px;
-      display: grid;
-      gap: 6px;
-    }
-    .alloc-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      align-items: baseline;
-      font-size: 14px;
-      font-weight: 800;
-      color: #f2f6ff;
-    }
-    .alloc-row span:last-child {
-      font-size: 16px;
-      font-weight: 900;
+    .pnl-note {
+      margin-top: 2px;
+      font-size: 11px;
+      color: rgba(214, 227, 255, 0.66);
+      letter-spacing: .02em;
       white-space: nowrap;
     }
     .hero-cta-row {
@@ -249,7 +235,7 @@
       .hero-card { padding: 18px 14px 14px; }
       .action-panel { min-height: 260px; padding: 16px 14px 14px; }
       .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
-      .hero-bottom { grid-template-columns: minmax(0,1fr) minmax(96px,.8fr); gap: 10px; padding: 12px 12px 10px; }
+      .hero-bottom { grid-template-columns: minmax(0,1fr); gap: 8px; padding: 12px 12px 10px; }
       .hero-cta-row { grid-template-columns: 1fr; gap: 10px; }
       .hero-cta { width: 100%; }
       .audit-row { grid-template-columns: 1fr; gap: 2px; }
@@ -266,8 +252,8 @@
 
       <section class="action-panel">
         <div class="action-panel__label">GENKI'S LATEST ACTION</div>
-        <div id="actionSignal" class="action-panel__signal">Waiting</div>
-        <div id="portfolioSummary" class="action-panel__summary">Portfolio: Managed by rule-based allocation</div>
+        <div id="actionSignal" class="action-panel__signal" style="text-align:center">Waiting</div>
+        <div class="action-panel__spacer"></div>
         <div class="action-panel__meta">
           <div id="pillDate" class="pill">DATE: -</div>
           <div id="pillPrice" class="pill">PRICE: -</div>
@@ -280,10 +266,7 @@
           <div class="live-label">LIVE TESTING:</div>
           <div id="liveEquity" class="live-equity">-</div>
           <div id="pnlPct" class="pnl-pct" style="display:none"></div>
-        </div>
-        <div class="hero-bottom__right">
-          <div class="alloc-row"><span>BTC</span><span id="btcPct">-</span></div>
-          <div class="alloc-row"><span>Cash</span><span id="cashPct">-</span></div>
+          <div id="pnlNote" class="pnl-note" style="display:none">Since test start</div>
         </div>
       </section>
 
@@ -392,8 +375,6 @@
       const action = actionLabelFromTargetRatio(ratio);
 
       document.getElementById("actionSignal").textContent = action;
-      document.getElementById("portfolioSummary").textContent = "Portfolio: Managed by rule-based allocation";
-
       document.getElementById("pillDate").textContent = `DATE: ${parseDateAny(latest)}`;
       document.getElementById("pillPrice").textContent = `PRICE: ${fmtUsd(latest?.btc_price)}`;
       document.getElementById("pillUpdated").textContent = `UPDATED: ${latest?.updated_at_utc || "-"}`;
@@ -401,26 +382,18 @@
       const equity = Number(latest?.equity_usd);
       document.getElementById("liveEquity").textContent = Number.isNaN(equity) ? "-" : fmtUsd(equity);
 
-      const actual = Number(latest?.actual_btc_ratio);
-      if (!Number.isNaN(actual)) {
-        const btcPct = (actual * 100).toFixed(1);
-        const cashPct = (100 - actual * 100).toFixed(1);
-        document.getElementById("btcPct").textContent = btcPct;
-        document.getElementById("cashPct").textContent = cashPct;
-      } else {
-        document.getElementById("btcPct").textContent = "-";
-        document.getElementById("cashPct").textContent = "-";
-      }
-
       const pnl = resolvePnlPercent(log, latest);
       const pnlEl = document.getElementById("pnlPct");
+      const pnlNoteEl = document.getElementById("pnlNote");
       if (pnl === null || Number.isNaN(Number(pnl))) {
         pnlEl.style.display = "none";
+        pnlNoteEl.style.display = "none";
       } else {
         const val = Number(pnl);
         const sign = val > 0 ? "+" : "";
         pnlEl.textContent = `(${sign}${val.toFixed(2)}%)`;
         pnlEl.style.display = "block";
+        pnlNoteEl.style.display = "block";
         pnlEl.classList.remove("positive", "negative", "flat");
         pnlEl.classList.add(val > 0 ? "positive" : val < 0 ? "negative" : "flat");
       }
