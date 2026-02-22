@@ -56,6 +56,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      justify-content: flex-start;
     }
     .action-panel__label {
       font-size: 12px;
@@ -65,6 +66,7 @@
       text-transform: uppercase;
     }
     .action-panel__asof {
+      margin-top: 8px;
       font-size: 11px;
       font-weight: 800;
       letter-spacing: .08em;
@@ -72,7 +74,7 @@
       text-transform: uppercase;
     }
     .action-panel__signal {
-      margin-top: 8px;
+      margin-top: 18px;
       font-size: clamp(56px, 15vw, 84px);
       line-height: .88;
       font-weight: 900;
@@ -82,7 +84,7 @@
       text-align: center;
     }
     .action-panel__price {
-      margin-top: 8px;
+      margin-top: 12px;
       font-size: 14px;
       line-height: 1.2;
       font-weight: 800;
@@ -91,15 +93,17 @@
       white-space: nowrap;
     }
     .action-panel__updated {
-      margin-top: 4px;
-      font-size: 10px;
+      margin-top: 6px;
+      font-size: 11px;
       line-height: 1.2;
       font-weight: 600;
-      color: rgba(200, 216, 245, .62);
+      color: rgba(200, 216, 245, .58);
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     .hero-bottom {
       margin-top: 14px;
@@ -145,11 +149,18 @@
       letter-spacing: .02em;
       white-space: nowrap;
     }
+    .since-start {
+      margin-top: 6px;
+      font-size: 11px;
+      color: rgba(214, 227, 255, 0.72);
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
     .hero-cta-row {
       margin-top: 14px;
       display: grid;
-      grid-template-columns: auto minmax(0,1fr);
-      gap: 12px;
+      grid-template-columns: 1fr;
+      gap: 0;
       align-items: center;
     }
     .hero-latest { min-width: 86px; }
@@ -184,6 +195,7 @@
       border: 1px solid rgba(255,230,140,.55);
       box-shadow: 0 8px 24px rgba(240,194,62,.2);
       white-space: nowrap;
+      width: 100%;
     }
     .tech-card {
       margin-top: 14px;
@@ -226,6 +238,20 @@
       display: grid;
       gap: 8px;
     }
+    .audit-section {
+      border: 1px solid rgba(110,160,255,.16);
+      border-radius: 12px;
+      background: rgba(8,17,37,.22);
+      padding: 10px;
+    }
+    .audit-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(230,238,255,.88);
+      margin-bottom: 8px;
+    }
     .audit-row {
       display: grid;
       grid-template-columns: 120px 1fr;
@@ -234,6 +260,39 @@
       color: rgba(230,238,255,.82);
     }
     .audit-row .k { color: rgba(180,200,230,.92); text-transform: uppercase; letter-spacing: .04em; }
+    .audit-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      font-size: 12px;
+      color: rgba(230,238,255,.82);
+    }
+    .proof-code {
+      margin-top: 8px;
+      border: 1px dashed rgba(110,160,255,.24);
+      border-radius: 10px;
+      background: rgba(8,17,37,.3);
+      padding: 8px;
+      font-size: 11px;
+      color: rgba(235,242,255,.86);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .proof-copy {
+      margin-top: 8px;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,230,140,.45);
+      background: rgba(248, 232, 164, .12);
+      color: rgba(252,211,77,.92);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
     @media (max-width: 430px) {
       .page { padding: 12px; }
@@ -242,7 +301,7 @@
       .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
       .action-panel__price { font-size: 13px; }
       .hero-bottom { grid-template-columns: minmax(0,1fr); gap: 8px; padding: 12px 12px 10px; }
-      .hero-cta-row { grid-template-columns: 1fr; gap: 10px; }
+      .hero-cta-row { grid-template-columns: 1fr; gap: 0; }
       .hero-cta { width: 100%; }
       .audit-row { grid-template-columns: 1fr; gap: 2px; }
     }
@@ -268,17 +327,14 @@
         <div class="hero-bottom__left">
           <div class="live-label">LIVE TESTING:</div>
           <div id="liveEquity" class="live-equity">-</div>
+          <div id="sinceStart" class="since-start">Since test start: -</div>
           <div id="pnlPct" class="pnl-pct" style="display:none"></div>
-          <div id="pnlNote" class="pnl-note" style="display:none">Since test start</div>
+          <div id="pnlNote" class="pnl-note" style="display:none">Performance vs start</div>
         </div>
       </section>
 
       <section class="hero-cta-row">
-        <div class="hero-latest">
-          <div class="hero-latest__label">LATEST FROM</div>
-          <div id="latestDate" class="hero-latest__date">-</div>
-        </div>
-        <a class="hero-cta" href="sales-page-en.html">Get daily BTC risk signal</a>
+        <a class="hero-cta" href="sales-page-en.html">Unlock today's BTC risk signal</a>
       </section>
     </section>
 
@@ -286,7 +342,29 @@
       <button class="tech-card__toggle" type="button" onclick="toggleAudit()">Technical Analysis <span id="auditChevron">⌄</span></button>
       <div id="auditContent" class="tech-card__content" style="display:none">
         <div class="tech-card__hint">Details hidden. Tap to expand.</div>
-        <div class="audit-grid" id="auditGrid"></div>
+        <div class="audit-grid">
+          <div class="audit-section">
+            <div class="audit-title">Chain Integrity</div>
+            <div class="audit-row"><div class="k">status</div><div id="auditChainStatus">-</div></div>
+            <div class="audit-row"><div class="k">logic</div><div id="auditLogicVersion">-</div></div>
+          </div>
+          <div class="audit-section">
+            <div class="audit-title">Allocation / Status</div>
+            <div class="audit-row"><div class="k">allocation</div><div id="auditAlloc">-</div></div>
+            <div class="audit-row"><div class="k">target_ratio</div><div id="auditTarget">-</div></div>
+            <div class="audit-row"><div class="k">status</div><div id="auditStatus">-</div></div>
+            <div class="audit-row"><div class="k">snapshot</div><div id="auditSnapshot">-</div></div>
+          </div>
+          <div class="audit-section">
+            <div class="audit-title">Recent Verified Decisions</div>
+            <ul id="auditRecentList" class="audit-list"><li>-</li></ul>
+          </div>
+          <div class="audit-section">
+            <div class="audit-title">Proof Block</div>
+            <div id="proofCode" class="proof-code">-</div>
+            <button id="copyProofBtn" class="proof-copy" type="button" onclick="copyLatestProof()">Copy Latest Proof</button>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -337,6 +415,14 @@
       return null;
     }
 
+    function getSinceTestStart(log) {
+      if (log?.start_date_utc) return String(log.start_date_utc);
+      const entries = Array.isArray(log?.entries) ? log.entries : [];
+      if (!entries.length) return null;
+      const dates = entries.map((e) => e?.date).filter(Boolean).sort();
+      return dates.length ? dates[0] : null;
+    }
+
     function resolvePnlPercent(log, latest) {
       const p = Number(latest?.pnl_percent);
       if (!Number.isNaN(p)) return p;
@@ -348,18 +434,33 @@
       return null;
     }
 
-    function renderAudit(latest) {
-      const grid = document.getElementById("auditGrid");
-      const rows = [
-        ["status", latest?.status ?? "-"],
-        ["snapshot", latest?.snapshot_status ?? "-"],
-        ["source", latest?.balance_source ?? "-"],
-        ["price_source", latest?.price_source ?? "-"],
-        ["target_ratio", latest?.target_btc_ratio ?? "-"],
-        ["actual_ratio", latest?.actual_btc_ratio ?? "-"],
-        ["updated", latest?.updated_at_utc ?? "-"],
-      ];
-      grid.innerHTML = rows.map(([k,v]) => `<div class="audit-row"><div class="k">${k}</div><div>${String(v)}</div></div>`).join("");
+    function renderAudit(log, latest) {
+      document.getElementById("auditChainStatus").textContent = latest?.chain_integrity ?? "-";
+      document.getElementById("auditLogicVersion").textContent = latest?.logic_version ?? "-";
+      document.getElementById("auditAlloc").textContent = latest?.allocation ?? "-";
+      document.getElementById("auditTarget").textContent = latest?.target_btc_ratio ?? "-";
+      document.getElementById("auditStatus").textContent = latest?.status ?? "-";
+      document.getElementById("auditSnapshot").textContent = latest?.snapshot_status ?? "-";
+
+      const entries = Array.isArray(log?.entries) ? log.entries.slice(-3).reverse() : [];
+      const list = document.getElementById("auditRecentList");
+      list.innerHTML = entries.length
+        ? entries.map((e) => `<li>${e?.date ?? "-"} | ${e?.status ?? "-"} | alloc ${e?.allocation ?? "-"}</li>`).join("")
+        : "<li>-</li>";
+
+      const proof = {
+        date: latest?.date ?? "-",
+        hash: latest?.hash ?? "-",
+        prev_hash: latest?.prev_hash ?? "-",
+        status: latest?.status ?? "-",
+      };
+      document.getElementById("proofCode").textContent = JSON.stringify(proof, null, 2);
+    }
+
+    function copyLatestProof() {
+      const txt = document.getElementById("proofCode").textContent || "";
+      if (!txt || txt === "-") return;
+      navigator.clipboard?.writeText(txt).catch(() => {});
     }
 
     function toggleAudit() {
@@ -384,6 +485,7 @@
 
       const equity = Number(latest?.equity_usd);
       document.getElementById("liveEquity").textContent = Number.isNaN(equity) ? "-" : fmtUsd(equity);
+      document.getElementById("sinceStart").textContent = `Since test start: ${getSinceTestStart(log) || "-"}`;
 
       const pnl = resolvePnlPercent(log, latest);
       const pnlEl = document.getElementById("pnlPct");
@@ -401,8 +503,7 @@
         pnlEl.classList.add(val > 0 ? "positive" : val < 0 ? "negative" : "flat");
       }
 
-      document.getElementById("latestDate").textContent = parseDateAny(latest);
-      renderAudit(latest);
+      renderAudit(log, latest);
     }
 
     load().catch((e) => {
