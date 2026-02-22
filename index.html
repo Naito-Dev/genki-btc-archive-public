@@ -225,6 +225,46 @@
       overflow-wrap: anywhere;
       text-align: right;
     }
+    .meta-pill small {
+      display: block;
+      font-size: 12px;
+      opacity: 0.75;
+      letter-spacing: 0.04em;
+      margin-top: 1px;
+    }
+    .live-split {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 14px;
+      align-items: end;
+    }
+    .alloc-box {
+      text-align: right;
+      color: #f4f7ff;
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+    .alloc-row {
+      display: grid;
+      grid-template-columns: auto auto;
+      justify-content: end;
+      gap: 14px;
+      font-size: 42px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+    }
+    .alloc-row .label {
+      color: #e8edff;
+      font-weight: 600;
+      opacity: 0.95;
+    }
+    .alloc-row .value {
+      color: #f6f8ff;
+      font-weight: 800;
+    }
     .hero-bottom {
       margin-top: 12px;
       display: flex;
@@ -382,6 +422,15 @@
       .equity-value { font-size: clamp(46px, 13.8vw, 68px); }
       .equity-pct { font-size: clamp(16px, 4.8vw, 22px); }
       .meta-strip { font-size: 16px; }
+      .meta-pill small { font-size: 11px; }
+      .live-split {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .alloc-row {
+        font-size: 34px;
+        gap: 10px;
+      }
       .hero-bottom { gap: 10px; }
       .latest-tag { font-size: 13px; }
       .cta { width: 100%; }
@@ -406,17 +455,22 @@
           <div class="meta-strip">
             <span class="meta-pill" data-kpi-date>DATE: --</span>
             <span class="meta-pill" data-kpi-price>PRICE: --</span>
-            <span class="meta-pill" data-kpi-updated>UPDATED: --</span>
+            <span class="meta-pill" data-kpi-updated>UPDATED: --<small>(UTC)</small></span>
           </div>
-          <div class="equity-box">
-            <div class="equity-label">Live Testing:</div>
-            <div class="equity-line">
-              <p class="equity-value" data-kpi-equity>$ ---.--</p>
-              <p class="equity-pct neutral" data-kpi-pct>(--.--%)</p>
+          <div class="live-split">
+            <div class="equity-box">
+              <div class="equity-label">Live Testing:</div>
+              <div class="equity-line">
+                <p class="equity-value" data-kpi-equity>$ ---.--</p>
+                <p class="equity-pct neutral" data-kpi-pct>(--.--%)</p>
+              </div>
+              <p class="pnl-value" data-kpi-pnl>Start baseline pending</p>
+              <p class="subtitle" data-phase-note>Live tracking active</p>
             </div>
-            <div class="status-detail compact" data-kpi-portfolio>Current allocation: BTC --% / Cash --%</div>
-            <p class="pnl-value" data-kpi-pnl>Start baseline pending</p>
-            <p class="subtitle" data-phase-note>Live tracking active</p>
+            <div class="alloc-box" aria-label="allocation">
+              <div class="alloc-row"><span class="label">BTC</span><span class="value" data-kpi-btc-pct>--.-</span></div>
+              <div class="alloc-row"><span class="label">Cash</span><span class="value" data-kpi-cash-pct>--.-</span></div>
+            </div>
           </div>
           <div class="hero-bottom">
             <div class="latest-tag" data-kpi-latest>Latest from --</div>
@@ -480,7 +534,8 @@
         pnl: document.querySelector('[data-kpi-pnl]'),
         phaseNote: document.querySelector('[data-phase-note]'),
         action: document.querySelector('[data-kpi-action]'),
-        portfolio: document.querySelector('[data-kpi-portfolio]'),
+        btcPct: document.querySelector('[data-kpi-btc-pct]'),
+        cashPct: document.querySelector('[data-kpi-cash-pct]'),
         latest: document.querySelector('[data-kpi-latest]'),
         trustText: document.querySelector('[data-kpi-trust]'),
         date: document.querySelector('[data-kpi-date]'),
@@ -732,13 +787,15 @@
           }
           applyAction(action);
 
-          if (els.portfolio) {
+          if (els.btcPct && els.cashPct) {
             if (actualRatio != null) {
               var btcPct = Math.max(0, Math.min(100, actualRatio * 100));
               var cashPct = Math.max(0, 100 - btcPct);
-              els.portfolio.textContent = 'Current allocation: BTC ' + btcPct.toFixed(1) + '% / Cash ' + cashPct.toFixed(1) + '%';
+              els.btcPct.textContent = btcPct.toFixed(1);
+              els.cashPct.textContent = cashPct.toFixed(1);
             } else {
-              els.portfolio.textContent = 'Current allocation: BTC --% / Cash --%';
+              els.btcPct.textContent = '--.-';
+              els.cashPct.textContent = '--.-';
             }
           }
           // Guidance and top icon intentionally hidden for cleaner hero UX.
@@ -751,7 +808,7 @@
 
           els.date.textContent = 'DATE: ' + (latest.date || 'N/A');
           els.price.textContent = 'PRICE: ' + fmtUsd(latest.btc_price);
-          els.updated.textContent = 'UPDATED: ' + (latest.updated_at_utc || 'N/A') + ' UTC';
+          els.updated.innerHTML = 'UPDATED: ' + (latest.updated_at_utc || 'N/A') + '<small>(UTC)</small>';
           if (els.latest) {
             els.latest.textContent = 'Latest from ' + (latest.date || 'N/A');
           }
