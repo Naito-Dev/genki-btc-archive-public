@@ -85,6 +85,30 @@
       text-wrap: balance;
       transform: translate(-2px, 4px);
     }
+    .action-panel__trustPills {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 8px;
+      min-height: 28px;
+    }
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid rgba(180,210,255,.14);
+      background: rgba(10,17,34,.12);
+      color: rgba(226,236,255,.78);
+      white-space: nowrap;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      padding: 5px 9px;
+    }
     .action-panel__metaDock {
       position: absolute;
       right: 16px;
@@ -343,6 +367,8 @@
       .hero-card { padding: 18px 14px 14px; }
       .action-panel { min-height: 260px; padding: 16px 14px 84px; }
       .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
+      .action-panel__trustPills { margin-top: 8px; gap: 5px; }
+      .trust-pill { font-size: 10px; padding: 5px 8px; }
       .action-panel__metaDock {
         right: 14px;
         bottom: 10px;
@@ -367,6 +393,10 @@
         <div class="action-panel__label">GENKI'S LATEST ACTION</div>
         <div class="action-panel__body">
           <div id="actionSignal" class="action-panel__signal">Wait</div>
+        </div>
+        <div class="action-panel__trustPills">
+          <span class="trust-pill">Live verified daily</span>
+          <span class="trust-pill">MaxDD -19.79%</span>
         </div>
         <div class="action-panel__metaDock">
           <div id="metaPrice" class="meta-pill meta-pill--price">BTC $67,950.98</div>
