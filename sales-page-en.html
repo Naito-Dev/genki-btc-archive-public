@@ -1,35 +1,49 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MarketEdge | Defensive BTC Allocation Engine</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Genki BTC Signal | Waitlist</title>
+  <!--
+    Switch-to-paid checklist (after 60-day live verification):
+    1) Replace waitlist CTA href (#waitlist-form) with checkout URL in BOTH CTA buttons.
+    2) Update access state text from "Waitlist Open" to "Now Open".
+    3) Keep price at US$329/mo (no discounts) and update FAQ "When paid access begins" answer.
+    4) Keep proof + live verification sections unchanged for trust continuity.
+  -->
   <style>
     :root {
-      --bg: #0b1118;
-      --bg2: #101b27;
-      --ink: #edf3fb;
-      --muted: #a8bed3;
-      --line: #273c52;
-      --accent: #38e3aa;
-      --accent2: #f9c45a;
-      --card: rgba(10, 22, 34, 0.86);
+      --bg: #05090f;
+      --bg-2: #0a1630;
+      --panel: rgba(10, 24, 49, 0.92);
+      --panel-2: rgba(8, 18, 36, 0.9);
+      --line: rgba(122, 159, 225, 0.24);
+      --text: #f2f6ff;
+      --muted: #aebddb;
+      --soft: #7f91b4;
+      --gold: #d8b24a;
+      --gold-hi: #e4c76a;
+      --gold-edge: #b98d2f;
+      --green: #49c884;
+      --red: #e07d7d;
+      --radius: 18px;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      color: var(--ink);
-      font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+      color: var(--text);
       background:
-        radial-gradient(1200px 640px at 95% -5%, rgba(56, 227, 170, 0.16), transparent 60%),
-        radial-gradient(900px 420px at -10% 5%, rgba(249, 196, 90, 0.14), transparent 58%),
-        linear-gradient(160deg, var(--bg), var(--bg2));
-      line-height: 1.6;
+        radial-gradient(1200px 700px at 90% -10%, rgba(216,178,74,0.12), transparent 62%),
+        radial-gradient(1000px 600px at -10% 10%, rgba(73,200,132,0.10), transparent 58%),
+        linear-gradient(180deg, var(--bg), var(--bg-2));
+      font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
     }
-    .wrap { width: min(1120px, 92vw); margin: 0 auto; }
-    .hero { padding: 86px 0 54px; }
-    .tag {
-      display: inline-block;
+    .wrap { width: min(1080px, 92vw); margin: 0 auto; }
+    .hero { padding: 56px 0 34px; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
       border: 1px solid var(--line);
       border-radius: 999px;
       padding: 6px 12px;
@@ -37,523 +51,468 @@
       letter-spacing: .08em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     h1 {
-      margin: 0 0 14px;
-      font-size: clamp(36px, 6vw, 64px);
-      line-height: 1.08;
+      margin: 0;
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 1.06;
       letter-spacing: -0.02em;
-      max-width: 950px;
+      max-width: 900px;
     }
     .lead {
-      margin: 0;
-      max-width: 900px;
+      margin: 14px 0 0;
       color: var(--muted);
-      font-size: clamp(16px, 2.1vw, 22px);
+      font-size: clamp(16px, 2.2vw, 22px);
+      max-width: 840px;
     }
-    .kpis {
-      margin-top: 30px;
+    .phase-note {
+      margin-top: 10px;
+      color: var(--soft);
+      font-size: 13px;
+      letter-spacing: .02em;
+    }
+    .hero-grid {
+      margin-top: 22px;
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 12px;
-    }
-    .kpi {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-    }
-    .kpi .v { font-size: 24px; font-weight: 800; line-height: 1.05; }
-    .kpi .k { color: var(--muted); font-size: 12px; margin-top: 4px; }
-
-    section { padding: 26px 0; }
-    .grid {
-      display: grid;
-      grid-template-columns: 1.1fr 1fr;
-      gap: 18px;
+      gap: 14px;
+      grid-template-columns: 1fr 1fr;
     }
     .card {
-      background: var(--card);
+      background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 22px;
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.03);
     }
-    h2 { margin: 0 0 12px; font-size: clamp(24px, 3vw, 34px); }
-    ul { margin: 8px 0 0 18px; padding: 0; }
-    li { margin: 6px 0; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .small { color: var(--muted); font-size: 13px; }
+    .mini-title {
+      margin: 0 0 8px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .signal-preview {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .signal-preview div {
+      border: 1px solid rgba(122,159,225,.2);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(7, 17, 34, 0.65);
+    }
+    .cta-row {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      border-radius: 999px;
+      padding: 0 18px;
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .btn.primary {
+      color: #0b1020;
+      background: linear-gradient(180deg, var(--gold-hi), var(--gold));
+      border: 1px solid var(--gold-edge);
+      box-shadow: 0 8px 20px rgba(216, 178, 74, 0.24);
+    }
+    .btn.secondary {
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: rgba(8, 18, 36, 0.5);
+    }
+    section { padding: 14px 0; }
+    h2 {
+      margin: 0 0 10px;
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    p { margin: 0; }
+    .sub {
+      color: var(--muted);
+      margin-bottom: 14px;
+      font-size: 15px;
+    }
+    .unlock-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .unlock-item {
+      border: 1px solid rgba(122,159,225,.2);
+      border-radius: 12px;
+      background: rgba(8, 18, 36, 0.58);
+      padding: 12px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .unlock-item strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
     .table-wrap { overflow-x: auto; }
-    table { border-collapse: collapse; width: 100%; min-width: 660px; }
-    th, td { border-bottom: 1px solid var(--line); padding: 10px 8px; text-align: left; font-size: 14px; }
-    th { color: var(--muted); font-weight: 600; }
-    .form-grid {
+    table { width: 100%; border-collapse: collapse; min-width: 640px; }
+    th, td {
+      border-bottom: 1px solid rgba(122,159,225,.18);
+      padding: 10px 8px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th { color: var(--muted); font-weight: 700; }
+    .good { color: var(--green); }
+    .warn { color: var(--red); }
+    .steps {
       display: grid;
       gap: 10px;
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .step {
+      border: 1px solid rgba(122,159,225,.2);
+      border-radius: 12px;
+      background: rgba(8, 18, 36, 0.58);
+      padding: 12px;
+    }
+    .step .n {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .step h3 { margin: 0 0 6px; font-size: 16px; }
+    .step p { color: var(--muted); font-size: 14px; }
+    .proof-kpis {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       margin-top: 10px;
     }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 13px;
+    .proof-kpis .kpi {
+      border: 1px solid rgba(122,159,225,.2);
+      border-radius: 12px;
+      background: rgba(8, 18, 36, 0.58);
+      padding: 12px;
+    }
+    .proof-kpis .v { font-size: 21px; font-weight: 900; line-height: 1; }
+    .proof-kpis .k { margin-top: 5px; color: var(--muted); font-size: 12px; }
+    .price-box {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+    .price {
+      font-size: clamp(34px, 7vw, 48px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      display: grid;
+      gap: 5px;
+    }
+    .faq {
+      display: grid;
+      gap: 10px;
+    }
+    details {
+      border: 1px solid rgba(122,159,225,.2);
+      border-radius: 12px;
+      background: rgba(8, 18, 36, 0.58);
+      padding: 10px 12px;
+    }
+    summary {
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      list-style: none;
+    }
+    details p {
+      margin-top: 8px;
+      font-size: 14px;
       color: var(--muted);
     }
-    .field input, .field select {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      color: var(--ink);
+    .waitlist-card {
+      background: linear-gradient(130deg, rgba(216,178,74,.15), rgba(8,18,36,.86));
+      border: 1px solid rgba(216,178,74,.3);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .waitlist-form {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+    }
+    .waitlist-form label {
+      display: grid;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .waitlist-form input {
+      width: 100%;
+      min-height: 42px;
       border-radius: 10px;
-      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: rgba(8,18,36,.66);
+      color: var(--text);
+      padding: 0 12px;
       font-size: 14px;
     }
-    .status { color: var(--accent); font-size: 13px; margin-top: 8px; min-height: 18px; }
-    .blurred {
-      filter: blur(7px);
-      user-select: none;
-      pointer-events: none;
-      transition: filter .2s ease;
+    .waitlist-form .full { grid-column: 1 / -1; }
+    .fine {
+      margin-top: 10px;
+      color: var(--soft);
+      font-size: 12px;
     }
-    .cta {
-      margin: 12px 0 78px;
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 18px;
-      padding: 26px;
-      background: linear-gradient(125deg, rgba(56,227,170,0.16), rgba(249,196,90,0.13));
+    footer {
+      padding: 10px 0 44px;
+      color: var(--soft);
+      font-size: 12px;
+      text-align: center;
     }
-    .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
-    .btn {
-      display: inline-block;
-      text-decoration: none;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 11px 16px;
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
     }
-    .btn.primary { background: var(--accent); color: #06261a; }
-    .btn.secondary { border: 1px solid var(--line); color: var(--ink); }
-
-    @media (max-width: 980px) {
-      .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 560px) {
-      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .hero { padding-top: 64px; }
+    @media (max-width: 900px) {
+      .hero-grid, .price-box { grid-template-columns: 1fr; }
+      .proof-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .steps { grid-template-columns: 1fr; }
+      .unlock-grid { grid-template-columns: 1fr; }
+      .waitlist-form { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <header class="hero">
     <div class="wrap">
-      <span class="tag">Institutional-grade risk control for BTC holders</span>
-      <h1>Capture upside.<br>Avoid structural breakdowns.</h1>
-      <p class="lead">
-        MarketEdge is a rules-based BTC allocation engine designed for one objective:
-        preserve capital through major market breakdowns while staying exposed when structure is healthy.
-      </p>
-      <p class="small">Currently in live verification. Beta access via waitlist.</p>
-      <div class="kpis">
-        <div class="kpi"><div class="v">15.17x</div><div class="k">Final Equity (1.00 to 15.1732)</div></div>
-        <div class="kpi"><div class="v">41.02%</div><div class="k">CAGR</div></div>
-        <div class="kpi"><div class="v">-19.79%</div><div class="k">Max Drawdown</div></div>
-        <div class="kpi"><div class="v">1.52</div><div class="k">Sharpe Ratio (rf=0)</div></div>
-        <div class="kpi"><div class="v">11.80%</div><div class="k">Avg Exposure</div></div>
-        <div class="kpi"><div class="v">Live</div><div class="k">Daily public verification log</div></div>
+      <span class="eyebrow">BTC capital protection signal</span>
+      <h1>Rules-based BTC risk signals for holders who care about survival first.</h1>
+      <p class="lead">Free dashboard shows proof and status. Premium access reveals exact allocation and target ratios so you can act with confidence in minutes, not hours.</p>
+      <p class="phase-note">Current status: 60-day live verification in progress • Waitlist Open • Paid access opens after verification</p>
+
+      <div class="hero-grid">
+        <article class="card">
+          <p class="mini-title">What this is</p>
+          <p class="sub" style="margin:0">A defensive allocation engine for BTC spot holders. No discretionary calls, no hype, no always-on chart watching.</p>
+          <div class="signal-preview" aria-label="Free vs Premium preview">
+            <div><strong>Free:</strong> Safety state only (e.g. <span class="warn">Wait / Safety Hold</span>)</div>
+            <div><strong>Premium:</strong> Exact execution line (e.g. <span class="good">11.8% BTC / 88.2% Cash</span>)</div>
+          </div>
+          <div class="cta-row">
+            <a class="btn primary" href="#waitlist-form">Join the Waitlist</a>
+            <a class="btn secondary" href="/">View Public Dashboard</a>
+          </div>
+        </article>
+        <article class="card">
+          <p class="mini-title">Who this is for</p>
+          <ul class="list" style="padding-left:16px">
+            <li>BTC spot holders prioritizing drawdown control over hype.</li>
+            <li>Founders/executives who want a short daily risk decision at 21:00 JST.</li>
+            <li>Users willing to pay for clarity, discipline, and repeatability.</li>
+          </ul>
+        </article>
       </div>
     </div>
   </header>
 
   <main>
     <section>
-      <div class="wrap grid">
-        <article class="card">
-          <h2>Why it matters</h2>
-          <ul>
-            <li>Buy-and-hold BTC can experience deep multi-year drawdowns.</li>
-            <li>MarketEdge uses deterministic MA-structure and trigger logic to reduce exposure in broken regimes.</li>
-            <li>Current focus: live verification with daily public logs and hash-linked records.</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h2>Auditability first</h2>
-          <ul>
-            <li>Full strategy code available.</li>
-            <li>Executed trades are exported with timestamps, side, price, notional, and costs.</li>
-            <li>Backtest KPIs are currently under reproducibility re-validation.</li>
-          </ul>
-          <p class="small">
-            Files: <span class="mono">output/marketedge_report.md</span> and <span class="mono">output/marketedge_trades.csv</span>
-          </p>
-        </article>
+      <div class="wrap card">
+        <h2>What You Unlock</h2>
+        <p class="sub">Premium access reveals the actionable layer intentionally hidden in the free dashboard.</p>
+        <div class="unlock-grid">
+          <div class="unlock-item"><strong>Exact Allocation %</strong>Precise BTC/Cash split for the day, not a generic state label.</div>
+          <div class="unlock-item"><strong>Target Risk Ratio</strong>Position sizing line used for execution decisions.</div>
+          <div class="unlock-item"><strong>Daily Delivery (21:00 JST)</strong>Concise email report with today’s actionable posture.</div>
+          <div class="unlock-item"><strong>Full Decision Archive</strong>Historical signal log with allocation visibility for consistency checks.</div>
+          <div class="unlock-item"><strong>Sync & Readiness Status</strong>Whether data is stable enough to act now or hold safely.</div>
+          <div class="unlock-item"><strong>Proof-anchored Process</strong>Hash-linked records remain visible for transparency.</div>
+        </div>
       </div>
     </section>
 
-    <!-- EVIDENCE_SECTION_START -->
     <section>
       <div class="wrap card">
-        <h2>Evidence &amp; Robustness</h2>
-        <p>
-          Backtest KPIs below are sourced from reproducibility evidence and synchronized with the current execution logic.
-          We publish live verification logs and proof data daily.
-        </p>
-        <p>
-          Audit Status: comparison.status = MATCH (Backtest &amp; Live Execution Logic fully synchronized.
-          Reference Commit: ea16dd...9030d)
-        </p>
+        <h2>Free vs Premium</h2>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr>
-                <th>Strategy</th>
-                <th>CAGR</th>
-                <th>MaxDD</th>
-                <th>Sharpe</th>
-                <th>MAR</th>
-                <th>Exposure</th>
-                <th>Worst Month</th>
-              </tr>
+              <tr><th>Item</th><th>Free Dashboard</th><th>Premium Access</th></tr>
             </thead>
             <tbody>
-              <tr><td>BTC Buy&amp;Hold</td><td>27.53%</td><td>-77.23%</td><td>0.70</td><td>0.36</td><td>100.00%</td><td>-37.29%</td></tr>
-              <tr><td>MarketEdge (0.24% RT)</td><td>41.02%</td><td>-19.79%</td><td>1.52</td><td>2.07</td><td>11.80%</td><td>-4.25% (2021-04)</td></tr>
-              <tr><td>MarketEdge (1.00% RT)</td><td>34.79%</td><td>-19.89%</td><td>1.33</td><td>1.75</td><td>11.80%</td><td>-5.56%</td></tr>
+              <tr><td>Position Allocation</td><td>Hidden / summary only</td><td>Exact BTC % and Cash %</td></tr>
+              <tr><td>Target Risk Ratio</td><td>Hidden</td><td>Visible daily</td></tr>
+              <tr><td>Today’s Signal</td><td>State only (Wait/Defensive/etc.)</td><td>State + allocation line</td></tr>
+              <tr><td>Recent Decisions</td><td>Status text</td><td>Status + allocation context</td></tr>
+              <tr><td>Data Sync / Readiness</td><td>Summary</td><td>Action-ready interpretation</td></tr>
+              <tr><td>Delivery Method</td><td>Public dashboard check</td><td>Daily email (21:00 JST)</td></tr>
+              <tr><td>Historical Archive</td><td>Limited transparency layer</td><td>Full practical archive</td></tr>
+              <tr><td>Proof of Integrity</td><td>Visible</td><td>Visible (same proof spine)</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="small">Source files: output/tradetest_inventory_summary.json, output/marketedge_benchmark_table.csv, evidence/repro/*/results.json.</p>
-        <p>
-          <img src="/marketedge_walkforward_composite.png" alt="Walk-forward composite OOS equity curve" style="width:100%;border:1px solid var(--line);border-radius:12px;margin-top:14px;">
-        </p>
-        <p class="small">
-          Footnotes: UTC timestamps, half-open windows [start, end), execution = next_bar_open, and data source assumptions are under re-validation.
-        </p>
-      </div>
-    </section>
-    <!-- EVIDENCE_SECTION_END -->
-
-    <section>
-      <div class="wrap card">
-        <h2>Live Verification (Real-money tracking)</h2>
-        <p class="small">
-          Start date (UTC): <span data-live-start>2026-02-17T00:00:00Z</span> |
-          Day count: <span data-live-day>1</span> |
-          Current allocation: <span class="blurred" data-allocation>70%</span> |
-          Current equity: <span data-live-equity>Not disclosed</span> |
-          Last update: <span data-live-updated>--</span>
-        </p>
-        <p><a class="btn secondary" href="/log.html">Daily log</a></p>
-        <h3>Latest Weekly Summary</h3>
-        <pre class="small" data-latest-weekly>Loading...</pre>
-        <p class="small">This is an ongoing verification log. Not an offer to sell.</p>
       </div>
     </section>
 
     <section>
       <div class="wrap card">
-        <h2>Join the beta waitlist</h2>
-        <p class="small">Includes: Institutional deck + sample trade log (CSV) + methodology notes.</p>
-        <form class="deck-form" action="#" method="post">
-          <div class="form-grid">
-            <label class="field">Email (required)
-              <input type="email" name="email" required>
-            </label>
-            <label class="field">Name (optional)
-              <input type="text" name="name">
-            </label>
-            <label class="field">Use case (optional)
-              <select name="use_case">
-                <option value="">Select</option>
-                <option>Managed account</option>
-                <option>Treasury</option>
-                <option>Subscription</option>
-              </select>
-            </label>
+        <h2>How It Works</h2>
+        <p class="sub">Designed to reduce emotional load and decision fatigue.</p>
+        <div class="steps">
+          <article class="step">
+            <span class="n">1</span>
+            <h3>Receive today’s report</h3>
+            <p>At 21:00 JST, get a short update with risk posture and allocation context.</p>
+          </article>
+          <article class="step">
+            <span class="n">2</span>
+            <h3>Check the risk line</h3>
+            <p>Read one clear instruction: keep defense, hold exposure, or scale risk.</p>
+          </article>
+          <article class="step">
+            <span class="n">3</span>
+            <h3>Rebalance only when needed</h3>
+            <p>No all-day chart monitoring. Act only when the signal changes.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>Proof & Track Record (Reference)</h2>
+        <p class="sub">Historical strategy evidence and live verification are shown for transparency, not as a profit guarantee.</p>
+        <div class="proof-kpis">
+          <div class="kpi"><div class="v">15.17x</div><div class="k">Final Equity (reference)</div></div>
+          <div class="kpi"><div class="v">41.02%</div><div class="k">CAGR (reference)</div></div>
+          <div class="kpi"><div class="v">-19.79%</div><div class="k">Max Drawdown (reference)</div></div>
+          <div class="kpi"><div class="v">11.80%</div><div class="k">Avg Exposure (reference)</div></div>
+        </div>
+        <p class="fine">No guaranteed returns. Not investment advice. Use with your own risk controls.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>Pricing & Access</h2>
+        <div class="price-box">
+          <div>
+            <p class="price">US$329<span style="font-size:.42em;font-weight:700"> / month</span></p>
+            <p class="sub" style="margin-top:8px">Built for serious BTC spot holders who value capital protection and execution clarity.</p>
           </div>
-          <div class="btns">
-            <button class="btn primary" type="submit">Join the beta waitlist</button>
+          <ul class="list">
+            <li>No discounts.</li>
+            <li>Initial capacity: 10 seats.</li>
+            <li>Current phase: waitlist during 60-day live verification.</li>
+            <li>Paid access opens immediately after verification is complete.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap card">
+        <h2>FAQ</h2>
+        <div class="faq">
+          <details>
+            <summary>What is the BTC Risk Signal?</summary>
+            <p>A rules-based daily posture that indicates whether to stay defensive or maintain BTC exposure based on market structure.</p>
+          </details>
+          <details>
+            <summary>Who is this for?</summary>
+            <p>BTC spot holders who prioritize drawdown control and want a concise daily risk decision workflow.</p>
+          </details>
+          <details>
+            <summary>What exactly do I get?</summary>
+            <p>Daily signal report, exact allocation line, target risk ratio, and archive-level visibility not shown in the free dashboard.</p>
+          </details>
+          <details>
+            <summary>How often are signals updated?</summary>
+            <p>Once daily at 21:00 JST, with synchronization and proof checks.</p>
+          </details>
+          <details>
+            <summary>What happens if market data is unstable?</summary>
+            <p>The system defaults to safety behavior and communicates that state explicitly rather than forcing risk-on decisions.</p>
+          </details>
+          <details>
+            <summary>Is this financial advice?</summary>
+            <p>No. This is an informational risk-management signal service. You remain responsible for all execution decisions.</p>
+          </details>
+          <details>
+            <summary>Can I cancel anytime?</summary>
+            <p>Paid phase policy is monthly cancel-anytime. During current waitlist phase, no payment is collected.</p>
+          </details>
+          <details>
+            <summary>When does paid access begin?</summary>
+            <p>After the 60-day live verification period is completed and cohort access opens.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap waitlist-card" id="waitlist-form">
+        <h2>Join the Beta Cohort Waitlist</h2>
+        <p class="sub">Get first access when verification closes. We will notify waitlist members before public opening.</p>
+        <form class="waitlist-form" action="#" method="post" onsubmit="return false;">
+          <label>Email (required)
+            <input type="email" required placeholder="you@example.com" />
+          </label>
+          <label>Name (optional)
+            <input type="text" placeholder="Your name" />
+          </label>
+          <label class="full">What best describes your use case? (optional)
+            <input type="text" placeholder="Treasury / Personal holdings / Managed account" />
+          </label>
+          <div class="full cta-row" style="margin-top:2px">
+            <a class="btn primary" href="#" aria-label="Join waitlist">Join the Waitlist</a>
+            <a class="btn secondary" href="#" aria-label="Future checkout placeholder">Future checkout (placeholder)</a>
           </div>
-          <div class="status" data-status></div>
         </form>
-        <p class="small"><a href="#" data-export-leads>Export leads (JSON)</a></p>
-        <div class="btns" data-intro-call style="display:none;">
-          <a class="btn secondary" href="#">Complete 3-min Intake (text)</a>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>Beta Cohort</h2>
-        <p class="small">Cohort size: 10 seats.</p>
-        <p class="small">Start: after 60 days of live tracking (Day 61).</p>
-        <p class="small">Eligibility: waitlist + one 3-min intake (text).</p>
-        <p class="small">What you get: weekly summary updates + deck + sample trade log.</p>
-        <p class="small">No payment during beta.</p>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>Post-Beta Plan</h2>
-        <p class="small">Monthly subscription: US$329</p>
-        <p class="small">Seats: limited (initial 10)</p>
-        <p class="small">Activation: considered after verified 60-day live track</p>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>Revenue Target</h2>
-        <p class="small">Planning target: ¥600,000/month</p>
-        <p class="small">Reference price: ¥49,800/month (US$329)</p>
-        <p class="small">Reference needed: 13 subscribers (≈¥647,400/month), post-verification only</p>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>Cost stress test (Round-trip friction)</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Round-trip Cost</th>
-                <th>Final Equity</th>
-                <th>CAGR</th>
-                <th>Max Drawdown</th>
-                <th>Trades</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>0.24%</td><td>15.1732</td><td>41.02%</td><td>-19.79%</td><td>360</td></tr>
-              <tr><td>0.50%</td><td>13.4311</td><td>38.86%</td><td>-19.82%</td><td>362</td></tr>
-              <tr><td>0.60%</td><td>12.8149</td><td>38.04%</td><td>-19.83%</td><td>367</td></tr>
-              <tr><td>0.80%</td><td>11.6649</td><td>36.41%</td><td>-19.86%</td><td>375</td></tr>
-              <tr><td>1.00%</td><td>10.6167</td><td>34.79%</td><td>-19.89%</td><td>378</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap cta">
-        <h2>Built for allocators who care about survival and compounding</h2>
-        <p>
-          If you are evaluating defensive BTC overlays for a managed account, treasury sleeve, or quant subscription product,
-          MarketEdge provides transparent logic, reproducible evidence, and implementation-ready controls.
-        </p>
-        <p class="small">Additional resources</p>
-        <div class="btns">
-          <a class="btn secondary" href="#">Join the beta waitlist</a>
-          <a class="btn secondary" href="#">Join the beta waitlist</a>
-        </div>
-      </div>
-      <div class="wrap small">
-        Backtest KPI publication is paused until full re-validation with current execution code is complete. Historical performance does not guarantee future results.
+        <p class="fine">Current CTA mode: waitlist. Future paid checkout link is intentionally disabled in this phase.</p>
       </div>
     </section>
   </main>
-  <script>
-    (function () {
-      var forms = document.querySelectorAll('.deck-form');
-      var isJa = (document.documentElement.lang || '').toLowerCase().startsWith('ja');
-      var pageLang = isJa ? 'ja' : 'en';
-      var successMsg = isJa
-        ? '登録しました。60日間の実運用ログが揃い次第、β招待を送ります。'
-        : 'You’re on the list. We’ll invite the first cohort after 60 days of live tracking.';
-      var savedLocalMsg = isJa ? 'ローカル保存のみ完了（サーバー未接続）' : 'Saved locally (server unavailable).';
-      var invalidMsg = isJa ? '有効なメールアドレスを入力してください。' : 'Please enter a valid email address.';
-      var exportOkMsg = isJa ? 'エクスポートしました。' : 'Exported.';
-      var exportErrMsg = isJa ? 'エクスポートに失敗しました。' : 'Export failed.';
-      var betaUnlocked = localStorage.getItem('beta_unlocked') === '1';
 
-      function setLiveMeta() {
-        var startEl = document.querySelector('[data-live-start]');
-        var dayEl = document.querySelector('[data-live-day]');
-        var updateEl = document.querySelector('[data-live-updated]');
-        if (!startEl || !dayEl || !updateEl) return;
-        var start = new Date(String(startEl.textContent || '').trim());
-        var now = new Date();
-        var diffDays = Math.floor((now.getTime() - start.getTime()) / 86400000) + 1;
-        dayEl.textContent = String(Math.max(1, diffDays));
-        updateEl.textContent = now.toISOString();
-      }
-
-      function applyUnlock() {
-        if (!betaUnlocked) return;
-        document.querySelectorAll('[data-allocation].blurred').forEach(function (el) {
-          el.classList.remove('blurred');
-        });
-      }
-
-      function isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      }
-
-      function readLeads() {
-        var raw = localStorage.getItem('marketedge_leads');
-        if (!raw) return [];
-        try {
-          var parsed = JSON.parse(raw);
-          return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-          return [];
-        }
-      }
-
-      function saveLeadServer(lead) {
-        return fetch('/api/lead', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(lead)
-        }).then(function (r) { return r.ok; }).catch(function () { return false; });
-      }
-
-      function loadLatestWeeklySummary() {
-        var out = document.querySelector('[data-latest-weekly]');
-        if (!out) return;
-        function pickDate(x) {
-          return String((x && (x.date_utc || x.date)) || '');
-        }
-        fetch('/log.json?ts=' + Date.now())
-          .then(function (r) { return r.json(); })
-          .then(function (data) {
-            var entries = Array.isArray(data.entries) ? data.entries.slice() : [];
-            if (!entries.length) {
-              out.textContent = isJa ? 'まだ生成されていません' : 'Not generated yet.';
-              return;
-            }
-            entries.sort(function (a, b) { return pickDate(a).localeCompare(pickDate(b)); });
-            var items = entries.slice(-7);
-            var first = pickDate(items[0]);
-            var last = pickDate(items[items.length - 1]);
-            var changes = 0;
-            for (var i = 1; i < items.length; i++) {
-              if (String(items[i].allocation) !== String(items[i - 1].allocation)) changes++;
-            }
-            var currentAlloc = items[items.length - 1].allocation;
-            var notes = items
-              .filter(function (x) { return String(x.notes || '').trim(); })
-              .map(function (x) { return '- ' + pickDate(x) + ': ' + String(x.notes || '').trim(); });
-
-            var lines = isJa
-              ? [
-                  'Weekly Summary',
-                  '対象期間 (UTC): ' + first + ' -> ' + last,
-                  'アロケーション変更回数: ' + changes,
-                  '現在アロケーション: ' + (currentAlloc != null ? currentAlloc : 'N/A'),
-                  'Notes:',
-                  notes.length ? notes.join('\n') : '- なし'
-                ]
-              : [
-                  'Weekly Summary',
-                  'Covered dates (UTC): ' + first + ' -> ' + last,
-                  'Allocation changes count: ' + changes,
-                  'Current allocation: ' + (currentAlloc != null ? currentAlloc : 'N/A'),
-                  'Notes:',
-                  notes.length ? notes.join('\n') : '- None'
-                ];
-            out.textContent = lines.join('\n');
-          })
-          .catch(function () {
-            out.textContent = isJa ? '読み込みに失敗しました' : 'Unable to load summary.';
-          });
-      }
-
-      setLiveMeta();
-      applyUnlock();
-      loadLatestWeeklySummary();
-
-      forms.forEach(function (form) {
-        if (form.dataset.bound === '1') return;
-        form.dataset.bound = '1';
-
-        form.addEventListener('submit', function (e) {
-          e.preventDefault();
-          var fd = new FormData(form);
-          var email = String(fd.get('email') || '').trim();
-          var name = String(fd.get('name') || '').trim();
-          var useCase = String(fd.get('use_case') || '').trim();
-          var status = form.querySelector('[data-status]');
-          var call = form.parentElement.querySelector('[data-intro-call]');
-
-          if (!email || !isValidEmail(email)) {
-            if (status) status.textContent = invalidMsg;
-            if (call) call.style.display = 'none';
-            setTimeout(function () {
-              if (status) status.textContent = '';
-            }, 3000);
-            return;
-          }
-
-          var lead = {
-            timestamp_utc: new Date().toISOString(),
-            email: email,
-            name: name,
-            use_case: useCase,
-            page_lang: pageLang
-          };
-          var leads = readLeads();
-          leads.push(lead);
-          localStorage.setItem('marketedge_leads', JSON.stringify(leads));
-          localStorage.setItem('beta_unlocked', '1');
-          betaUnlocked = true;
-          applyUnlock();
-
-          saveLeadServer(lead).then(function (ok) {
-            if (status) status.textContent = ok ? successMsg : savedLocalMsg;
-            setTimeout(function () {
-              if (status) status.textContent = '';
-            }, 3000);
-          });
-          if (call) call.style.display = 'block';
-        });
-
-        var exportLink = form.parentElement.querySelector('[data-export-leads]');
-        if (exportLink && exportLink.dataset.bound !== '1') {
-          exportLink.dataset.bound = '1';
-          exportLink.addEventListener('click', function (e) {
-            e.preventDefault();
-            var status = form.querySelector('[data-status]');
-            var payload = localStorage.getItem('marketedge_leads') || '[]';
-
-            function done(ok) {
-              if (status) status.textContent = ok ? exportOkMsg : exportErrMsg;
-              setTimeout(function () {
-                if (status) status.textContent = '';
-              }, 3000);
-            }
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(payload).then(
-                function () { done(true); },
-                function () { done(false); }
-              );
-              return;
-            }
-
-            try {
-              var ta = document.createElement('textarea');
-              ta.value = payload;
-              ta.style.position = 'fixed';
-              ta.style.opacity = '0';
-              document.body.appendChild(ta);
-              ta.focus();
-              ta.select();
-              var ok = document.execCommand('copy');
-              document.body.removeChild(ta);
-              done(ok);
-            } catch (err) {
-              done(false);
-            }
-          });
-        }
-      });
-    })();
-  </script>
+  <footer>
+    Capital protection signal service for BTC spot holders. Historical metrics are reference only and do not guarantee future performance.
+  </footer>
 </body>
 </html>
