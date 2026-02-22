@@ -183,6 +183,12 @@
     "target_btc_ratio": 0.0,
     "timestamp_utc": "2026-02-21T15:04:29Z",
     "trigger": "Bearish structure or price < MA100",
-    "updated_at_utc": "2026-02-21T15:04:29Z"
-  }
+    "updated_at_utc": "2026-02-21T15:04:29Z",
+    "base_equity": 100.19,
+    "initial_capital": 100.19,
+    "start_date_utc": "2026-02-22",
+    "pnl_percent": 0.0
+  },
+  "base_equity": 100.19,
+  "start_date_utc": "2026-02-22"
 }
