@@ -407,7 +407,7 @@
           <p class="sub" style="margin:0">BTC現物保有者向けの防御的アロケーションエンジンです。裁量判断や煽りはなく、常時チャート監視も不要です。</p>
           <div class="signal-preview" aria-label="無料版と有料版の比較 preview">
             <div><strong>無料版:</strong> 安全状態のみ表示（例: <span class="warn">Wait / Safety Hold</span>）</div>
-            <div><strong>有料版:</strong> 実行用の正確な配分ライン（例: <span class="good">BTC 11.8% / 現金 88.2%</span>）</div>
+            <div><strong>有料版:</strong> ルール化された配分バンド（例: <span class="good">BTC 0% / 30% / 70% / 100%</span>）</div>
           </div>
           <div class="cta-row">
             <a class="btn primary" href="#waitlist">βコホートのウェイトリストに参加</a>
@@ -418,7 +418,7 @@
           <p class="mini-title">対象ユーザー</p>
           <ul class="list" style="padding-left:16px">
             <li>煽りよりドローダウン管理を優先するBTC現物保有者。</li>
-            <li>毎日21:00 JSTに短いリスク判断を受け取りたい経営者・意思決定者。</li>
+            <li>毎日12:00 UTCに短いリスク判断を受け取りたい経営者・意思決定者。</li>
             <li>明確さ・規律・再現性に対価を払うユーザー。</li>
           </ul>
         </article>
@@ -432,9 +432,9 @@
         <h2>有料版で解放される内容</h2>
         <p class="sub">無料版で意図的に隠している「実行レイヤー」を有料版で開示します。</p>
         <div class="unlock-grid">
-          <div class="unlock-item"><strong>正確な配分比率（%）</strong>その日のBTC/現金配分を具体数値で表示（抽象ラベルのみではありません）。</div>
-          <div class="unlock-item"><strong>ターゲット・リスク比率</strong>実行判断に使うポジションサイズの基準値。</div>
-          <div class="unlock-item"><strong>毎日配信（21:00 JST）</strong>その日の実行姿勢を短いメールで配信。</div>
+          <div class="unlock-item"><strong>ルール化された配分バンド</strong>4段階の固定レベル（BTC 0% / 30% / 70% / 100%）を明示します。</div>
+          <div class="unlock-item"><strong>実行用の配分コンテキスト</strong>当日の固定レベルに基づく実行文脈を提示します。</div>
+          <div class="unlock-item"><strong>毎日配信（12:00 UTC）</strong>その日の実行姿勢を短いメールで配信。</div>
           <div class="unlock-item"><strong>完全な判断履歴アーカイブ</strong>配分付き履歴ログで一貫性を確認可能。</div>
           <div class="unlock-item"><strong>同期・実行準備ステータス</strong>今アクション可能か、安全待機すべきかを明示。</div>
           <div class="unlock-item"><strong>証跡ベースの運用</strong>ハッシュ連鎖の記録を可視化し透明性を維持。</div>
@@ -451,24 +451,24 @@
               <tr><th>項目</th><th>無料ダッシュボード</th><th>有料アクセス</th></tr>
             </thead>
             <tbody>
-              <tr><td>ポジション配分</td><td>非表示 / 要約のみ</td><td>BTC% / 現金% を数値表示</td></tr>
-              <tr><td>ターゲット・リスク比率</td><td>非表示</td><td>毎日表示</td></tr>
+              <tr><td>ポジション配分</td><td>非表示 / 要約のみ</td><td>ルール化バンド（0% / 30% / 70% / 100%）</td></tr>
+              <tr><td>ターゲット配分バンド</td><td>非表示</td><td>毎日表示（4段階固定）</td></tr>
               <tr><td>本日のシグナル</td><td>状態ラベルのみ（Wait/Defensiveなど）</td><td>状態 + 配分ライン</td></tr>
               <tr><td>直近の判断履歴</td><td>状態テキスト</td><td>状態 + 配分コンテキスト</td></tr>
               <tr><td>データ同期 / 実行可否</td><td>要約</td><td>実行可否の解釈付き</td></tr>
-              <tr><td>配信方法</td><td>公開ダッシュボード閲覧</td><td>日次メール（21:00 JST）</td></tr>
+              <tr><td>配信方法</td><td>公開ダッシュボード閲覧</td><td>日次メール（12:00 UTC）</td></tr>
               <tr><td>履歴アーカイブ</td><td>限定的な透明性レイヤー</td><td>実務向け完全アーカイブ</td></tr>
               <tr><td>改ざん防止の証跡</td><td>Visible</td><td>表示あり（同一の証跡基盤）</td></tr>
             </tbody>
           </table>
         </div>
         <div class="compare-cards" aria-label="無料版と有料版の比較 mobile comparison">
-          <article class="compare-card"><p class="item">ポジション配分</p><p class="row"><strong>Free:</strong>非表示 / 要約のみ</p><p class="row"><strong>Premium:</strong>BTC% / 現金% を数値表示</p></article>
-          <article class="compare-card"><p class="item">ターゲット・リスク比率</p><p class="row"><strong>Free:</strong>非表示</p><p class="row"><strong>Premium:</strong>毎日表示</p></article>
+          <article class="compare-card"><p class="item">ポジション配分</p><p class="row"><strong>Free:</strong>非表示 / 要約のみ</p><p class="row"><strong>Premium:</strong>ルール化バンド（0% / 30% / 70% / 100%）</p></article>
+          <article class="compare-card"><p class="item">ターゲット配分バンド</p><p class="row"><strong>Free:</strong>非表示</p><p class="row"><strong>Premium:</strong>毎日表示（4段階固定）</p></article>
           <article class="compare-card"><p class="item">本日のシグナル</p><p class="row"><strong>Free:</strong>状態ラベルのみ（Wait/Defensiveなど）</p><p class="row"><strong>Premium:</strong>状態 + 配分ライン</p></article>
           <article class="compare-card"><p class="item">直近の判断履歴</p><p class="row"><strong>Free:</strong>状態テキスト</p><p class="row"><strong>Premium:</strong>状態 + 配分コンテキスト</p></article>
           <article class="compare-card"><p class="item">データ同期 / 実行可否</p><p class="row"><strong>Free:</strong>要約</p><p class="row"><strong>Premium:</strong>実行可否の解釈付き</p></article>
-          <article class="compare-card"><p class="item">配信方法</p><p class="row"><strong>Free:</strong>公開ダッシュボード閲覧</p><p class="row"><strong>Premium:</strong>日次メール（21:00 JST）</p></article>
+          <article class="compare-card"><p class="item">配信方法</p><p class="row"><strong>Free:</strong>公開ダッシュボード閲覧</p><p class="row"><strong>Premium:</strong>日次メール（12:00 UTC）</p></article>
           <article class="compare-card"><p class="item">履歴アーカイブ</p><p class="row"><strong>Free:</strong>限定的な透明性レイヤー</p><p class="row"><strong>Premium:</strong>実務向け完全アーカイブ</p></article>
           <article class="compare-card"><p class="item">改ざん防止の証跡</p><p class="row"><strong>Free:</strong>Visible</p><p class="row"><strong>Premium:</strong>表示あり（同一の証跡基盤）</p></article>
         </div>
@@ -483,7 +483,7 @@
           <article class="step">
             <span class="n">1</span>
             <h3>本日のレポートを受け取る</h3>
-            <p>毎日21:00 JSTに、リスク姿勢と配分コンテキストを短く受信。</p>
+            <p>毎日12:00 UTCに、リスク姿勢と配分コンテキストを短く受信。</p>
           </article>
           <article class="step">
             <span class="n">2</span>
@@ -510,6 +510,7 @@
           <div class="kpi"><div class="v">11.80%</div><div class="k">平均エクスポージャー（参考）</div></div>
         </div>
         <p class="fine">将来収益は保証されません。投資助言ではありません。最終判断はご自身で行ってください。</p>
+        <p class="fine" style="margin-top:8px"><a href="https://naito-dev.github.io/genki-btc-archive-public/" style="color:var(--muted)">公開検証ダッシュボードを見る</a> • <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" style="color:var(--muted)">公開証跡（log.json）を見る</a></p>
       </div>
     </section>
 
@@ -537,7 +538,7 @@
         <div class="faq">
           <details>
             <summary>BTCリスクシグナルとは？</summary>
-            <p>資産防衛を目的に、ルールベースの姿勢・配分ガイダンス・実行ラインを日次で示すレポートです。</p>
+            <p>BTC現物保有者向けに、市場構造に基づいて守り優先か保有継続かを示すルールベースの日次レポートです。目的は資産防衛と判断の明確化であり、常時トレードではありません。</p>
           </details>
           <details>
             <summary>どんな人向けですか？</summary>
@@ -545,11 +546,11 @@
           </details>
           <details>
             <summary>具体的に何が届きますか？</summary>
-            <p>現在のシグナル状態、正確な配分ライン、ターゲット比率、無料版では見えない履歴レベルの情報を含む短い日次メールです。</p>
+            <p>現在のシグナル状態、ルール化された配分レベル（4段階固定）、実行コンテキスト、無料版では見えない履歴情報を含む短い日次メールです。</p>
           </details>
           <details>
             <summary>更新頻度は？</summary>
-            <p>毎日21:00 JSTに1回更新。同期と証跡チェックを実施します。</p>
+            <p>毎日12:00 UTC（21:00 JST）に1回更新。同期と証跡チェックを実施します。</p>
           </details>
           <details>
             <summary>市場データが不安定なときは？</summary>
