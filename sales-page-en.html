@@ -586,31 +586,44 @@
       async function submitJson(endpoint, payload) {
         const res = await fetch(endpoint, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          // text/plain keeps this as a simple request (no preflight),
+          // while Apps Script can still parse postData.contents as JSON.
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
         const bodyText = await res.text();
         let bodyJson = null;
         try { bodyJson = JSON.parse(bodyText); } catch (_) {}
-        const appOk = !!(bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true));
+        const appOk = !!(
+          (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
+          /\"ok\"\\s*:\\s*true/i.test(bodyText) ||
+          /\bok\b/i.test(bodyText)
+        );
         const accepted = res.ok && (appOk || !bodyJson);
         return { accepted, status: res.status, body: bodyJson || bodyText };
       }
 
-      async function submitFormNoCors(endpoint, payload) {
+      async function submitFormUrlEncoded(endpoint, payload) {
         const params = new URLSearchParams();
         Object.keys(payload).forEach(function (k) {
           const v = payload[k];
           if (v !== null && v !== undefined) params.append(k, String(v));
         });
-        await fetch(endpoint, {
+        const res = await fetch(endpoint, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-          body: params.toString(),
-          keepalive: true
+          body: params.toString()
         });
-        return { accepted: true, status: 0, body: 'opaque(no-cors)' };
+        const bodyText = await res.text();
+        let bodyJson = null;
+        try { bodyJson = JSON.parse(bodyText); } catch (_) {}
+        const appOk = !!(
+          (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
+          /\"ok\"\\s*:\\s*true/i.test(bodyText) ||
+          /\bok\b/i.test(bodyText)
+        );
+        const accepted = res.ok && (appOk || !bodyJson);
+        return { accepted, status: res.status, body: bodyJson || bodyText };
       }
 
       submitBtn.addEventListener('click', async function () {
@@ -649,8 +662,9 @@
             result = await submitJson(WAITLIST_ENDPOINT, payload);
             if (!result.accepted) throw new Error('submit_not_accepted_json');
           } catch (primaryErr) {
-            mode = 'no-cors-form';
-            result = await submitFormNoCors(WAITLIST_ENDPOINT, payload);
+            mode = 'form-urlencoded';
+            result = await submitFormUrlEncoded(WAITLIST_ENDPOINT, payload);
+            if (!result.accepted) throw new Error('submit_not_accepted_form');
           }
 
           console.debug('[WAITLIST_SUBMIT]', {
