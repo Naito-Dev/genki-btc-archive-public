@@ -630,10 +630,28 @@
       return latestDate || null;
     }
 
-    function resolvePnlPercent(log, latest) {
+    function resolveLiveEquityDetails(log, latest) {
+      const keys = ["equity_usd", "equity", "portfolio_value", "total_equity_usd"];
+      for (const k of keys) {
+        const n = parseFiniteNumber(latest?.[k]);
+        if (n !== null) return { value: n, source: `latest.${k}` };
+      }
+
+      const entries = Array.isArray(log?.entries) ? [...log.entries] : [];
+      entries.sort((a, b) => dateSortValue(getEntryDate(b)) - dateSortValue(getEntryDate(a)));
+      for (const e of entries) {
+        for (const k of keys) {
+          const n = parseFiniteNumber(e?.[k]);
+          if (n !== null) return { value: n, source: `entries[].${k}` };
+        }
+      }
+      return { value: null, source: "none" };
+    }
+
+    function resolvePnlPercent(log, latest, equityFallback = null) {
       const p = parseFiniteNumber(latest?.pnl_percent);
       if (p !== null) return p;
-      const eq = parseFiniteNumber(latest?.equity_usd);
+      const eq = parseFiniteNumber(equityFallback ?? latest?.equity_usd);
       const base = parseFiniteNumber(getBaseEquity(log));
       if (eq !== null && base !== null && base > 0) {
         return ((eq - base) / base) * 100;
@@ -758,7 +776,8 @@
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(latest?.btc_price)}`;
       document.getElementById("metaUpdated").textContent = `Updated ${latest?.updated_at_utc || "-"}`;
 
-      const equity = parseFiniteNumber(latest?.equity_usd);
+      const liveEquity = resolveLiveEquityDetails(log, latest);
+      const equity = parseFiniteNumber(liveEquity.value);
       document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
       const sinceStart = getSinceTestStart(log);
       const sinceStartEl = document.getElementById("sinceStart");
@@ -770,7 +789,7 @@
         sinceStartEl.style.display = "none";
       }
 
-      const pnl = resolvePnlPercent(log, latest);
+      const pnl = resolvePnlPercent(log, latest, equity);
       const pnlEl = document.getElementById("pnlPct");
       const pnlNoteEl = document.getElementById("pnlNote");
       const baseDetails = getBaseEquityDetails(log);
@@ -781,6 +800,8 @@
       console.debug("[LIVE_TESTING_PNL]", {
         pnl_percent: latest?.pnl_percent,
         equity_usd: latest?.equity_usd,
+        live_equity_source: liveEquity.source,
+        live_equity_value: equity,
         base_equity: resolvedBaseEquity,
         base_source: baseDetails.source,
         computedPnl
