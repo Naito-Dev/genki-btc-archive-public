@@ -81,15 +81,19 @@
       border-radius: 0;
       padding: 4px 0 0;
       background: transparent;
+      margin-left: auto;
+      max-width: 72%;
+      text-align: right;
     }
     .equity-value {
-      font-size: clamp(50px, 12.4vw, 74px);
+      font-size: clamp(42px, 10.5vw, 62px);
       line-height: 1;
       font-weight: 600;
       letter-spacing: -0.035em;
       margin: 0 0 6px;
       color: #f3f6ff;
-      text-align: left;
+      text-align: right;
+      opacity: 0.92;
     }
     .equity-pct {
       font-size: clamp(18px, 4.6vw, 26px);
@@ -152,6 +156,19 @@
       opacity: 1;
       text-align: left;
       color: #f1f5ff;
+    }
+    .equity-box .status-detail.compact {
+      text-align: right;
+      opacity: 0.9;
+      font-size: 12px;
+    }
+    .equity-box .equity-label {
+      text-align: right;
+      font-size: 24px;
+      opacity: 0.82;
+    }
+    .equity-box .equity-line {
+      justify-content: flex-end;
     }
     .cta {
       display: inline-flex;
