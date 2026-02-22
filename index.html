@@ -490,8 +490,8 @@
           </div>
           <div class="audit-section">
             <div class="audit-title">Current Risk Exposure</div>
-            <div class="audit-row"><div class="k">Exposure</div><div id="auditAlloc">-</div></div>
-            <div class="audit-row"><div class="k">Target Exposure</div><div id="auditTarget">-</div></div>
+            <div class="audit-row"><div class="k">Position Status</div><div id="auditAlloc">-</div></div>
+            <div class="audit-row"><div class="k">Risk Posture</div><div id="auditTarget">-</div></div>
             <div class="audit-row"><div class="k">Status</div><div id="auditStatus">-</div></div>
             <div class="audit-row"><div class="k">Data Sync</div><div id="auditSnapshot">-</div></div>
           </div>
@@ -645,22 +645,45 @@
       return `${pct.toFixed(0)}%`;
     }
 
+    function getEntryDate(e) {
+      return toDateOnly(e?.date_utc) || toDateOnly(e?.date) || null;
+    }
+
+    function dateSortValue(yyyyMmDd) {
+      if (!yyyyMmDd) return -Infinity;
+      const t = Date.parse(`${yyyyMmDd}T00:00:00Z`);
+      return Number.isFinite(t) ? t : -Infinity;
+    }
+
     function renderAudit(log, latest) {
       document.getElementById("auditChainStatus").textContent = mapStatusDisplay(latest?.chain_integrity, "integrity");
       document.getElementById("auditLogicVersion").textContent = latest?.logic_version ?? "Unavailable";
-      document.getElementById("auditAlloc").textContent = formatExposure(latest?.allocation);
-      document.getElementById("auditTarget").textContent = formatTargetExposure(latest?.target_btc_ratio);
+      document.getElementById("auditAlloc").textContent = "Subscriber-only";
+      document.getElementById("auditTarget").textContent = "Capital Protection Active";
       document.getElementById("auditStatus").textContent = mapStatusDisplay(latest?.status, "status");
       document.getElementById("auditSnapshot").textContent = mapStatusDisplay(latest?.snapshot_status, "sync");
 
-      const entries = Array.isArray(log?.entries) ? log.entries.slice(-3).reverse() : [];
+      const entryList = Array.isArray(log?.entries) ? log.entries : [];
+      const merged = [{ ...latest }, ...entryList];
+      const withDate = merged
+        .map((e) => ({ e, d: getEntryDate(e) }))
+        .filter((x) => !!x.d)
+        .sort((a, b) => dateSortValue(b.d) - dateSortValue(a.d));
+      const seen = new Set();
+      const entries = [];
+      for (const item of withDate) {
+        const key = item.d;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        entries.push(item.e);
+        if (entries.length >= 3) break;
+      }
       const list = document.getElementById("auditRecentList");
       list.innerHTML = entries.length
         ? entries.map((e) => {
-            const d = e?.date ?? "Unavailable";
+            const d = getEntryDate(e) || "Unavailable";
             const s = mapStatusDisplay(e?.status, "status");
-            const ex = formatExposure(e?.allocation);
-            return `<li>${d} | ${s} | Exposure: ${ex}</li>`;
+            return `<li>${d} | ${s} | Allocation hidden</li>`;
           }).join("")
         : "<li>Unavailable</li>";
 
