@@ -175,6 +175,34 @@
       font-size: 14px;
     }
     th { color: var(--muted); font-weight: 700; }
+    .compare-cards {
+      display: none;
+      gap: 10px;
+      margin-top: 2px;
+    }
+    .compare-card {
+      border: 1px solid rgba(122,159,225,.2);
+      border-radius: 12px;
+      background: rgba(8, 18, 36, 0.58);
+      padding: 12px;
+    }
+    .compare-card .item {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: .01em;
+    }
+    .compare-card .row {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .compare-card .row strong {
+      color: var(--text);
+      font-weight: 700;
+      margin-right: 6px;
+    }
     .good { color: var(--green); }
     .warn { color: var(--red); }
     .steps {
@@ -317,6 +345,10 @@
       .unlock-grid { grid-template-columns: 1fr; }
       .waitlist-form { grid-template-columns: 1fr; }
     }
+    @media (max-width: 760px) {
+      .table-wrap { display: none; }
+      .compare-cards { display: grid; }
+    }
   </style>
 </head>
 <body>
@@ -336,7 +368,7 @@
             <div><strong>Premium:</strong> Exact execution line (e.g. <span class="good">11.8% BTC / 88.2% Cash</span>)</div>
           </div>
           <div class="cta-row">
-            <a class="btn primary" href="#waitlist-form">Join the Waitlist</a>
+            <a class="btn primary" href="#waitlist-form">Join the Beta Cohort Waitlist</a>
             <a class="btn secondary" href="/">View Public Dashboard</a>
           </div>
         </article>
@@ -387,6 +419,16 @@
               <tr><td>Proof of Integrity</td><td>Visible</td><td>Visible (same proof spine)</td></tr>
             </tbody>
           </table>
+        </div>
+        <div class="compare-cards" aria-label="Free vs Premium mobile comparison">
+          <article class="compare-card"><p class="item">Position Allocation</p><p class="row"><strong>Free:</strong>Hidden / summary only</p><p class="row"><strong>Premium:</strong>Exact BTC % and Cash %</p></article>
+          <article class="compare-card"><p class="item">Target Risk Ratio</p><p class="row"><strong>Free:</strong>Hidden</p><p class="row"><strong>Premium:</strong>Visible daily</p></article>
+          <article class="compare-card"><p class="item">Today’s Signal</p><p class="row"><strong>Free:</strong>State only (Wait/Defensive/etc.)</p><p class="row"><strong>Premium:</strong>State + allocation line</p></article>
+          <article class="compare-card"><p class="item">Recent Decisions</p><p class="row"><strong>Free:</strong>Status text</p><p class="row"><strong>Premium:</strong>Status + allocation context</p></article>
+          <article class="compare-card"><p class="item">Data Sync / Readiness</p><p class="row"><strong>Free:</strong>Summary</p><p class="row"><strong>Premium:</strong>Action-ready interpretation</p></article>
+          <article class="compare-card"><p class="item">Delivery Method</p><p class="row"><strong>Free:</strong>Public dashboard check</p><p class="row"><strong>Premium:</strong>Daily email (21:00 JST)</p></article>
+          <article class="compare-card"><p class="item">Historical Archive</p><p class="row"><strong>Free:</strong>Limited transparency layer</p><p class="row"><strong>Premium:</strong>Full practical archive</p></article>
+          <article class="compare-card"><p class="item">Proof of Integrity</p><p class="row"><strong>Free:</strong>Visible</p><p class="row"><strong>Premium:</strong>Visible (same proof spine)</p></article>
         </div>
       </div>
     </section>
@@ -498,11 +540,8 @@
           <label>Name (optional)
             <input type="text" placeholder="Your name" />
           </label>
-          <label class="full">What best describes your use case? (optional)
-            <input type="text" placeholder="Treasury / Personal holdings / Managed account" />
-          </label>
           <div class="full cta-row" style="margin-top:2px">
-            <a class="btn primary" href="#" aria-label="Join waitlist">Join the Waitlist</a>
+            <a class="btn primary" href="#" aria-label="Join waitlist">Join the Beta Cohort Waitlist</a>
             <a class="btn secondary" href="#" aria-label="Future checkout placeholder">Future checkout (placeholder)</a>
           </div>
         </form>
