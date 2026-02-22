@@ -6,7 +6,7 @@
   <title>Genki BTC Signal | Waitlist</title>
   <!--
     Switch-to-paid checklist (after 60-day live verification):
-    1) Replace waitlist CTA href (#waitlist-form) with checkout URL in BOTH CTA buttons.
+    1) Replace waitlist CTA href (#waitlist) with checkout URL in BOTH CTA buttons.
     2) Update access state text from "Waitlist Open" to "Now Open".
     3) Keep price at US$329/mo (no discounts) and update FAQ "When paid access begins" answer.
     4) Keep proof + live verification sections unchanged for trust continuity.
@@ -29,6 +29,7 @@
       --radius: 18px;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       color: var(--text);
@@ -122,6 +123,12 @@
       font-size: 14px;
       font-weight: 800;
       white-space: nowrap;
+    }
+    .btn[aria-disabled="true"] {
+      pointer-events: none;
+      opacity: .48;
+      cursor: not-allowed;
+      filter: saturate(.7);
     }
     .btn.primary {
       color: #0b1020;
@@ -368,8 +375,8 @@
             <div><strong>Premium:</strong> Exact execution line (e.g. <span class="good">11.8% BTC / 88.2% Cash</span>)</div>
           </div>
           <div class="cta-row">
-            <a class="btn primary" href="#waitlist-form">Join the Beta Cohort Waitlist</a>
-            <a class="btn secondary" href="/">View Public Dashboard</a>
+            <a class="btn primary" href="#waitlist">Join the Beta Cohort Waitlist</a>
+            <a class="btn secondary" href="https://naito-dev.github.io/genki-btc-archive-public/">View Public Dashboard</a>
           </div>
         </article>
         <article class="card">
@@ -495,7 +502,7 @@
         <div class="faq">
           <details>
             <summary>What is the BTC Risk Signal?</summary>
-            <p>A rules-based daily posture that indicates whether to stay defensive or maintain BTC exposure based on market structure.</p>
+            <p>A daily BTC risk-control report with a rules-based posture, allocation guidance, and execution line focused on capital protection.</p>
           </details>
           <details>
             <summary>Who is this for?</summary>
@@ -503,7 +510,7 @@
           </details>
           <details>
             <summary>What exactly do I get?</summary>
-            <p>Daily signal report, exact allocation line, target risk ratio, and archive-level visibility not shown in the free dashboard.</p>
+            <p>A short daily email report with the current signal state, exact allocation line, target risk ratio, and archive-level visibility not shown in the free dashboard.</p>
           </details>
           <details>
             <summary>How often are signals updated?</summary>
@@ -523,27 +530,29 @@
           </details>
           <details>
             <summary>When does paid access begin?</summary>
-            <p>After the 60-day live verification period is completed and cohort access opens.</p>
+            <p>After the 60-day live verification period is completed and cohort access opens. Waitlist members are notified first.</p>
           </details>
         </div>
       </div>
     </section>
 
     <section>
-      <div class="wrap waitlist-card" id="waitlist-form">
+      <div class="wrap waitlist-card" id="waitlist">
         <h2>Join the Beta Cohort Waitlist</h2>
         <p class="sub">Get first access when verification closes. We will notify waitlist members before public opening.</p>
+        <p class="fine" style="margin-top:-4px">“Wait / Defensive / Bullish / Strong Bullish” are state labels. “Safety Hold” explains why the system stays defensive in unstable data conditions.</p>
         <form class="waitlist-form" action="#" method="post" onsubmit="return false;">
           <label>Email (required)
-            <input type="email" required placeholder="you@example.com" />
+            <input id="waitlistEmail" type="email" required placeholder="you@example.com" />
           </label>
           <label>Name (optional)
-            <input type="text" placeholder="Your name" />
+            <input id="waitlistName" type="text" placeholder="Your name" />
           </label>
           <div class="full cta-row" style="margin-top:2px">
-            <a class="btn primary" href="#" aria-label="Join waitlist">Join the Beta Cohort Waitlist</a>
-            <a class="btn secondary" href="#" aria-label="Future checkout placeholder">Future checkout (placeholder)</a>
+            <button id="waitlistSubmitBtn" class="btn primary" type="button" aria-label="Join waitlist">Join the Beta Cohort Waitlist</button>
+            <a class="btn secondary" aria-disabled="true" tabindex="-1" aria-label="Future checkout placeholder">Future checkout (placeholder)</a>
           </div>
+          <p id="waitlistStatus" class="fine" aria-live="polite"></p>
         </form>
         <p class="fine">Current CTA mode: waitlist. Future paid checkout link is intentionally disabled in this phase.</p>
       </div>
@@ -553,5 +562,53 @@
   <footer>
     Capital protection signal service for BTC spot holders. Historical metrics are reference only and do not guarantee future performance.
   </footer>
+  <script>
+    (function () {
+      const form = document.querySelector('.waitlist-form');
+      const emailEl = document.getElementById('waitlistEmail');
+      const nameEl = document.getElementById('waitlistName');
+      const submitBtn = document.getElementById('waitlistSubmitBtn');
+      const statusEl = document.getElementById('waitlistStatus');
+      if (!form || !emailEl || !submitBtn || !statusEl) return;
+
+      function isValidEmail(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
+      }
+
+      function setStatus(msg) {
+        statusEl.textContent = msg || '';
+      }
+
+      submitBtn.addEventListener('click', function () {
+        const email = String(emailEl.value || '').trim();
+        const name = String((nameEl && nameEl.value) || '').trim();
+        if (!isValidEmail(email)) {
+          setStatus('Please enter a valid email address.');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        setStatus('Submitting...');
+        submitBtn.textContent = 'Submitting...';
+
+        try {
+          const key = 'genki_waitlist_leads';
+          const leads = JSON.parse(localStorage.getItem(key) || '[]');
+          leads.push({
+            email: email,
+            name: name || null,
+            source: 'sales-page-en',
+            submitted_at_utc: new Date().toISOString()
+          });
+          localStorage.setItem(key, JSON.stringify(leads));
+          setStatus('You are on the waitlist. We will notify you before public opening.');
+          submitBtn.textContent = 'Submitted';
+        } catch (_) {
+          setStatus('Saved locally. We will notify you before public opening.');
+          submitBtn.textContent = 'Submitted';
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
