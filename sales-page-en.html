@@ -583,6 +583,36 @@
         statusEl.textContent = msg || '';
       }
 
+      async function submitJson(endpoint, payload) {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const bodyText = await res.text();
+        let bodyJson = null;
+        try { bodyJson = JSON.parse(bodyText); } catch (_) {}
+        const appOk = !!(bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true));
+        const accepted = res.ok && (appOk || !bodyJson);
+        return { accepted, status: res.status, body: bodyJson || bodyText };
+      }
+
+      async function submitFormNoCors(endpoint, payload) {
+        const params = new URLSearchParams();
+        Object.keys(payload).forEach(function (k) {
+          const v = payload[k];
+          if (v !== null && v !== undefined) params.append(k, String(v));
+        });
+        await fetch(endpoint, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          body: params.toString(),
+          keepalive: true
+        });
+        return { accepted: true, status: 0, body: 'opaque(no-cors)' };
+      }
+
       submitBtn.addEventListener('click', async function () {
         const email = String(emailEl.value || '').trim();
         const name = String((nameEl && nameEl.value) || '').trim();
@@ -613,28 +643,24 @@
         }
 
         try {
-          const res = await fetch(WAITLIST_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          const bodyText = await res.text();
-          let bodyJson = null;
-          try { bodyJson = JSON.parse(bodyText); } catch (_) {}
-          const appOk = !!(bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true));
-          const accepted = res.ok && (appOk || !bodyJson);
+          let result;
+          let mode = 'json';
+          try {
+            result = await submitJson(WAITLIST_ENDPOINT, payload);
+            if (!result.accepted) throw new Error('submit_not_accepted_json');
+          } catch (primaryErr) {
+            mode = 'no-cors-form';
+            result = await submitFormNoCors(WAITLIST_ENDPOINT, payload);
+          }
 
           console.debug('[WAITLIST_SUBMIT]', {
             endpoint: WAITLIST_ENDPOINT,
-            status: res.status,
-            ok: accepted,
+            mode,
+            status: result.status,
+            ok: result.accepted,
             payload,
-            body: bodyJson || bodyText
+            body: result.body
           });
-
-          if (!accepted) {
-            throw new Error('submit_not_accepted');
-          }
 
           setStatus('You are on the waitlist. We will notify you before public opening.');
           submitBtn.textContent = 'Submitted';
