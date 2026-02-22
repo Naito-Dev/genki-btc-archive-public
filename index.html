@@ -79,6 +79,10 @@
       color: #ff9b68;
       text-shadow: 0 2px 10px rgba(255,133,70,.08);
       text-align: center;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      text-wrap: balance;
     }
     .action-panel__metaDock {
       position: absolute;
@@ -122,13 +126,39 @@
       align-items: end;
     }
     .live-label {
-      margin-bottom: 6px;
       font-size: 11px;
       letter-spacing: .14em;
       font-weight: 800;
       color: rgba(235,242,255,.9);
       white-space: nowrap;
       text-transform: uppercase;
+    }
+    .live-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .live-header__text {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+    .live-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 1px solid rgba(180,210,255,.35);
+      box-shadow: 0 2px 8px rgba(0,0,0,.28);
+      flex: 0 0 auto;
+    }
+    .live-owner {
+      font-size: 11px;
+      line-height: 1.2;
+      color: rgba(214, 227, 255, 0.72);
+      letter-spacing: .02em;
+      white-space: nowrap;
     }
     .live-equity {
       font-size: clamp(28px, 7.2vw, 38px);
@@ -338,7 +368,13 @@
 
       <section class="hero-bottom">
         <div class="hero-bottom__left">
-          <div class="live-label">LIVE TESTING:</div>
+          <div class="live-header">
+            <img src="GenkiBTC.jpeg" alt="Genki" class="live-avatar">
+            <div class="live-header__text">
+              <div class="live-label">LIVE TESTING:</div>
+              <div class="live-owner">Genki test portfolio</div>
+            </div>
+          </div>
           <div id="liveEquity" class="live-equity">-</div>
           <div id="sinceStart" class="since-start">Since test start: -</div>
           <div id="pnlPct" class="pnl-pct" style="display:none"></div>
@@ -399,7 +435,8 @@
       if (typeof v === "string") {
         const t = v.trim();
         if (!t) return null;
-        const n = Number(t);
+        const normalized = t.replace(/[$,%\s]/g, "").replace(/,/g, "");
+        const n = Number(normalized);
         return Number.isFinite(n) ? n : null;
       }
       return null;
