@@ -415,6 +415,25 @@
       font-weight: 700;
       cursor: pointer;
     }
+    .audit-cta-row {
+      margin-top: 10px;
+    }
+    .audit-cta {
+      display: inline-flex;
+      width: 100%;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+      color: rgba(231, 216, 168, .95);
+      background: rgba(216, 178, 74, .12);
+      border: 1px solid rgba(185, 141, 47, .34);
+      box-shadow: inset 0 1px 0 rgba(255, 246, 204, .10);
+      white-space: nowrap;
+    }
 
     @media (max-width: 430px) {
       .page { padding: 12px; }
@@ -505,6 +524,9 @@
             <button id="proofToggleBtn" class="proof-toggle" type="button" onclick="toggleProofDetails()">Show raw proof</button>
             <div id="proofCode" class="proof-code" style="display:none">-</div>
             <button id="copyProofBtn" class="proof-copy" type="button" onclick="copyLatestProof()">Copy Latest Proof</button>
+            <div class="audit-cta-row">
+              <a class="audit-cta" href="sales-page-en.html">Subscribe for full signal access</a>
+            </div>
           </div>
         </div>
       </div>
