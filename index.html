@@ -47,10 +47,11 @@
     .action-panel {
       margin-top: 18px;
       min-height: 290px;
+      position: relative;
       background: linear-gradient(180deg, rgba(14,28,60,.92), rgba(10,22,49,.94));
       border: 1px solid rgba(100,150,240,.22);
       border-radius: 20px;
-      padding: 18px 16px 16px;
+      padding: 18px 16px 96px;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -63,6 +64,12 @@
       color: rgba(236,243,255,.9);
       text-transform: uppercase;
     }
+    .action-panel__body {
+      min-height: 150px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
     .action-panel__signal {
       margin-top: 18px;
       font-size: clamp(56px, 15vw, 84px);
@@ -73,27 +80,36 @@
       text-shadow: 0 2px 10px rgba(255,133,70,.08);
       text-align: center;
     }
-    .action-panel__price {
-      margin-top: 12px;
-      font-size: 14px;
-      line-height: 1.2;
-      font-weight: 800;
-      color: rgba(237, 244, 255, .95);
-      text-align: center;
+    .action-panel__metaDock {
+      position: absolute;
+      right: 16px;
+      bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      max-width: calc(100% - 32px);
+    }
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid rgba(180,210,255,.18);
+      background: rgba(10,17,34,.16);
+      color: rgba(242,246,255,.95);
       white-space: nowrap;
     }
-    .action-panel__updated {
-      margin-top: 6px;
+    .meta-pill--price {
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .meta-pill--updated {
+      padding: 6px 11px;
       font-size: 11px;
-      line-height: 1.2;
-      font-weight: 600;
-      color: rgba(200, 216, 245, .58);
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      overflow-wrap: anywhere;
-      word-break: break-word;
+      font-weight: 700;
+      color: rgba(230,238,255,.78);
     }
     .hero-bottom {
       margin-top: 14px;
@@ -287,9 +303,13 @@
     @media (max-width: 430px) {
       .page { padding: 12px; }
       .hero-card { padding: 18px 14px 14px; }
-      .action-panel { min-height: 260px; padding: 16px 14px 14px; }
+      .action-panel { min-height: 260px; padding: 16px 14px 90px; }
       .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
-      .action-panel__price { font-size: 13px; }
+      .action-panel__metaDock {
+        right: 14px;
+        bottom: 12px;
+        max-width: calc(100% - 28px);
+      }
       .hero-bottom { grid-template-columns: minmax(0,1fr); gap: 8px; padding: 12px 12px 10px; }
       .hero-cta-row { grid-template-columns: 1fr; gap: 0; }
       .hero-cta { width: 100%; }
@@ -307,9 +327,13 @@
 
       <section class="action-panel">
         <div class="action-panel__label">GENKI'S LATEST ACTION</div>
-        <div id="actionSignal" class="action-panel__signal">Waiting</div>
-        <div id="actionPrice" class="action-panel__price">BTC -</div>
-        <div id="actionUpdated" class="action-panel__updated">Updated -</div>
+        <div class="action-panel__body">
+          <div id="actionSignal" class="action-panel__signal">Wait</div>
+        </div>
+        <div class="action-panel__metaDock">
+          <div id="metaPrice" class="meta-pill meta-pill--price">BTC $67,950.98</div>
+          <div id="metaUpdated" class="meta-pill meta-pill--updated">Updated 2026-02-21T15:04:29Z</div>
+        </div>
       </section>
 
       <section class="hero-bottom">
@@ -496,8 +520,8 @@
       const action = actionLabelFromTargetRatio(ratio);
 
       document.getElementById("actionSignal").textContent = action;
-      document.getElementById("actionPrice").textContent = `BTC ${fmtUsd(latest?.btc_price)}`;
-      document.getElementById("actionUpdated").textContent = `Updated ${latest?.updated_at_utc || "-"}`;
+      document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(latest?.btc_price)}`;
+      document.getElementById("metaUpdated").textContent = `Updated ${latest?.updated_at_utc || "-"}`;
 
       const equity = parseFiniteNumber(latest?.equity_usd);
       document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
