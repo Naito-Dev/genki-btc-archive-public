@@ -61,13 +61,19 @@
       opacity: 0.72;
     }
     .equity-label {
-      color: #dce4ff;
+      color: rgba(253, 230, 138, 0.8);
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      font-size: 34px;
+      font-size: 30px;
       margin-bottom: 8px;
       text-align: left;
       font-weight: 700;
+    }
+    .equity-line {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     .equity-box {
       margin-top: 6px;
@@ -77,7 +83,7 @@
       background: transparent;
     }
     .equity-value {
-      font-size: clamp(56px, 13.8vw, 86px);
+      font-size: clamp(50px, 12.4vw, 74px);
       line-height: 1;
       font-weight: 600;
       letter-spacing: -0.035em;
@@ -85,6 +91,15 @@
       color: #f3f6ff;
       text-align: left;
     }
+    .equity-pct {
+      font-size: clamp(18px, 4.6vw, 26px);
+      font-weight: 700;
+      margin: 0;
+      line-height: 1;
+    }
+    .equity-pct.pos { color: var(--ok); }
+    .equity-pct.neg { color: var(--bad); }
+    .equity-pct.neutral { color: var(--muted); }
     .pnl-value {
       font-size: clamp(16px, 3.8vw, 24px);
       color: var(--gold-2);
@@ -347,7 +362,8 @@
       .status-kicker { font-size: 28px; }
       .status-main { font-size: clamp(64px, 21vw, 90px); }
       .equity-label { font-size: 30px; }
-      .equity-value { font-size: clamp(50px, 15vw, 76px); }
+      .equity-value { font-size: clamp(46px, 13.8vw, 68px); }
+      .equity-pct { font-size: clamp(16px, 4.8vw, 22px); }
       .meta-strip { font-size: 16px; }
       .hero-bottom { gap: 10px; }
       .latest-tag { font-size: 13px; }
@@ -365,7 +381,6 @@
   <main class="wrap">
     <section class="hero">
       <h1>BTC Signal</h1>
-      <p class="subtitle">Premium BTC risk-control dashboard with full audit transparency.</p>
 
       <div class="status-wrap">
         <article class="status-card">
@@ -378,14 +393,17 @@
           </div>
           <div class="equity-box">
             <div class="equity-label">Live Testing:</div>
-            <p class="equity-value" data-kpi-equity>$ ---.--</p>
+            <div class="equity-line">
+              <p class="equity-value" data-kpi-equity>$ ---.--</p>
+              <p class="equity-pct neutral" data-kpi-pct>(--.--%)</p>
+            </div>
             <div class="status-detail compact" data-kpi-portfolio>Current allocation: BTC --% / Cash --%</div>
             <p class="pnl-value" data-kpi-pnl>Start baseline pending</p>
             <p class="subtitle" data-phase-note>Live tracking active</p>
           </div>
           <div class="hero-bottom">
             <div class="latest-tag" data-kpi-latest>Latest from --</div>
-            <a class="cta" href="sales-page-en.html">[Get the next BTC signal]</a>
+            <a class="cta" href="sales-page-en.html">Get the next BTC signal</a>
           </div>
         </article>
       </div>
@@ -441,6 +459,7 @@
     (function () {
       var els = {
         equity: document.querySelector('[data-kpi-equity]'),
+        pct: document.querySelector('[data-kpi-pct]'),
         pnl: document.querySelector('[data-kpi-pnl]'),
         phaseNote: document.querySelector('[data-phase-note]'),
         action: document.querySelector('[data-kpi-action]'),
@@ -669,6 +688,20 @@
           els.pnl.textContent = (pnlUsd !== null)
             ? ((pnlUsd >= 0 ? '+' : '') + fmtUsd(pnlUsd).replace('$', '$') + (pnlPct !== null ? (' / ' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%') : ''))
             : ('Status: ' + (latest.status || 'N/A'));
+          var pnlPercent = (typeof latest.pnl_percent === 'number')
+            ? latest.pnl_percent
+            : (pnlPct !== null ? pnlPct : null);
+          if (els.pct) {
+            els.pct.classList.remove('pos', 'neg', 'neutral');
+            if (typeof pnlPercent === 'number') {
+              var sign = pnlPercent >= 0 ? '+' : '';
+              els.pct.textContent = '(' + sign + pnlPercent.toFixed(2) + '%)';
+              els.pct.classList.add(pnlPercent >= 0 ? 'pos' : 'neg');
+            } else {
+              els.pct.textContent = '(--.--%)';
+              els.pct.classList.add('neutral');
+            }
+          }
           if (!eqTrusted) {
             if (fallbackEq && fallbackEq.date) {
               els.phaseNote.textContent = 'Latest verified equity shown from ' + fallbackEq.date + ' UTC';
