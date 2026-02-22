@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Technical Verification Center | Genki BTC</title>
+  <style>
+    :root { --bg:#060b14; --panel:#0f1d35; --line:rgba(122,159,225,.28); --text:#f2f6ff; --muted:#aebddb; --gold:#d8b24a; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter,system-ui,-apple-system,sans-serif; background:linear-gradient(180deg,#05090f,#0a1630); color:var(--text); }
+    .wrap { width:min(900px,92vw); margin:24px auto 40px; }
+    .lang { display:flex; gap:8px; justify-content:flex-end; margin-bottom:12px; }
+    .lang a { color:var(--muted); text-decoration:none; border:1px solid var(--line); border-radius:999px; padding:4px 10px; font-size:12px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:18px; margin-top:10px; }
+    h1,h2 { margin:0 0 10px; }
+    p,li { color:var(--muted); line-height:1.55; }
+    code { color:#f6d57b; }
+    .links a { color:#f6d57b; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="lang">
+      <a href="/genki-btc-archive-public/verification/index.html">EN</a>
+      <a href="/genki-btc-archive-public/verification/index.html#ja">JA</a>
+    </nav>
+
+    <section class="panel">
+      <h1>Technical Verification & Reproducibility Center</h1>
+      <p>This page publishes verification artifacts and reproducibility links while keeping proprietary strategy logic private.</p>
+      <ul>
+        <li>Live dashboard facts are public.</li>
+        <li>Historical metrics are reference-only.</li>
+        <li>Core strategy logic is not publicly disclosed.</li>
+      </ul>
+      <p class="links">
+        <a href="https://naito-dev.github.io/genki-btc-archive-public/">Public Dashboard</a> •
+        <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json">Public proof records (log.json)</a> •
+        <a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.md">Backtest methodology (reference)</a>
+      </p>
+    </section>
+
+    <section class="panel" id="ja">
+      <h2>技術検証・再現性センター（上級者向け）</h2>
+      <p>このページでは、ロジック本体を公開せずに、検証可能性と再現性に必要な公開情報をまとめています。</p>
+      <ul>
+        <li>ライブ運用の事実は公開</li>
+        <li>ヒストリカル指標は参考値として公開</li>
+        <li>戦略ロジック本体（IP）は非公開</li>
+      </ul>
+      <p>必要な再現性資料は順次ここへ追加します。</p>
+    </section>
+  </div>
+</body>
+</html>
