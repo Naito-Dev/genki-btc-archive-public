@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BTC SIGNAL</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
     :root{
@@ -13,9 +13,12 @@
       --text-primary: #f2f5fb;
       --text-secondary: #a8b3cf;
       --wait-color: #e8a15f;
+      --defensive-color: #8ea6d9;
+      --bullish-color: #58c98b;
+      --strong-bullish-color: #2fd58a;
       --wait-glow: rgba(232, 161, 95, 0.16);
-      --cta-bg-top: #f1dd93;
-      --cta-bg-bottom: #e8d27a;
+      --cta-gold: #eab308;
+      --accent-gold: #facc15;
       --cta-text: #141826;
     }
     body {
@@ -45,6 +48,7 @@
       font-weight: 900;
       letter-spacing: .02em;
       color: var(--text-primary);
+      font-family: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
     }
     .hero-subtitle {
       margin: 10px auto 0;
@@ -84,7 +88,7 @@
       margin-top: 18px;
       font-size: clamp(56px, 15vw, 84px);
       line-height: .88;
-      font-weight: 900;
+      font-weight: 800;
       letter-spacing: -.02em;
       color: var(--wait-color);
       text-shadow: 0 8px 24px var(--wait-glow);
@@ -94,7 +98,12 @@
       word-break: break-word;
       text-wrap: balance;
       transform: translate(-2px, 4px);
+      font-family: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
     }
+    .action-panel__signal.state-wait { color: var(--wait-color); }
+    .action-panel__signal.state-defensive { color: var(--defensive-color); text-shadow: 0 8px 24px rgba(142, 166, 217, 0.16); }
+    .action-panel__signal.state-bullish { color: var(--bullish-color); text-shadow: 0 8px 24px rgba(88, 201, 139, 0.16); }
+    .action-panel__signal.state-strong-bullish { color: var(--strong-bullish-color); text-shadow: 0 8px 24px rgba(47, 213, 138, 0.18); }
     .action-panel__trustPills {
       margin-top: 6px;
       display: flex;
@@ -110,7 +119,7 @@
       align-items: center;
       justify-content: center;
       border-radius: 999px;
-      border: 1px solid rgba(180,210,255,.14);
+      border: 1px solid rgba(250, 204, 21, .22);
       background: rgba(10,17,34,.12);
       color: rgba(226,236,255,.78);
       white-space: nowrap;
@@ -134,7 +143,7 @@
       align-items: center;
       justify-content: center;
       border-radius: 999px;
-      border: 1px solid rgba(180,210,255,.18);
+      border: 1px solid rgba(250, 204, 21, .25);
       background: rgba(10,17,34,.16);
       color: rgba(242,246,255,.95);
       white-space: nowrap;
@@ -143,6 +152,7 @@
       padding: 7px 12px;
       font-size: 12px;
       font-weight: 800;
+      color: var(--accent-gold);
       font-variant-numeric: tabular-nums lining-nums;
       font-feature-settings: "tnum" 1, "lnum" 1;
     }
@@ -277,11 +287,15 @@
       font-size: 14px;
       font-weight: 900;
       color: var(--cta-text);
-      background: linear-gradient(180deg, var(--cta-bg-top) 0%, var(--cta-bg-bottom) 100%);
+      background: var(--cta-gold);
       border: 1px solid rgba(255,230,140,.55);
       box-shadow: 0 8px 24px rgba(240,194,62,.2);
       white-space: nowrap;
       width: 100%;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums lining-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
     }
     .tech-card {
       margin-top: 14px;
@@ -529,6 +543,14 @@
       return "Waiting";
     }
 
+    function actionStateClassFromLabel(label) {
+      if (label === "Wait") return "state-wait";
+      if (label === "Defensive") return "state-defensive";
+      if (label === "Bullish") return "state-bullish";
+      if (label === "Strong Bullish") return "state-strong-bullish";
+      return "state-wait";
+    }
+
     function getBaseEquityDetails(log) {
       const latest = log?.latest || {};
       const latestBase = parseFiniteNumber(latest.base_equity);
@@ -618,7 +640,10 @@
       const ratio = normalizeRatio(latest?.target_btc_ratio, latest?.allocation);
       const action = actionLabelFromTargetRatio(ratio);
 
-      document.getElementById("actionSignal").textContent = action;
+      const actionEl = document.getElementById("actionSignal");
+      actionEl.textContent = action;
+      actionEl.classList.remove("state-wait", "state-defensive", "state-bullish", "state-strong-bullish");
+      actionEl.classList.add(actionStateClassFromLabel(action));
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(latest?.btc_price)}`;
       document.getElementById("metaUpdated").textContent = `Updated ${latest?.updated_at_utc || "-"}`;
 
