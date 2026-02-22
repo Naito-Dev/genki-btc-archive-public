@@ -369,6 +369,26 @@
       return Number(v).toFixed(d);
     }
 
+    function parseFiniteNumber(v) {
+      if (v === null || v === undefined) return null;
+      if (typeof v === "number") return Number.isFinite(v) ? v : null;
+      if (typeof v === "string") {
+        const t = v.trim();
+        if (!t) return null;
+        const n = Number(t);
+        return Number.isFinite(n) ? n : null;
+      }
+      return null;
+    }
+
+    function toDateOnly(v) {
+      if (!v) return null;
+      const s = String(v).trim();
+      if (!s) return null;
+      const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+      return m ? m[1] : null;
+    }
+
     function parseDateAny(e) {
       return e?.date_utc || e?.date || "-";
     }
@@ -394,30 +414,38 @@
 
     function getBaseEquity(log) {
       const latest = log?.latest || {};
-      if (typeof latest.base_equity === "number") return latest.base_equity;
-      if (typeof latest.initial_capital === "number") return latest.initial_capital;
+      const latestBase = parseFiniteNumber(latest.base_equity);
+      if (latestBase !== null) return latestBase;
+      const latestInit = parseFiniteNumber(latest.initial_capital);
+      if (latestInit !== null) return latestInit;
+      const logBase = parseFiniteNumber(log?.base_equity);
+      if (logBase !== null) return logBase;
       const entries = Array.isArray(log?.entries) ? log.entries : [];
       for (const e of entries) {
-        if (typeof e?.base_equity === "number") return e.base_equity;
-        if (typeof e?.initial_capital === "number") return e.initial_capital;
+        const b = parseFiniteNumber(e?.base_equity);
+        if (b !== null) return b;
+        const i = parseFiniteNumber(e?.initial_capital);
+        if (i !== null) return i;
       }
       return null;
     }
 
     function getSinceTestStart(log) {
-      if (log?.start_date_utc) return String(log.start_date_utc);
+      const start = toDateOnly(log?.start_date_utc);
+      if (start) return start;
       const entries = Array.isArray(log?.entries) ? log.entries : [];
-      if (!entries.length) return null;
-      const dates = entries.map((e) => e?.date).filter(Boolean).sort();
-      return dates.length ? dates[0] : null;
+      const dates = entries.map((e) => toDateOnly(e?.date)).filter(Boolean).sort();
+      if (dates.length) return dates[0];
+      const latestDate = toDateOnly(log?.latest?.date);
+      return latestDate || null;
     }
 
     function resolvePnlPercent(log, latest) {
-      const p = Number(latest?.pnl_percent);
-      if (!Number.isNaN(p)) return p;
-      const eq = Number(latest?.equity_usd);
-      const base = Number(getBaseEquity(log));
-      if (!Number.isNaN(eq) && !Number.isNaN(base) && base > 0) {
+      const p = parseFiniteNumber(latest?.pnl_percent);
+      if (p !== null) return p;
+      const eq = parseFiniteNumber(latest?.equity_usd);
+      const base = parseFiniteNumber(getBaseEquity(log));
+      if (eq !== null && base !== null && base > 0) {
         return ((eq - base) / base) * 100;
       }
       return null;
@@ -471,20 +499,28 @@
       document.getElementById("actionPrice").textContent = `BTC ${fmtUsd(latest?.btc_price)}`;
       document.getElementById("actionUpdated").textContent = `Updated ${latest?.updated_at_utc || "-"}`;
 
-      const equity = Number(latest?.equity_usd);
-      document.getElementById("liveEquity").textContent = Number.isNaN(equity) ? "-" : fmtUsd(equity);
+      const equity = parseFiniteNumber(latest?.equity_usd);
+      document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
       document.getElementById("sinceStart").textContent = `Since test start: ${getSinceTestStart(log) || "-"}`;
 
       const pnl = resolvePnlPercent(log, latest);
       const pnlEl = document.getElementById("pnlPct");
       const pnlNoteEl = document.getElementById("pnlNote");
-      if (pnl === null || Number.isNaN(Number(pnl))) {
-        pnlEl.style.display = "none";
+      const resolvedBaseEquity = getBaseEquity(log);
+      const computedPnl = (equity !== null && parseFiniteNumber(resolvedBaseEquity) !== null && parseFiniteNumber(resolvedBaseEquity) > 0)
+        ? ((equity - parseFiniteNumber(resolvedBaseEquity)) / parseFiniteNumber(resolvedBaseEquity)) * 100
+        : null;
+      console.debug("[LIVE_TESTING_PNL]", { pnl_percent: latest?.pnl_percent, equity_usd: latest?.equity_usd, base_equity: resolvedBaseEquity, computedPnl });
+      if (pnl === null || !Number.isFinite(Number(pnl))) {
+        pnlEl.textContent = "P/L unavailable";
+        pnlEl.style.display = "block";
         pnlNoteEl.style.display = "none";
+        pnlEl.classList.remove("positive", "negative");
+        pnlEl.classList.add("flat");
       } else {
         const val = Number(pnl);
         const sign = val > 0 ? "+" : "";
-        pnlEl.textContent = `(${sign}${val.toFixed(2)}%)`;
+        pnlEl.textContent = `P/L ${sign}${val.toFixed(2)}%`;
         pnlEl.style.display = "block";
         pnlNoteEl.style.display = "block";
         pnlEl.classList.remove("positive", "negative", "flat");
