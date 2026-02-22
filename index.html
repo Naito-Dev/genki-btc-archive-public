@@ -23,7 +23,7 @@
     body {
       margin: 0;
       color: var(--ink);
-      font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+      font-family: "Inter", "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
       background:
         radial-gradient(900px 520px at -10% -10%, #1f3558 0%, transparent 60%),
         radial-gradient(1000px 600px at 110% 0%, #1c2f4f 0%, transparent 62%),
@@ -31,86 +31,100 @@
       letter-spacing: 0.01em;
     }
     .wrap {
-      width: min(1080px, 94vw);
+      width: min(520px, 94vw);
       margin: 0 auto;
-      padding: 36px 0 86px;
+      padding: 18px 0 48px;
     }
     .hero,
     .hero-panel {
       text-align: center;
-      padding: 40px;
-      border: 1px solid #1F2937;
+      padding: 22px 14px 16px;
+      border: 1px solid rgba(44, 62, 94, 0.7);
       border-radius: 24px;
-      background: #0A0F1C;
-      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+      background:
+        radial-gradient(120% 180% at 20% 5%, rgba(37, 58, 98, 0.35) 0%, transparent 52%),
+        linear-gradient(175deg, #0a1125 0%, #091126 40%, #0a122a 100%);
+      box-shadow: 0 20px 44px -14px rgb(0 0 0 / 0.62);
     }
     .hero h1 {
-      margin: 0 0 8px;
-      color: var(--gold-2);
-      font-size: clamp(20px, 4.6vw, 30px);
-      font-weight: 700;
-      letter-spacing: 0.04em;
+      margin: 2px 0 14px;
+      color: #eef3ff;
+      font-size: clamp(36px, 9vw, 52px);
+      font-weight: 800;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
     }
     .hero .subtitle {
-      margin: 0 0 30px;
+      margin: 0 0 18px;
       color: var(--muted);
-      font-size: 14px;
+      font-size: 12px;
+      opacity: 0.72;
     }
     .equity-label {
-      color: var(--muted);
+      color: #dce4ff;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
-      font-size: 12px;
-      margin-bottom: 10px;
+      letter-spacing: 0.12em;
+      font-size: 34px;
+      margin-bottom: 8px;
+      text-align: left;
+      font-weight: 700;
     }
     .equity-box {
-      margin-top: 18px;
+      margin-top: 6px;
       border: 0;
       border-radius: 0;
-      padding: 20px 0 0;
+      padding: 4px 0 0;
       background: transparent;
     }
     .equity-value {
-      font-size: clamp(48px, 10.5vw, 72px);
+      font-size: clamp(56px, 13.8vw, 86px);
       line-height: 1;
       font-weight: 600;
       letter-spacing: -0.035em;
-      margin: 0 0 8px;
-      color: var(--ink);
+      margin: 0 0 6px;
+      color: #f3f6ff;
+      text-align: left;
     }
     .pnl-value {
       font-size: clamp(16px, 3.8vw, 24px);
       color: var(--gold-2);
       font-weight: 600;
       margin: 0;
+      display: none;
     }
+    .hero .subtitle[data-phase-note] { display: none; }
     .status-wrap {
-      margin-top: 24px;
+      margin-top: 2px;
       display: grid;
-      gap: 14px;
+      gap: 12px;
     }
     .status-card {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 28px;
-      background: linear-gradient(160deg, rgba(17,39,66,0.55), rgba(10,24,43,0.62));
+      border: 1px solid rgba(67, 88, 130, 0.58);
+      border-radius: 20px;
+      padding: 18px 16px 14px;
+      background:
+        radial-gradient(130% 120% at 12% 8%, rgba(54, 78, 124, 0.18) 0%, transparent 62%),
+        rgba(10, 20, 44, 0.56);
     }
     .status-kicker {
-      font-size: 12px;
+      text-align: left;
+      font-size: 34px;
       text-transform: uppercase;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-      margin: 0 0 6px;
+      color: #e9efff;
+      letter-spacing: 0.02em;
+      margin: 0 0 2px;
+      font-weight: 700;
     }
     .status-main {
-      margin: 0;
-      font-size: clamp(38px, 11vw, 62px);
+      margin: 0 0 10px;
+      text-align: left;
+      font-size: clamp(76px, 19vw, 112px);
       font-weight: 800;
-      line-height: 1;
+      line-height: 0.9;
+      letter-spacing: -0.04em;
     }
-    .status-main.long { color: var(--ok); }
-    .status-main.cash, .status-main.no-trade { color: var(--bad); }
+    .status-main.long { color: #ff9a62; }
+    .status-main.cash, .status-main.no-trade { color: #ff9a62; }
     .status-detail {
       margin-top: 14px;
       color: var(--muted);
@@ -119,22 +133,26 @@
     }
     .status-detail.compact {
       margin-top: 6px;
-      font-size: 12px;
-      opacity: 0.85;
+      font-size: 13px;
+      opacity: 1;
+      text-align: left;
+      color: #f1f5ff;
     }
     .cta {
-      display: inline-block;
-      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: min(320px, 100%);
       text-align: center;
       text-decoration: none;
-      margin-top: 8px;
-      border-radius: 14px;
+      margin-top: 0;
+      border-radius: 999px;
       min-height: 52px;
-      padding: 16px 22px;
+      padding: 14px 24px;
       background: linear-gradient(90deg, #fbbf24, #eab308);
       color: #162033;
       font-weight: 800;
-      font-size: clamp(16px, 4.2vw, 20px);
+      font-size: clamp(15px, 4vw, 20px);
       border: 1px solid #f0d38d;
       box-shadow: 0 0 30px rgb(245 158 11 / 0.5);
       transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
@@ -155,21 +173,43 @@
       display: none;
     }
     .meta-strip {
-      margin-top: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      color: var(--muted);
-      font-size: 11px;
+      margin-top: 2px;
+      display: grid;
+      gap: 0;
+      justify-items: end;
+      color: #f2f6ff;
+      font-size: 18px;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.03em;
+      line-height: 1.4;
     }
     .meta-pill {
-      border: 1px solid color-mix(in srgb, var(--line) 40%, transparent 60%);
-      border-radius: 999px;
-      padding: 4px 10px;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
       background: transparent;
+      font-weight: 500;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      text-align: right;
+    }
+    .hero-bottom {
+      margin-top: 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      text-align: left;
+    }
+    .latest-tag {
+      color: #e6ebff;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 700;
+      line-height: 1.35;
+      min-width: 120px;
     }
     .tech {
       margin-top: 34px;
@@ -297,13 +337,21 @@
     .warn { color: var(--warn); }
     .err { color: var(--bad); }
     @media (min-width: 760px) {
-      .status-wrap { grid-template-columns: 2fr 1fr; }
-      .cta { margin-top: 0; display: flex; align-items: center; justify-content: center; }
       .tech-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .row { grid-template-columns: 120px 140px 120px 1fr; align-items: center; }
       .row.head { grid-template-columns: 120px 140px 120px 1fr; }
     }
     @media (max-width: 480px) {
+      .hero, .hero-panel { padding: 18px 12px 14px; border-radius: 20px; }
+      .hero h1 { font-size: clamp(32px, 11.4vw, 46px); margin-bottom: 10px; }
+      .status-kicker { font-size: 28px; }
+      .status-main { font-size: clamp(64px, 21vw, 90px); }
+      .equity-label { font-size: 30px; }
+      .equity-value { font-size: clamp(50px, 15vw, 76px); }
+      .meta-strip { font-size: 16px; }
+      .hero-bottom { gap: 10px; }
+      .latest-tag { font-size: 13px; }
+      .cta { width: 100%; }
       .tech-card { padding: 9px; }
       .tiny-label { font-size: 10px; }
       pre {
@@ -321,7 +369,7 @@
 
       <div class="status-wrap">
         <article class="status-card">
-          <p class="status-kicker">Genki's Action</p>
+          <p class="status-kicker">Genki's Latest Action</p>
           <p class="status-main" data-kpi-action>Hold Cash</p>
           <div class="meta-strip">
             <span class="meta-pill" data-kpi-date>DATE: --</span>
@@ -335,8 +383,11 @@
             <p class="pnl-value" data-kpi-pnl>Start baseline pending</p>
             <p class="subtitle" data-phase-note>Live tracking active</p>
           </div>
+          <div class="hero-bottom">
+            <div class="latest-tag" data-kpi-latest>Latest from --</div>
+            <a class="cta" href="sales-page-en.html">[Get the next BTC signal]</a>
+          </div>
         </article>
-        <a class="cta" href="sales-page-en.html">Get daily BTC risk signal</a>
       </div>
     </section>
 
@@ -394,6 +445,7 @@
         phaseNote: document.querySelector('[data-phase-note]'),
         action: document.querySelector('[data-kpi-action]'),
         portfolio: document.querySelector('[data-kpi-portfolio]'),
+        latest: document.querySelector('[data-kpi-latest]'),
         trustText: document.querySelector('[data-kpi-trust]'),
         date: document.querySelector('[data-kpi-date]'),
         price: document.querySelector('[data-kpi-price]'),
@@ -649,7 +701,10 @@
 
           els.date.textContent = 'DATE: ' + (latest.date || 'N/A');
           els.price.textContent = 'PRICE: ' + fmtUsd(latest.btc_price);
-          els.updated.textContent = 'UPDATED: ' + (latest.updated_at_utc || 'N/A');
+          els.updated.textContent = 'UPDATED: ' + (latest.updated_at_utc || 'N/A') + ' UTC';
+          if (els.latest) {
+            els.latest.textContent = 'Latest from ' + (latest.date || 'N/A');
+          }
           els.allocation.textContent = (latest.allocation != null ? latest.allocation + '%' : 'N/A');
           els.status.textContent = (latest.status || 'N/A') + (stalePrice ? ' / PRICE_STALE' : '');
 
