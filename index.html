@@ -51,7 +51,7 @@
       background: linear-gradient(180deg, rgba(14,28,60,.92), rgba(10,22,49,.94));
       border: 1px solid rgba(100,150,240,.22);
       border-radius: 20px;
-      padding: 18px 16px 96px;
+      padding: 18px 16px 88px;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -83,15 +83,16 @@
       overflow-wrap: anywhere;
       word-break: break-word;
       text-wrap: balance;
+      transform: translate(-2px, 4px);
     }
     .action-panel__metaDock {
       position: absolute;
       right: 16px;
-      bottom: 14px;
+      bottom: 12px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 8px;
+      gap: 6px;
       max-width: calc(100% - 32px);
     }
     .meta-pill {
@@ -125,6 +126,12 @@
       gap: 8px;
       align-items: end;
     }
+    .hero-bottom__left {
+      width: 100%;
+      display: grid;
+      justify-items: center;
+      text-align: center;
+    }
     .live-label {
       font-size: 11px;
       letter-spacing: .14em;
@@ -136,6 +143,7 @@
     .live-header {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       min-width: 0;
     }
@@ -333,11 +341,11 @@
     @media (max-width: 430px) {
       .page { padding: 12px; }
       .hero-card { padding: 18px 14px 14px; }
-      .action-panel { min-height: 260px; padding: 16px 14px 90px; }
+      .action-panel { min-height: 260px; padding: 16px 14px 84px; }
       .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
       .action-panel__metaDock {
         right: 14px;
-        bottom: 12px;
+        bottom: 10px;
         max-width: calc(100% - 28px);
       }
       .hero-bottom { grid-template-columns: minmax(0,1fr); gap: 8px; padding: 12px 12px 10px; }
