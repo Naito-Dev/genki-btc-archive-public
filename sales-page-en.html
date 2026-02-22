@@ -569,7 +569,10 @@
       const nameEl = document.getElementById('waitlistName');
       const submitBtn = document.getElementById('waitlistSubmitBtn');
       const statusEl = document.getElementById('waitlistStatus');
-      const WAITLIST_ENDPOINT = (window.WAITLIST_ENDPOINT || '').trim();
+      const WAITLIST_ENDPOINT = (
+        window.WAITLIST_ENDPOINT ||
+        'https://script.google.com/macros/s/AKfycbxzFt641ISSZJWtPXMSEVgQiDsITZ4J3jMrXoPw7Up_8QKtP1orayXnBsSMJETAnVC7/exec'
+      ).trim();
       if (!form || !emailEl || !submitBtn || !statusEl) return;
 
       function isValidEmail(v) {
