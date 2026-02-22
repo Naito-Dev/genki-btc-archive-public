@@ -3,52 +3,242 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Technical Verification Center | Genki BTC</title>
+  <title>Technical Verification & Reproducibility Center | Genki BTC</title>
   <style>
-    :root { --bg:#060b14; --panel:#0f1d35; --line:rgba(122,159,225,.28); --text:#f2f6ff; --muted:#aebddb; --gold:#d8b24a; }
+    :root {
+      --bg:#060b14;
+      --panel:#0f1d35;
+      --line:rgba(122,159,225,.28);
+      --text:#f2f6ff;
+      --muted:#aebddb;
+      --soft:#7f91b4;
+      --gold:#d8b24a;
+      --ok:#5fd19a;
+      --warn:#f3c96b;
+    }
     * { box-sizing:border-box; }
-    body { margin:0; font-family:Inter,system-ui,-apple-system,sans-serif; background:linear-gradient(180deg,#05090f,#0a1630); color:var(--text); }
-    .wrap { width:min(900px,92vw); margin:24px auto 40px; }
-    .lang { display:flex; gap:8px; justify-content:flex-end; margin-bottom:12px; }
-    .lang a { color:var(--muted); text-decoration:none; border:1px solid var(--line); border-radius:999px; padding:4px 10px; font-size:12px; }
-    .panel { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:18px; margin-top:10px; }
-    h1,h2 { margin:0 0 10px; }
-    p,li { color:var(--muted); line-height:1.55; }
-    code { color:#f6d57b; }
-    .links a { color:#f6d57b; text-decoration:none; }
+    body {
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,sans-serif;
+      background:linear-gradient(180deg,#05090f,#0a1630);
+      color:var(--text);
+    }
+    .wrap { width:min(960px,92vw); margin:24px auto 40px; }
+    .lang {
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      margin-bottom:12px;
+    }
+    .lang a {
+      color:var(--muted);
+      text-decoration:none;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:4px 10px;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+    .panel {
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+      margin-top:10px;
+    }
+    h1,h2,h3 { margin:0 0 10px; letter-spacing:-.01em; }
+    h1 { font-size:clamp(26px,4vw,36px); }
+    h2 { font-size:clamp(22px,3vw,30px); }
+    h3 { font-size:16px; color:var(--text); margin-bottom:8px; }
+    p,li { color:var(--muted); line-height:1.55; margin:0; }
+    ul { margin:8px 0 0; padding-left:18px; display:grid; gap:4px; }
+    .grid {
+      display:grid;
+      gap:10px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      margin-top:8px;
+    }
+    .subcard {
+      border:1px solid rgba(122,159,225,.2);
+      border-radius:12px;
+      padding:12px;
+      background:rgba(8,18,36,.46);
+    }
+    .subtle { color:var(--soft); font-size:13px; margin-top:6px; }
+    .links { display:grid; gap:8px; margin-top:8px; }
+    .links a { color:#f6d57b; text-decoration:none; word-break:break-word; }
+    .planned {
+      margin-top:8px;
+      display:grid;
+      gap:6px;
+      font-size:14px;
+    }
+    .planned span {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      color:var(--muted);
+    }
+    .badge {
+      font-size:11px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:2px 8px;
+      color:var(--warn);
+      white-space:nowrap;
+    }
+    .ok { color:var(--ok); }
+    .divider {
+      margin:16px 0;
+      border:0;
+      height:1px;
+      background:linear-gradient(90deg,transparent,rgba(122,159,225,.28),transparent);
+    }
+    .footnote {
+      margin-top:8px;
+      font-size:12px;
+      color:var(--soft);
+    }
+    @media (max-width: 820px) {
+      .grid { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <nav class="lang">
+    <nav class="lang" aria-label="Language switch">
       <a href="/genki-btc-archive-public/verification/index.html">EN</a>
       <a href="/genki-btc-archive-public/verification/index.html#ja">JA</a>
     </nav>
 
     <section class="panel">
       <h1>Technical Verification & Reproducibility Center</h1>
-      <p>This page publishes verification artifacts and reproducibility links while keeping proprietary strategy logic private.</p>
-      <ul>
-        <li>Live dashboard facts are public.</li>
-        <li>Historical metrics are reference-only.</li>
-        <li>Core strategy logic is not publicly disclosed.</li>
-      </ul>
-      <p class="links">
-        <a href="https://naito-dev.github.io/genki-btc-archive-public/">Public Dashboard</a> •
-        <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json">Public proof records (log.json)</a> •
+      <p>Proprietary strategy logic remains private. Verification artifacts and reproducibility context are published here for transparency.</p>
+
+      <div class="grid">
+        <article class="subcard">
+          <h3>Live Verification (Public)</h3>
+          <ul>
+            <li>Daily public dashboard status and signal state</li>
+            <li>Public proof records and timestamped updates</li>
+            <li>Operational continuity and safety-state visibility</li>
+          </ul>
+        </article>
+        <article class="subcard">
+          <h3>Historical Reference Metrics</h3>
+          <ul>
+            <li>Historical metrics are reference-only</li>
+            <li>Not a promise of future returns</li>
+            <li>Used to provide context, not guarantees</li>
+          </ul>
+        </article>
+      </div>
+
+      <hr class="divider" />
+
+      <h3>Public Verification Links</h3>
+      <div class="links">
+        <a href="https://naito-dev.github.io/genki-btc-archive-public/">Public Dashboard</a>
+        <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json">Public proof records (log.json)</a>
         <a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.md">Backtest methodology (reference)</a>
-      </p>
+        <a href="https://github.com/Naito-Dev/genki-btc-archive-public">Project documentation index (public repository)</a>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="grid">
+        <article class="subcard">
+          <h3>What is Public</h3>
+          <ul>
+            <li>Live status and proof records</li>
+            <li>Historical reference metrics</li>
+            <li>Audit and verification notes</li>
+          </ul>
+        </article>
+        <article class="subcard">
+          <h3>What is Private</h3>
+          <ul>
+            <li>Proprietary strategy logic</li>
+            <li>Execution internals and IP implementation</li>
+            <li>Private operational controls</li>
+          </ul>
+        </article>
+      </div>
+
+      <p class="subtle">Reproducibility policy: outputs are monitored and published, historical metrics are reference-only, and this center is for technical verification context. It is not investment advice.</p>
+
+      <div class="planned" aria-label="Planned artifacts">
+        <span><span class="badge">Planned</span> <code>audit_report.json</code> (coming soon)</span>
+        <span><span class="badge">Planned</span> Reproducibility notes (coming soon)</span>
+      </div>
+
+      <p class="footnote">Past performance is not indicative of future results. Not investment advice.</p>
     </section>
 
     <section class="panel" id="ja">
       <h2>技術検証・再現性センター（上級者向け）</h2>
-      <p>このページでは、ロジック本体を公開せずに、検証可能性と再現性に必要な公開情報をまとめています。</p>
-      <ul>
-        <li>ライブ運用の事実は公開</li>
-        <li>ヒストリカル指標は参考値として公開</li>
-        <li>戦略ロジック本体（IP）は非公開</li>
-      </ul>
-      <p>必要な再現性資料は順次ここへ追加します。</p>
+      <p>戦略ロジック本体（IP）は非公開のまま、検証可能性と再現性に必要な公開資料をここに集約します。</p>
+
+      <div class="grid">
+        <article class="subcard">
+          <h3>ライブ検証（公開）</h3>
+          <ul>
+            <li>公開ダッシュボードの日次状態・シグナル</li>
+            <li>公開証跡（proof records）と更新時刻</li>
+            <li>安全状態を含む運用継続性の可視化</li>
+          </ul>
+        </article>
+        <article class="subcard">
+          <h3>ヒストリカル参考値</h3>
+          <ul>
+            <li>過去指標は参考値として公開</li>
+            <li>将来収益の保証ではない</li>
+            <li>判断補助の文脈提供が目的</li>
+          </ul>
+        </article>
+      </div>
+
+      <hr class="divider" />
+
+      <h3>公開検証リンク</h3>
+      <div class="links">
+        <a href="https://naito-dev.github.io/genki-btc-archive-public/">公開ダッシュボード</a>
+        <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json">公開証跡（log.json）</a>
+        <a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.md">バックテスト手法（参考）</a>
+        <a href="https://github.com/Naito-Dev/genki-btc-archive-public">公開ドキュメント索引（リポジトリ）</a>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="grid">
+        <article class="subcard">
+          <h3>公開しているもの</h3>
+          <ul>
+            <li>ライブ状態と証跡レコード</li>
+            <li>ヒストリカル参考値</li>
+            <li>監査・検証ノート</li>
+          </ul>
+        </article>
+        <article class="subcard">
+          <h3>非公開のもの</h3>
+          <ul>
+            <li>戦略ロジック本体</li>
+            <li>実行内部仕様・IP実装詳細</li>
+            <li>内部運用コントロール</li>
+          </ul>
+        </article>
+      </div>
+
+      <p class="subtle">再現性ポリシー: 出力は監視・公開し、ヒストリカル指標は参考値として扱います。本ページは技術検証の文脈提供を目的とし、投資助言ではありません。</p>
+
+      <div class="planned" aria-label="今後追加予定">
+        <span><span class="badge">予定</span> <code>audit_report.json</code>（準備中）</span>
+        <span><span class="badge">予定</span> 再現性ノート（準備中）</span>
+      </div>
+
+      <p class="footnote">過去実績は将来成果を保証しません。投資助言ではありません。</p>
     </section>
   </div>
 </body>
