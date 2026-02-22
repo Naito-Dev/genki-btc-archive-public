@@ -386,6 +386,23 @@
       word-break: break-word;
       white-space: pre-wrap;
     }
+    .proof-summary {
+      margin-top: 6px;
+      font-size: 12px;
+      color: rgba(230,238,255,.78);
+    }
+    .proof-toggle {
+      margin-top: 8px;
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(176, 145, 72, .28);
+      background: rgba(248, 232, 164, .08);
+      color: rgba(231, 216, 168, .92);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
     .proof-copy {
       margin-top: 8px;
       min-height: 34px;
@@ -465,27 +482,28 @@
     <section class="tech-card">
       <button class="tech-card__toggle" type="button" onclick="toggleAudit()">Technical Analysis <span id="auditChevron">⌄</span></button>
       <div id="auditContent" class="tech-card__content" style="display:none">
-        <div class="tech-card__hint">Details hidden. Tap to expand.</div>
         <div class="audit-grid">
           <div class="audit-section">
-            <div class="audit-title">Chain Integrity</div>
-            <div class="audit-row"><div class="k">status</div><div id="auditChainStatus">-</div></div>
-            <div class="audit-row"><div class="k">logic</div><div id="auditLogicVersion">-</div></div>
+            <div class="audit-title">Capital Protection Status</div>
+            <div class="audit-row"><div class="k">Status</div><div id="auditChainStatus">-</div></div>
+            <div class="audit-row"><div class="k">Core Logic</div><div id="auditLogicVersion">-</div></div>
           </div>
           <div class="audit-section">
-            <div class="audit-title">Allocation / Status</div>
-            <div class="audit-row"><div class="k">allocation</div><div id="auditAlloc">-</div></div>
-            <div class="audit-row"><div class="k">target_ratio</div><div id="auditTarget">-</div></div>
-            <div class="audit-row"><div class="k">status</div><div id="auditStatus">-</div></div>
-            <div class="audit-row"><div class="k">snapshot</div><div id="auditSnapshot">-</div></div>
+            <div class="audit-title">Current Risk Exposure</div>
+            <div class="audit-row"><div class="k">Exposure</div><div id="auditAlloc">-</div></div>
+            <div class="audit-row"><div class="k">Target Exposure</div><div id="auditTarget">-</div></div>
+            <div class="audit-row"><div class="k">Status</div><div id="auditStatus">-</div></div>
+            <div class="audit-row"><div class="k">Data Sync</div><div id="auditSnapshot">-</div></div>
           </div>
           <div class="audit-section">
             <div class="audit-title">Recent Verified Decisions</div>
             <ul id="auditRecentList" class="audit-list"><li>-</li></ul>
           </div>
           <div class="audit-section">
-            <div class="audit-title">Proof Block</div>
-            <div id="proofCode" class="proof-code">-</div>
+            <div class="audit-title">Proof of Integrity</div>
+            <div id="proofSummary" class="proof-summary">Latest proof available • Hash verified record</div>
+            <button id="proofToggleBtn" class="proof-toggle" type="button" onclick="toggleProofDetails()">Show raw proof</button>
+            <div id="proofCode" class="proof-code" style="display:none">-</div>
             <button id="copyProofBtn" class="proof-copy" type="button" onclick="copyLatestProof()">Copy Latest Proof</button>
           </div>
         </div>
@@ -601,19 +619,50 @@
       return null;
     }
 
+    function mapStatusDisplay(raw, mode = "status") {
+      if (raw === null || raw === undefined || raw === "") return "Unavailable";
+      const v = String(raw).trim();
+      const key = v.toUpperCase();
+      if (mode === "integrity" && key === "VALID") return "Verified";
+      if (mode === "sync" && key === "SYNCED") return "Synced";
+      if (key === "DATA_STALE") return "Safety Hold (Market Data Unstable)";
+      if (key === "API_ERROR") return "Risk Isolated (Connection Issue)";
+      if (key === "NO_TRADE" || key === "WAIT") return "Awaiting Conditions";
+      return v;
+    }
+
+    function formatExposure(value) {
+      const n = parseFiniteNumber(value);
+      if (n === null) return "Unavailable";
+      if (Math.abs(n) < 0.0001) return "0% (Cash)";
+      return `${n.toFixed(0)}%`;
+    }
+
+    function formatTargetExposure(value) {
+      const n = parseFiniteNumber(value);
+      if (n === null) return "Unavailable";
+      const pct = n <= 1 ? n * 100 : n;
+      return `${pct.toFixed(0)}%`;
+    }
+
     function renderAudit(log, latest) {
-      document.getElementById("auditChainStatus").textContent = latest?.chain_integrity ?? "-";
-      document.getElementById("auditLogicVersion").textContent = latest?.logic_version ?? "-";
-      document.getElementById("auditAlloc").textContent = latest?.allocation ?? "-";
-      document.getElementById("auditTarget").textContent = latest?.target_btc_ratio ?? "-";
-      document.getElementById("auditStatus").textContent = latest?.status ?? "-";
-      document.getElementById("auditSnapshot").textContent = latest?.snapshot_status ?? "-";
+      document.getElementById("auditChainStatus").textContent = mapStatusDisplay(latest?.chain_integrity, "integrity");
+      document.getElementById("auditLogicVersion").textContent = latest?.logic_version ?? "Unavailable";
+      document.getElementById("auditAlloc").textContent = formatExposure(latest?.allocation);
+      document.getElementById("auditTarget").textContent = formatTargetExposure(latest?.target_btc_ratio);
+      document.getElementById("auditStatus").textContent = mapStatusDisplay(latest?.status, "status");
+      document.getElementById("auditSnapshot").textContent = mapStatusDisplay(latest?.snapshot_status, "sync");
 
       const entries = Array.isArray(log?.entries) ? log.entries.slice(-3).reverse() : [];
       const list = document.getElementById("auditRecentList");
       list.innerHTML = entries.length
-        ? entries.map((e) => `<li>${e?.date ?? "-"} | ${e?.status ?? "-"} | alloc ${e?.allocation ?? "-"}</li>`).join("")
-        : "<li>-</li>";
+        ? entries.map((e) => {
+            const d = e?.date ?? "Unavailable";
+            const s = mapStatusDisplay(e?.status, "status");
+            const ex = formatExposure(e?.allocation);
+            return `<li>${d} | ${s} | Exposure: ${ex}</li>`;
+          }).join("")
+        : "<li>Unavailable</li>";
 
       const proof = {
         date: latest?.date ?? "-",
@@ -622,6 +671,10 @@
         status: latest?.status ?? "-",
       };
       document.getElementById("proofCode").textContent = JSON.stringify(proof, null, 2);
+      const summary = latest?.hash
+        ? "Latest proof available • Hash verified record"
+        : "Latest proof unavailable";
+      document.getElementById("proofSummary").textContent = summary;
     }
 
     function copyLatestProof() {
@@ -636,6 +689,14 @@
       const isHidden = el.style.display === "none";
       el.style.display = isHidden ? "block" : "none";
       chev.textContent = isHidden ? "⌃" : "⌄";
+    }
+
+    function toggleProofDetails() {
+      const proofEl = document.getElementById("proofCode");
+      const btn = document.getElementById("proofToggleBtn");
+      const isHidden = proofEl.style.display === "none";
+      proofEl.style.display = isHidden ? "block" : "none";
+      btn.textContent = isHidden ? "Hide raw proof" : "Show raw proof";
     }
 
     async function load() {
