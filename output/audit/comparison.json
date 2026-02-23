@@ -1,0 +1,51 @@
+{
+  "generated_at_utc": "2026-02-23T08:27:56Z",
+  "comparison": {
+    "status": "MATCH",
+    "checks": {
+      "metrics_ready": true,
+      "hash_match": true,
+      "guards_ok": true,
+      "order_constraints_ok": true,
+      "audit_repro_ok": true
+    },
+    "audit_meta": {
+      "hash_check": {
+        "reason": "ok",
+        "checked_entries": 6
+      },
+      "audit_repro": {
+        "reason": "ok",
+        "python_exec": "/Users/Claw/tradep-test/.venv/bin/python",
+        "run_dir": "evidence/repro/20260223T082757Z",
+        "results_path": "evidence/repro/20260223T082757Z/results.json",
+        "comparison_status": "MATCH"
+      }
+    }
+  },
+  "metrics": {
+    "final_equity": 15.173236110543796,
+    "cagr_pct": 41.016530513562245,
+    "max_drawdown_pct": -19.787021324619182,
+    "trades": 360
+  },
+  "hash_match": true,
+  "guards": {
+    "dry_run_guard_ok": true,
+    "armed_guard_ok": true,
+    "trading_enabled_guard_ok": true
+  },
+  "order_constraints": {
+    "spot_only": true,
+    "no_short": true,
+    "no_margin": true,
+    "no_futures_fields": true
+  },
+  "evidence_paths": {
+    "targets_manifest": "output/audit/targets.json",
+    "comparison_output": "output/audit/comparison.json",
+    "live_state": "output/state_live.json",
+    "live_trades": "output/trades_live.csv",
+    "public_log": "public/log.json"
+  }
+}

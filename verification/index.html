@@ -174,9 +174,22 @@
     }
     .summary-value.warn { color:var(--warn); }
     .summary-value.muted { color:var(--soft); }
+    .audit-summary {
+      margin-top:10px;
+      display:grid;
+      gap:8px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+    .audit-summary .summary-item {
+      border:1px solid rgba(122,159,225,.2);
+      border-radius:10px;
+      background:rgba(8,18,36,.38);
+      padding:10px;
+    }
     @media (max-width: 820px) {
       .grid { grid-template-columns:1fr; }
       .proof-summary { grid-template-columns:1fr; }
+      .audit-summary { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -227,6 +240,12 @@
         <div class="summary-item"><div class="summary-label">Latest Proof Time (UTC)</div><div class="summary-value" id="summaryTimeEn">UNAVAILABLE</div></div>
         <div class="summary-item"><div class="summary-label">Latest Chain Integrity</div><div class="summary-value" id="summaryIntegrityEn">UNAVAILABLE</div></div>
         <div class="summary-item"><div class="summary-label">Valid Records Ratio</div><div class="summary-value" id="summaryRatioEn">UNAVAILABLE</div></div>
+      </div>
+      <div class="audit-summary" aria-label="Audit comparison summary">
+        <div class="summary-item"><div class="summary-label">Audit Status</div><div class="summary-value" id="auditStatusEn">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">Hash Match</div><div class="summary-value" id="auditHashEn">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">Metrics Ready</div><div class="summary-value" id="auditMetricsEn">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">Generated At (UTC)</div><div class="summary-value" id="auditGeneratedEn">UNAVAILABLE</div></div>
       </div>
       <div class="log-table-wrap" aria-label="Human-readable proof log">
         <table class="log-table">
@@ -319,6 +338,12 @@
         <div class="summary-item"><div class="summary-label">Latest Proof Time (UTC)</div><div class="summary-value" id="summaryTimeJa">UNAVAILABLE</div></div>
         <div class="summary-item"><div class="summary-label">Latest Chain Integrity</div><div class="summary-value" id="summaryIntegrityJa">UNAVAILABLE</div></div>
         <div class="summary-item"><div class="summary-label">Valid Records Ratio</div><div class="summary-value" id="summaryRatioJa">UNAVAILABLE</div></div>
+      </div>
+      <div class="audit-summary" aria-label="監査比較サマリー">
+        <div class="summary-item"><div class="summary-label">Audit Status</div><div class="summary-value" id="auditStatusJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">Hash Match</div><div class="summary-value" id="auditHashJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">Metrics Ready</div><div class="summary-value" id="auditMetricsJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">Generated At (UTC)</div><div class="summary-value" id="auditGeneratedJa">UNAVAILABLE</div></div>
       </div>
       <div class="log-table-wrap" aria-label="公開証跡ログ（読みやすい表示）">
         <table class="log-table">
@@ -522,6 +547,63 @@
         applyLang(hashLang === 'ja' || hashLang === 'en' ? hashLang : (saved === 'ja' ? 'ja' : 'en'));
       }
 
+      function setAuditUnavailable(locale) {
+        const suffix = locale === 'ja' ? 'Ja' : 'En';
+        ['auditStatus', 'auditHash', 'auditMetrics', 'auditGenerated'].forEach((base) => {
+          const el = document.getElementById(`${base}${suffix}`);
+          if (!el) return;
+          el.textContent = 'UNAVAILABLE';
+          el.classList.add('muted');
+          el.classList.remove('ok', 'warn');
+        });
+      }
+
+      function setAuditSummary(locale, comparison) {
+        const suffix = locale === 'ja' ? 'Ja' : 'En';
+        const statusEl = document.getElementById(`auditStatus${suffix}`);
+        const hashEl = document.getElementById(`auditHash${suffix}`);
+        const metricsEl = document.getElementById(`auditMetrics${suffix}`);
+        const genEl = document.getElementById(`auditGenerated${suffix}`);
+        if (!statusEl || !hashEl || !metricsEl || !genEl) return;
+
+        const status = String((comparison && comparison.comparison && comparison.comparison.status) || 'UNAVAILABLE');
+        const checks = (comparison && comparison.comparison && comparison.comparison.checks) || {};
+        const hashMatch = checks.hash_match;
+        const metricsReady = checks.metrics_ready;
+        const generatedAt = String((comparison && comparison.generated_at_utc) || 'UNAVAILABLE');
+
+        statusEl.textContent = status;
+        hashEl.textContent = typeof hashMatch === 'boolean' ? (hashMatch ? 'true' : 'false') : 'UNAVAILABLE';
+        metricsEl.textContent = typeof metricsReady === 'boolean' ? (metricsReady ? 'true' : 'false') : 'UNAVAILABLE';
+        genEl.textContent = generatedAt;
+
+        [statusEl, hashEl, metricsEl, genEl].forEach((el) => el.classList.remove('muted', 'ok', 'warn'));
+        if (status === 'MATCH') statusEl.classList.add('ok');
+        else statusEl.classList.add('warn');
+        if (hashMatch === true) hashEl.classList.add('ok');
+        else if (hashMatch === false) hashEl.classList.add('warn');
+        else hashEl.classList.add('muted');
+        if (metricsReady === true) metricsEl.classList.add('ok');
+        else if (metricsReady === false) metricsEl.classList.add('warn');
+        else metricsEl.classList.add('muted');
+        if (generatedAt === 'UNAVAILABLE') genEl.classList.add('muted');
+      }
+
+      async function hydrateAuditSummary() {
+        try {
+          const res = await fetch(`https://naito-dev.github.io/genki-btc-archive-public/output/audit/comparison.json?ts=${Date.now()}`, { cache: 'no-store' });
+          if (!res.ok) throw new Error(`comparison_fetch_${res.status}`);
+          const comparison = await res.json();
+          setAuditSummary('en', comparison);
+          setAuditSummary('ja', comparison);
+          console.debug('[AUDIT_SUMMARY]', { status: comparison?.comparison?.status });
+        } catch (err) {
+          setAuditUnavailable('en');
+          setAuditUnavailable('ja');
+          console.debug('[AUDIT_SUMMARY]', { error: String(err) });
+        }
+      }
+
       async function hydrateProofTables() {
         const en = document.getElementById('proofRowsEn');
         const ja = document.getElementById('proofRowsJa');
@@ -547,6 +629,7 @@
       }
 
       initLangSwitch();
+      hydrateAuditSummary();
       hydrateProofTables();
     })();
   </script>
