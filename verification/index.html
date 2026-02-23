@@ -101,6 +101,46 @@
       font-size:12px;
       color:var(--soft);
     }
+    .log-table-wrap {
+      margin-top:10px;
+      border:1px solid rgba(122,159,225,.2);
+      border-radius:12px;
+      overflow:auto;
+      background:rgba(8,18,36,.46);
+    }
+    .log-table {
+      width:100%;
+      border-collapse:collapse;
+      min-width:860px;
+      font-size:12px;
+    }
+    .log-table th,
+    .log-table td {
+      padding:8px 10px;
+      border-bottom:1px solid rgba(122,159,225,.18);
+      color:var(--muted);
+      text-align:left;
+      vertical-align:top;
+      white-space:nowrap;
+    }
+    .log-table th {
+      color:var(--text);
+      font-size:11px;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      background:rgba(10,20,40,.42);
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+    .log-table td.ok { color:var(--ok); font-weight:700; }
+    .hash {
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      color:var(--soft);
+      max-width:220px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
     @media (max-width: 820px) {
       .grid { grid-template-columns:1fr; }
     }
@@ -144,6 +184,28 @@
         <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json">Public proof records (log.json)</a>
         <a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.md">Backtest methodology (reference)</a>
         <a href="https://github.com/Naito-Dev/genki-btc-archive-public">Project documentation index (public repository)</a>
+      </div>
+
+      <h3 style="margin-top:14px">Human-Readable Proof Log (Latest 20)</h3>
+      <p class="subtle">This is a readable view of public proof records from <code>log.json</code>. It does not expose proprietary strategy logic.</p>
+      <div class="log-table-wrap" aria-label="Human-readable proof log">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Date/UTC</th>
+              <th>Chain Integrity</th>
+              <th>Trigger</th>
+              <th>Allocation</th>
+              <th>BTC Price</th>
+              <th>Hash</th>
+              <th>Prev Hash</th>
+            </tr>
+          </thead>
+          <tbody id="proofRowsEn">
+            <tr><td colspan="8">Loading…</td></tr>
+          </tbody>
+        </table>
       </div>
 
       <hr class="divider" />
@@ -210,6 +272,28 @@
         <a href="https://github.com/Naito-Dev/genki-btc-archive-public">公開ドキュメント索引（リポジトリ）</a>
       </div>
 
+      <h3 style="margin-top:14px">公開証跡ログ（読みやすい表示・最新20件）</h3>
+      <p class="subtle"><code>log.json</code> の公開証跡を人間向けに整形表示しています。戦略ロジック本体は公開しません。</p>
+      <div class="log-table-wrap" aria-label="公開証跡ログ（読みやすい表示）">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Date/UTC</th>
+              <th>Chain Integrity</th>
+              <th>Trigger</th>
+              <th>Allocation</th>
+              <th>BTC Price</th>
+              <th>Hash</th>
+              <th>Prev Hash</th>
+            </tr>
+          </thead>
+          <tbody id="proofRowsJa">
+            <tr><td colspan="8">読み込み中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <hr class="divider" />
 
       <div class="grid">
@@ -241,5 +325,110 @@
       <p class="footnote">過去実績は将来成果を保証しません。投資助言ではありません。</p>
     </section>
   </div>
+
+  <script>
+    (function () {
+      function toNumber(v) {
+        if (v === null || v === undefined) return null;
+        const n = Number(String(v).replace(/[$,%\s,]/g, '').trim());
+        return Number.isFinite(n) ? n : null;
+      }
+
+      function shortHash(v) {
+        const s = String(v || '').trim();
+        if (!s) return '—';
+        if (s.length <= 16) return s;
+        return s.slice(0, 8) + '…' + s.slice(-8);
+      }
+
+      function fmtUsd(v) {
+        const n = toNumber(v);
+        if (n === null) return '—';
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n);
+      }
+
+      function fmtAllocation(e) {
+        const alloc = toNumber(e && e.allocation);
+        if (alloc !== null) return `${alloc}%`;
+        const ratio = toNumber(e && e.target_btc_ratio);
+        if (ratio !== null) return `${Math.round(ratio * 100)}%`;
+        return '—';
+      }
+
+      function fmtUtc(e) {
+        const v = (e && (e.updated_at_utc || e.timestamp_utc || e.date)) || '';
+        if (!v) return '—';
+        const d = new Date(v);
+        if (!Number.isFinite(d.getTime())) return String(v);
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        const hh = String(d.getUTCHours()).padStart(2, '0');
+        const mm = String(d.getUTCMinutes()).padStart(2, '0');
+        return `${y}-${m}-${day} ${hh}:${mm}`;
+      }
+
+      function normDay(e, idx) {
+        if (e && e.day) return String(e.day);
+        return `Day ${idx + 1}`;
+      }
+
+      function sortByUtcDesc(entries) {
+        return [...entries].sort((a, b) => {
+          const ta = Date.parse((a && (a.updated_at_utc || a.timestamp_utc || a.date)) || '') || 0;
+          const tb = Date.parse((b && (b.updated_at_utc || b.timestamp_utc || b.date)) || '') || 0;
+          return tb - ta;
+        });
+      }
+
+      function renderRows(tbody, entries, locale) {
+        if (!tbody) return;
+        if (!entries.length) {
+          tbody.innerHTML = `<tr><td colspan="8">${locale === 'ja' ? '表示可能なレコードがありません。' : 'No records available.'}</td></tr>`;
+          return;
+        }
+
+        const rows = entries.slice(0, 20).map((e, i) => {
+          const integrity = String((e && e.chain_integrity) || '—');
+          const trigger = String((e && (e.trigger || e.status || e.reason_summary)) || '—');
+          return `<tr>
+            <td>${normDay(e, i)}</td>
+            <td>${fmtUtc(e)}</td>
+            <td class="${integrity === 'VALID' ? 'ok' : ''}">${integrity}</td>
+            <td>${trigger}</td>
+            <td>${fmtAllocation(e)}</td>
+            <td>${fmtUsd(e && e.btc_price)}</td>
+            <td class="hash" title="${String((e && e.hash) || '')}">${shortHash(e && e.hash)}</td>
+            <td class="hash" title="${String((e && e.prev_hash) || '')}">${shortHash(e && e.prev_hash)}</td>
+          </tr>`;
+        }).join('');
+
+        tbody.innerHTML = rows;
+      }
+
+      async function hydrateProofTables() {
+        const en = document.getElementById('proofRowsEn');
+        const ja = document.getElementById('proofRowsJa');
+        if (!en && !ja) return;
+
+        try {
+          const res = await fetch(`https://naito-dev.github.io/genki-btc-archive-public/log.json?ts=${Date.now()}`, { cache: 'no-store' });
+          if (!res.ok) throw new Error(`log_fetch_${res.status}`);
+          const log = await res.json();
+          const entries = Array.isArray(log && log.entries) ? sortByUtcDesc(log.entries) : [];
+          renderRows(en, entries, 'en');
+          renderRows(ja, entries, 'ja');
+          console.debug('[PROOF_LOG_VIEW]', { count: entries.length });
+        } catch (err) {
+          if (en) en.innerHTML = '<tr><td colspan="8">UNAVAILABLE</td></tr>';
+          if (ja) ja.innerHTML = '<tr><td colspan="8">UNAVAILABLE</td></tr>';
+          console.debug('[PROOF_LOG_VIEW]', { error: String(err) });
+        }
+      }
+
+      hydrateProofTables();
+    })();
+  </script>
+
 </body>
 </html>
