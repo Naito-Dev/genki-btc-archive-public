@@ -243,10 +243,11 @@
       </div>
       <div class="audit-summary" aria-label="Audit comparison summary">
         <div class="summary-item"><div class="summary-label">Audit Status</div><div class="summary-value" id="auditStatusEn">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">Hash Match</div><div class="summary-value" id="auditHashEn">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">Metrics Ready</div><div class="summary-value" id="auditMetricsEn">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">Proof Chain Check</div><div class="summary-value" id="auditHashEn">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">Audit Metrics Available</div><div class="summary-value" id="auditMetricsEn">UNAVAILABLE</div></div>
         <div class="summary-item"><div class="summary-label">Generated At (UTC)</div><div class="summary-value" id="auditGeneratedEn">UNAVAILABLE</div></div>
       </div>
+      <p class="subtle">Quick audit check for reproducibility and proof integrity. Detailed evidence is available in comparison.json.</p>
       <div class="log-table-wrap" aria-label="Human-readable proof log">
         <table class="log-table">
           <thead>
@@ -340,11 +341,12 @@
         <div class="summary-item"><div class="summary-label">Valid Records Ratio</div><div class="summary-value" id="summaryRatioJa">UNAVAILABLE</div></div>
       </div>
       <div class="audit-summary" aria-label="監査比較サマリー">
-        <div class="summary-item"><div class="summary-label">Audit Status</div><div class="summary-value" id="auditStatusJa">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">Hash Match</div><div class="summary-value" id="auditHashJa">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">Metrics Ready</div><div class="summary-value" id="auditMetricsJa">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">Generated At (UTC)</div><div class="summary-value" id="auditGeneratedJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">監査ステータス</div><div class="summary-value" id="auditStatusJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">証跡チェーン検証</div><div class="summary-value" id="auditHashJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">監査指標の取得状態</div><div class="summary-value" id="auditMetricsJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">生成時刻（UTC）</div><div class="summary-value" id="auditGeneratedJa">UNAVAILABLE</div></div>
       </div>
+      <p class="subtle">再現性と証跡整合性のクイック監査表示です。詳細証跡は comparison.json で確認できます。</p>
       <div class="log-table-wrap" aria-label="公開証跡ログ（読みやすい表示）">
         <table class="log-table">
           <thead>
@@ -573,8 +575,8 @@
         const generatedAt = String((comparison && comparison.generated_at_utc) || 'UNAVAILABLE');
 
         statusEl.textContent = status;
-        hashEl.textContent = typeof hashMatch === 'boolean' ? (hashMatch ? 'true' : 'false') : 'UNAVAILABLE';
-        metricsEl.textContent = typeof metricsReady === 'boolean' ? (metricsReady ? 'true' : 'false') : 'UNAVAILABLE';
+        hashEl.textContent = typeof hashMatch === 'boolean' ? (hashMatch ? 'PASS' : 'FAIL') : 'UNAVAILABLE';
+        metricsEl.textContent = typeof metricsReady === 'boolean' ? (metricsReady ? 'PASS' : 'FAIL') : 'UNAVAILABLE';
         genEl.textContent = generatedAt;
 
         [statusEl, hashEl, metricsEl, genEl].forEach((el) => el.classList.remove('muted', 'ok', 'warn'));
