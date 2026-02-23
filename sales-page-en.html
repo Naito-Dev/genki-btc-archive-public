@@ -537,7 +537,7 @@
             <div><strong>Chain Integrity:</strong> <span id="proofIntegrity">VALID</span></div>
             <div><strong>Records Published:</strong> <span id="proofRecords">N</span></div>
             <div><strong>Last Proof Time (UTC):</strong> <span id="proofTimeUtc">YYYY-MM-DD HH:MM</span></div>
-            <div><strong>Last Commit SHA:</strong> <a id="proofCommitLink" href="https://github.com/Naito-Dev/genki-btc-archive-public/commits/main" target="_blank" rel="noopener noreferrer" style="color:var(--muted)"><span id="proofCommitSha">UNAVAILABLE</span></a></div>
+            <div><strong>Last Commit SHA:</strong> <a id="proofCommitLink" href="" target="_blank" rel="noopener noreferrer" style="color:var(--muted)" hidden><span id="proofCommitShaLink">UNAVAILABLE</span></a><span id="proofCommitShaPlain" style="color:var(--muted)">UNAVAILABLE</span></div>
             <div><strong>Real Capital Test:</strong> $1,300 in progress</div>
           </div>
         </div>
@@ -720,9 +720,10 @@
         const integrityEl = document.getElementById('proofIntegrity');
         const recordsEl = document.getElementById('proofRecords');
         const timeEl = document.getElementById('proofTimeUtc');
-        const commitEl = document.getElementById('proofCommitSha');
+        const commitLinkTextEl = document.getElementById('proofCommitShaLink');
+        const commitPlainEl = document.getElementById('proofCommitShaPlain');
         const commitLinkEl = document.getElementById('proofCommitLink');
-        if (!dayEl || !integrityEl || !recordsEl || !timeEl || !commitEl || !commitLinkEl) return;
+        if (!dayEl || !integrityEl || !recordsEl || !timeEl || !commitLinkEl || !commitLinkTextEl || !commitPlainEl) return;
 
         try {
           const res = await fetch(`log.json?ts=${Date.now()}`, { cache: 'no-store' });
@@ -743,9 +744,18 @@
           const fullSha = String(log?.commit_sha || latest?.commit_sha || '').trim();
           const commitSha = fullSha ? fullSha.slice(0, 7) : 'UNAVAILABLE';
           const commitUrl = String(log?.commit_url || latest?.commit_url || '').trim() ||
-            (fullSha ? `https://github.com/Naito-Dev/genki-btc-archive-public/commit/${fullSha}` : 'https://github.com/Naito-Dev/genki-btc-archive-public/commits/main');
-          commitEl.textContent = commitSha;
-          commitLinkEl.href = commitUrl;
+            (fullSha ? `https://github.com/Naito-Dev/genki-btc-archive-public/commit/${fullSha}` : '');
+          if (commitUrl && commitSha !== 'UNAVAILABLE') {
+            commitLinkTextEl.textContent = commitSha;
+            commitLinkEl.href = commitUrl;
+            commitLinkEl.hidden = false;
+            commitPlainEl.hidden = true;
+          } else {
+            commitPlainEl.textContent = 'UNAVAILABLE';
+            commitPlainEl.hidden = false;
+            commitLinkEl.hidden = true;
+            commitLinkEl.removeAttribute('href');
+          }
 
           console.debug('[PROOF_STATUS]', {
             day: dayCount || 0,
@@ -758,8 +768,10 @@
           integrityEl.textContent = 'UNAVAILABLE';
           recordsEl.textContent = 'UNAVAILABLE';
           timeEl.textContent = 'UNAVAILABLE';
-          commitEl.textContent = 'UNAVAILABLE';
-          commitLinkEl.href = 'https://github.com/Naito-Dev/genki-btc-archive-public/commits/main';
+          commitPlainEl.textContent = 'UNAVAILABLE';
+          commitPlainEl.hidden = false;
+          commitLinkEl.hidden = true;
+          commitLinkEl.removeAttribute('href');
           console.debug('[PROOF_STATUS]', { error: String(err) });
         }
       }
