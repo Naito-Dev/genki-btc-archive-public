@@ -639,8 +639,12 @@
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
       }
 
-      function setStatus(msg) {
+      function setStatus(msg, type) {
         statusEl.textContent = msg || '';
+        statusEl.style.color =
+          type === 'success' ? '#2bb673' :
+          type === 'error' ? '#d95b5b' :
+          '';
       }
 
       async function submitJson(endpoint, payload) {
@@ -762,16 +766,18 @@
       hydrateProofStatus();
 
       submitBtn.addEventListener('click', async function () {
+        const defaultLabel = 'βコホートのウェイトリストに参加';
+        const submittingLabel = '送信中...';
         const email = String(emailEl.value || '').trim();
         const name = String((nameEl && nameEl.value) || '').trim();
         if (!isValidEmail(email)) {
-          setStatus('有効なメールアドレスを入力してください。');
+          setStatus('有効なメールアドレスを入力してください。', 'error');
           return;
         }
 
         submitBtn.disabled = true;
         setStatus('送信中...');
-        submitBtn.textContent = '送信中...';
+        submitBtn.textContent = submittingLabel;
 
         const payload = {
           timestamp_utc: new Date().toISOString(),
@@ -779,18 +785,14 @@
           name: name || '',
           use_case: 'Waitlist',
           page_lang: 'ja',
-          source: 'sales-page-en'
+          source: 'sales-page-ja'
         };
 
-        if (!WAITLIST_ENDPOINT) {
-          console.error('[WAITLIST_SUBMIT]', { ok: false, reason: 'endpoint_missing', payload });
-          setStatus('送信に失敗しました。再度お試しください。');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'βコホートのウェイトリストに参加';
-          return;
-        }
-
         try {
+          if (!WAITLIST_ENDPOINT) {
+            throw new Error('endpoint_missing');
+          }
+
           let result;
           let mode = 'json';
           try {
@@ -811,18 +813,19 @@
             body: result.body
           });
 
-          setStatus('ウェイトリスト登録を受け付けました。一般公開前にご案内します。');
-          submitBtn.textContent = '送信済み';
-        } catch (_) {
+          setStatus('登録ありがとうございます。先行案内の対象として受け付けました。', 'success');
+        } catch (err) {
+          console.error('[WAITLIST_SUBMIT]', { ok: false, error: String(err), payload });
           try {
             const key = 'genki_waitlist_leads_failed';
             const failed = JSON.parse(localStorage.getItem(key) || '[]');
             failed.push(payload);
             localStorage.setItem(key, JSON.stringify(failed));
           } catch (__){}
-          setStatus('送信に失敗しました。再度お試しください。');
+          setStatus('送信に失敗しました。再度お試しください。', 'error');
+        } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'βコホートのウェイトリストに参加';
+          submitBtn.textContent = defaultLabel;
         }
       });
     })();

@@ -640,8 +640,12 @@
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
       }
 
-      function setStatus(msg) {
+      function setStatus(msg, type) {
         statusEl.textContent = msg || '';
+        statusEl.style.color =
+          type === 'success' ? '#2bb673' :
+          type === 'error' ? '#d95b5b' :
+          '';
       }
 
       async function submitJson(endpoint, payload) {
@@ -763,16 +767,18 @@
       hydrateProofStatus();
 
       submitBtn.addEventListener('click', async function () {
+        const defaultLabel = 'Join the Beta Cohort Waitlist';
+        const submittingLabel = 'Submitting...';
         const email = String(emailEl.value || '').trim();
         const name = String((nameEl && nameEl.value) || '').trim();
         if (!isValidEmail(email)) {
-          setStatus('Please enter a valid email address.');
+          setStatus('Please enter a valid email address.', 'error');
           return;
         }
 
         submitBtn.disabled = true;
         setStatus('Submitting...');
-        submitBtn.textContent = 'Submitting...';
+        submitBtn.textContent = submittingLabel;
 
         const payload = {
           timestamp_utc: new Date().toISOString(),
@@ -783,15 +789,11 @@
           source: 'sales-page-en'
         };
 
-        if (!WAITLIST_ENDPOINT) {
-          console.error('[WAITLIST_SUBMIT]', { ok: false, reason: 'endpoint_missing', payload });
-          setStatus('Submission failed. Please try again.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Join the Beta Cohort Waitlist';
-          return;
-        }
-
         try {
+          if (!WAITLIST_ENDPOINT) {
+            throw new Error('endpoint_missing');
+          }
+
           let result;
           let mode = 'json';
           try {
@@ -812,18 +814,19 @@
             body: result.body
           });
 
-          setStatus('You are on the waitlist. We will notify you before public opening.');
-          submitBtn.textContent = 'Submitted';
-        } catch (_) {
+          setStatus('Thanks — you’re on the waitlist. We’ll notify you before public opening.', 'success');
+        } catch (err) {
+          console.error('[WAITLIST_SUBMIT]', { ok: false, error: String(err), payload });
           try {
             const key = 'genki_waitlist_leads_failed';
             const failed = JSON.parse(localStorage.getItem(key) || '[]');
             failed.push(payload);
             localStorage.setItem(key, JSON.stringify(failed));
           } catch (__){}
-          setStatus('Submission failed. Please try again.');
+          setStatus('Submission failed. Please try again.', 'error');
+        } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Join the Beta Cohort Waitlist';
+          submitBtn.textContent = defaultLabel;
         }
       });
     })();
