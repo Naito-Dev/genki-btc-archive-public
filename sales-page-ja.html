@@ -533,10 +533,10 @@
         <div class="proof-status" aria-label="Proof status summary">
           <p class="title">Proof Status</p>
           <div class="proof-status-grid">
-            <div><strong>Live Forward Test:</strong> Day X / 30</div>
-            <div><strong>Chain Integrity:</strong> VALID</div>
-            <div><strong>Records Published:</strong> N</div>
-            <div><strong>Last Proof Time (UTC):</strong> YYYY-MM-DD HH:MM</div>
+            <div><strong>Live Forward Test:</strong> <span id="proofDay">Day X / 30</span></div>
+            <div><strong>Chain Integrity:</strong> <span id="proofIntegrity">VALID</span></div>
+            <div><strong>Records Published:</strong> <span id="proofRecords">N</span></div>
+            <div><strong>Last Proof Time (UTC):</strong> <span id="proofTimeUtc">YYYY-MM-DD HH:MM</span></div>
             <div><strong>Real Capital Test:</strong> $1,300 in progress</div>
           </div>
         </div>
@@ -700,6 +700,57 @@
         const accepted = res.ok && (appOk || !bodyJson);
         return { accepted, status: res.status, body: bodyJson || bodyText };
       }
+
+      function formatUtc(ts) {
+        if (!ts) return 'UNAVAILABLE';
+        const d = new Date(ts);
+        if (!Number.isFinite(d.getTime())) return String(ts);
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        const hh = String(d.getUTCHours()).padStart(2, '0');
+        const mm = String(d.getUTCMinutes()).padStart(2, '0');
+        return `${y}-${m}-${day} ${hh}:${mm}`;
+      }
+
+      async function hydrateProofStatus() {
+        const dayEl = document.getElementById('proofDay');
+        const integrityEl = document.getElementById('proofIntegrity');
+        const recordsEl = document.getElementById('proofRecords');
+        const timeEl = document.getElementById('proofTimeUtc');
+        if (!dayEl || !integrityEl || !recordsEl || !timeEl) return;
+
+        try {
+          const res = await fetch(`log.json?ts=${Date.now()}`, { cache: 'no-store' });
+          if (!res.ok) throw new Error(`log_fetch_${res.status}`);
+          const log = await res.json();
+          const entries = Array.isArray(log?.entries) ? log.entries : [];
+          const latest = (log && typeof log === 'object' ? log.latest : null) || entries[entries.length - 1] || {};
+
+          const dayCount = entries.length;
+          const integrity = latest?.chain_integrity || 'UNAVAILABLE';
+          const proofTime = latest?.updated_at_utc || latest?.timestamp_utc || log?.last_updated_utc || latest?.date || '';
+
+          dayEl.textContent = `Day ${dayCount || 0} / 30`;
+          integrityEl.textContent = String(integrity);
+          recordsEl.textContent = String(dayCount || 0);
+          timeEl.textContent = formatUtc(proofTime);
+
+          console.debug('[PROOF_STATUS]', {
+            day: dayCount || 0,
+            chain_integrity: integrity,
+            last_proof_time_utc: proofTime
+          });
+        } catch (err) {
+          dayEl.textContent = 'UNAVAILABLE';
+          integrityEl.textContent = 'UNAVAILABLE';
+          recordsEl.textContent = 'UNAVAILABLE';
+          timeEl.textContent = 'UNAVAILABLE';
+          console.debug('[PROOF_STATUS]', { error: String(err) });
+        }
+      }
+
+      hydrateProofStatus();
 
       submitBtn.addEventListener('click', async function () {
         const email = String(emailEl.value || '').trim();
