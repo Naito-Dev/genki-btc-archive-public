@@ -8,7 +8,7 @@ Japanese version: [README.ja.md](./README.ja.md)
 
 ## What This Repository Is
 
-This is the **public proof archive** for Genki BTC Signal — a daily risk-control service for BTC spot holders.
+This is the public proof archive for Genki BTC Signal — a daily risk-control service for BTC spot holders.
 
 Every day, the system evaluates market structure and outputs one of four allocation bands:
 
