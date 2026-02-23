@@ -9,6 +9,17 @@ No strategy code, no API keys, no infrastructure details are included.
 
 This repository is a public performance archive only.
 
+## Verification & Reference Methodology (v1)
+- Genki BTC Signal is a rule-based BTC spot allocation service using four allocation bands: `0 / 30 / 70 / 100`.
+- Headline metrics shown on LP (Final Equity, CAGR, Max Drawdown, Avg Exposure) are **historical reference metrics**, not live guarantees.
+- Daily live proof records are published via `log.json` with a hash chain (`hash`, `prev_hash`, `chain_integrity`) and Git commit history.
+- Strategy logic implementation is proprietary; reproducibility context and publication integrity are public.
+
+### How to verify (basic)
+1. Open `log.json` and read `latest` and `entries`.
+2. Confirm each record links to previous via `prev_hash` and hash chain remains valid.
+3. Compare publication timestamps with GitHub commit history.
+
 Hash-chain note:
 - Each entry hash is derived from canonical entry JSON + `|` + `prev_hash` (or empty on first entry), using SHA-256.
 
