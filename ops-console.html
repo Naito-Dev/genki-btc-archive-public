@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>運用コンソール（朝9時 / 夜21時）</title>
+  <style>
+    :root{
+      --bg:#0a0f1a;
+      --panel:#121a2a;
+      --line:#2a3a58;
+      --text:#f1f5ff;
+      --muted:#9fb1d2;
+      --ok:#2bb673;
+      --ng:#d95b5b;
+      --btn:#d8b24a;
+      --btnText:#101828;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background:linear-gradient(180deg,#090d14,#0d1524);
+      color:var(--text);
+    }
+    .wrap{
+      width:min(980px,94vw);
+      margin:18px auto 34px;
+      display:grid;
+      gap:14px;
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+    h1{font-size:22px;margin:0 0 8px}
+    h2{font-size:18px;margin:0 0 10px}
+    .sub{color:var(--muted);font-size:13px;line-height:1.45}
+    .top-row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+    }
+    .date-box{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .date-box input{
+      background:#0b1220;
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:10px;
+      min-height:42px;
+      padding:0 10px;
+      font-size:14px;
+    }
+    button, .link-btn{
+      border:0;
+      border-radius:10px;
+      min-height:44px;
+      padding:0 14px;
+      font-weight:700;
+      cursor:pointer;
+      font-size:14px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .btn-main{
+      background:linear-gradient(180deg,#e7cb76,#d8b24a);
+      color:var(--btnText);
+      border:1px solid #b98d2f;
+    }
+    .btn-ghost{
+      background:#0d1526;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+    .steps{display:grid;gap:10px;margin-top:10px}
+    .step{
+      border:1px solid #2a3a58;
+      background:#0b1423;
+      border-radius:12px;
+      padding:10px;
+      display:grid;
+      gap:8px;
+    }
+    .step-title{font-weight:700}
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .ok-ng{
+      min-width:88px;
+      min-height:42px;
+      border:1px solid transparent;
+    }
+    .ok-ng.ok{background:rgba(43,182,115,.16);color:#7ef0bd;border-color:rgba(43,182,115,.45)}
+    .ok-ng.ng{background:rgba(217,91,91,.16);color:#ffb8b8;border-color:rgba(217,91,91,.45)}
+    .ok-ng.active{outline:2px solid #ffffff33}
+    .status{
+      font-size:13px;
+      color:var(--muted);
+    }
+    .cmd{
+      width:100%;
+      background:#0a1020;
+      border:1px dashed #39507a;
+      border-radius:10px;
+      padding:8px;
+      color:#d8e4ff;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;
+      overflow:auto;
+      white-space:nowrap;
+    }
+    .memo{
+      display:none;
+      border:1px solid #614646;
+      background:#1e1316;
+      border-radius:10px;
+      padding:10px;
+      font-size:12px;
+      color:#ffd3d3;
+      white-space:pre-wrap;
+    }
+    .memo.show{display:block}
+    .save-row{
+      margin-top:10px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
+      background:#0b1322;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+      margin-top:8px;
+    }
+    th,td{
+      border-bottom:1px solid #243552;
+      padding:8px;
+      text-align:left;
+      vertical-align:top;
+    }
+    th{color:#cbd7ef;font-size:12px;text-transform:uppercase}
+    .row-pass{color:#7ef0bd}
+    .row-fail{color:#ffb8b8}
+    @media (max-width: 760px){
+      .top-row{grid-template-columns:1fr}
+      .actions{flex-direction:row}
+      th:nth-child(4), td:nth-child(4){display:none}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1>運用コンソール（朝9時 / 夜21時）</h1>
+      <p class="sub">毎日の運用を「確認作業」にするためのローカル専用画面です。売買ロジックや監査ロジックは変更しません。</p>
+      <div class="top-row" style="margin-top:10px">
+        <div class="date-box">
+          <span class="pill">対象日（JST）</span>
+          <input id="opsDate" type="date">
+          <button class="btn-ghost" id="todayBtn" type="button">今日をセット</button>
+        </div>
+        <button class="btn-main" id="saveAllBtn" type="button">今日の記録を保存</button>
+      </div>
+    </section>
+
+    <section class="card" id="amSection">
+      <div class="top-row">
+        <h2>朝9時チェック（公開面の確認）</h2>
+        <button class="btn-main" type="button" id="amStartBtn">AMチェック開始</button>
+      </div>
+      <p class="sub">目的: 公開面が更新されていて、見た人に不安を与えない状態か確認する。</p>
+      <div class="actions" style="margin-top:8px">
+        <a class="link-btn btn-ghost" href="https://naito-dev.github.io/genki-btc-archive-public/" target="_blank" rel="noopener">公開ダッシュボードを開く</a>
+        <a class="link-btn btn-ghost" href="https://naito-dev.github.io/genki-btc-archive-public/verification/index.html" target="_blank" rel="noopener">検証ページを開く</a>
+      </div>
+      <div class="steps" id="amSteps"></div>
+      <div class="save-row">
+        <button class="btn-main" type="button" id="amSaveBtn">AM確認記録を保存（ローカル）</button>
+        <span class="pill" id="amStatus">AM結果: 未保存</span>
+      </div>
+      <p class="sub" style="margin-top:8px">この保存は運営者の確認記録（ローカル保存）です。顧客向け証拠は公開ダッシュボード/検証ページ/証跡ログで管理します。</p>
+    </section>
+
+    <section class="card" id="pmSection">
+      <div class="top-row">
+        <h2>夜21時運用（送信チェック）</h2>
+        <button class="btn-main" type="button" id="pmStartBtn">PM運用開始</button>
+      </div>
+      <p class="sub">目的: DRY_RUN→LIVE→アーカイブまでを確実に回し、証拠を残す。</p>
+      <div class="steps" id="pmSteps"></div>
+      <div class="save-row">
+        <button class="btn-main" type="button" id="pmSaveBtn">PM確認記録を保存（ローカル）</button>
+        <span class="pill" id="pmStatus">PM結果: 未保存</span>
+      </div>
+      <p class="sub" style="margin-top:8px">この保存は運営者の確認記録（ローカル保存）です。顧客向け証拠は公開ダッシュボード/検証ページ/証跡ログで管理します。</p>
+    </section>
+
+    <section class="card">
+      <div class="top-row">
+        <h2>日次ログ（ローカル）</h2>
+        <button class="btn-ghost" type="button" id="clearBtn">全ログ削除</button>
+      </div>
+      <div class="sub">localStorage保存。必要ならこの内容をChatGPT/Codexへ貼って監査できます。</div>
+      <table>
+        <thead>
+          <tr>
+            <th>日付</th>
+            <th>AM</th>
+            <th>PM</th>
+            <th>メモ</th>
+            <th>保存時刻</th>
+          </tr>
+        </thead>
+        <tbody id="dailyLogRows">
+          <tr><td colspan="5">まだ記録がありません。</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "opsConsoleRecordsV1";
+
+    const amChecklist = [
+      { id: "am1", title: "公開ダッシュボードを開き、Updatedが当日（JST）か確認", check: "日付が古いままならNG" },
+      { id: "am2", title: "検証ページを開き、最新レコード日付が更新されているか確認", check: "前日止まりならNG" },
+      { id: "am3", title: "崩れ・エラー表示（表示欠け/UNAVAILABLE多発）がないか確認", check: "目立つ崩れ/欠損があればNG" }
+    ];
+
+    const pmChecklist = [
+      { id: "pm1", title: ".env.live があるか確認", cmd: "ls -la /Users/Claw/tradep-test/.env.live", check: "なければ中止して相談" },
+      { id: "pm2", title: ".env.live を読み込む", cmd: "cd /Users/Claw/tradep-test && set -a && source .env.live && set +a", check: "読み込み後に次ステップへ進む" },
+      { id: "pm3", title: "DRY_RUN 実行", cmd: "python3 /Users/Claw/tradep-test/scripts/send_waitlist_daily.py --status-type WAIT --allocation-band 30 --leads-source /tmp/waitlist_single.csv --dry-run", check: "DRY_RUN_OK / recipient_count > 0" },
+      { id: "pm4", title: "LIVE 実行", cmd: "MAIL_MODE=smtp python3 /Users/Claw/tradep-test/scripts/send_waitlist_daily.py --status-type WAIT --allocation-band 30 --leads-source /tmp/waitlist_single.csv --live", check: "LIVE_OK / success_count>=1 / failure_count=0" },
+      { id: "pm5", title: "送信ログ確認（直近3行）", cmd: "tail -n 3 /Users/Claw/tradep-test/output/waitlist_email_send_log.ndjson", check: "今回のrun_id行で success_count, failure_count を確認（tail -n 1 は古い dry_run 行の可能性あり）" },
+      { id: "pm6", title: "証跡アーカイブ実行", cmd: "python3 /Users/Claw/tradep-test/scripts/archive_waitlist_ops.py --source /Users/Claw/tradep-test/output/waitlist_email_send_log.ndjson", check: "ARCHIVE_OK が出ること" }
+    ];
+
+    function jstToday() {
+      const now = new Date();
+      const jst = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+      const y = jst.getFullYear();
+      const m = String(jst.getMonth() + 1).padStart(2, "0");
+      const d = String(jst.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function escapeHtml(s) {
+      return String(s || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function ngMemoTemplate(stepTitle, date) {
+      return [
+        "【運用コンソール NG報告】",
+        `日付: ${date}`,
+        `NG項目: ${stepTitle}`,
+        "実際に起きたこと: ",
+        "期待していた状態: ",
+        "画面/ログの抜粋: ",
+        "次に確認してほしいこと: "
+      ].join("\n");
+    }
+
+    function createStep(container, item, section) {
+      const wrap = document.createElement("div");
+      wrap.className = "step";
+      wrap.dataset.stepId = item.id;
+
+      const title = document.createElement("div");
+      title.className = "step-title";
+      title.textContent = item.title;
+      wrap.appendChild(title);
+
+      const check = document.createElement("div");
+      check.className = "sub";
+      check.textContent = `確認ポイント: ${item.check}`;
+      wrap.appendChild(check);
+
+      if (item.cmd) {
+        const cmd = document.createElement("div");
+        cmd.className = "cmd";
+        cmd.textContent = item.cmd;
+        wrap.appendChild(cmd);
+
+        const cmdActions = document.createElement("div");
+        cmdActions.className = "actions";
+        const copy = document.createElement("button");
+        copy.type = "button";
+        copy.className = "btn-ghost";
+        copy.textContent = "コマンドをコピー";
+        copy.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(item.cmd);
+            copy.textContent = "コピー済み";
+            setTimeout(() => (copy.textContent = "コマンドをコピー"), 900);
+          } catch (_) {
+            copy.textContent = "コピー失敗";
+            setTimeout(() => (copy.textContent = "コマンドをコピー"), 900);
+          }
+        });
+        cmdActions.appendChild(copy);
+        wrap.appendChild(cmdActions);
+      }
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+      const ok = document.createElement("button");
+      ok.type = "button";
+      ok.className = "ok-ng ok";
+      ok.textContent = "OK";
+      const ng = document.createElement("button");
+      ng.type = "button";
+      ng.className = "ok-ng ng";
+      ng.textContent = "NG";
+      const status = document.createElement("div");
+      status.className = "status";
+      status.textContent = "未判定";
+      actions.appendChild(ok);
+      actions.appendChild(ng);
+      actions.appendChild(status);
+      wrap.appendChild(actions);
+
+      const memo = document.createElement("div");
+      memo.className = "memo";
+      wrap.appendChild(memo);
+
+      function setResult(v) {
+        wrap.dataset.result = v;
+        ok.classList.toggle("active", v === "PASS");
+        ng.classList.toggle("active", v === "FAIL");
+        if (v === "PASS") {
+          status.textContent = "判定: PASS";
+          status.className = "status row-pass";
+          memo.classList.remove("show");
+          memo.textContent = "";
+        } else {
+          status.textContent = "判定: FAIL";
+          status.className = "status row-fail";
+          const date = document.getElementById("opsDate").value || jstToday();
+          const text = ngMemoTemplate(item.title, date);
+          memo.textContent = text;
+          memo.classList.add("show");
+        }
+      }
+
+      ok.addEventListener("click", () => setResult("PASS"));
+      ng.addEventListener("click", () => setResult("FAIL"));
+
+      container.appendChild(wrap);
+    }
+
+    function gatherResult(sectionId) {
+      const steps = Array.from(document.querySelectorAll(`#${sectionId} .step`));
+      const total = steps.length;
+      const pass = steps.filter((s) => s.dataset.result === "PASS").length;
+      const fail = steps.filter((s) => s.dataset.result === "FAIL").length;
+      const overall = fail > 0 ? "FAIL" : (pass === total ? "PASS" : "PENDING");
+      const failedMemos = steps
+        .map((s) => s.querySelector(".memo"))
+        .filter((m) => m && m.classList.contains("show"))
+        .map((m) => m.textContent);
+      return { total, pass, fail, overall, failedMemos };
+    }
+
+    function loadRecords() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function saveRecords(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function renderTable() {
+      const records = loadRecords();
+      const rows = document.getElementById("dailyLogRows");
+      const dates = Object.keys(records).sort().reverse();
+      if (!dates.length) {
+        rows.innerHTML = '<tr><td colspan="5">まだ記録がありません。</td></tr>';
+        return;
+      }
+      rows.innerHTML = dates.map((d) => {
+        const r = records[d] || {};
+        const am = r.am?.overall || "PENDING";
+        const pm = r.pm?.overall || "PENDING";
+        const memo = (r.am?.failedMemos?.[0] || r.pm?.failedMemos?.[0] || "").split("\n")[0];
+        const amCls = am === "PASS" ? "row-pass" : (am === "FAIL" ? "row-fail" : "");
+        const pmCls = pm === "PASS" ? "row-pass" : (pm === "FAIL" ? "row-fail" : "");
+        return `<tr>
+          <td>${escapeHtml(d)}</td>
+          <td class="${amCls}">${escapeHtml(am)}</td>
+          <td class="${pmCls}">${escapeHtml(pm)}</td>
+          <td>${escapeHtml(memo)}</td>
+          <td>${escapeHtml(r.saved_at_utc || "-")}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    function saveSection(sectionId, targetLabelId, keyName) {
+      const date = document.getElementById("opsDate").value || jstToday();
+      const result = gatherResult(sectionId);
+      const records = loadRecords();
+      const row = records[date] || {};
+      row[keyName] = result;
+      row.saved_at_utc = new Date().toISOString();
+      records[date] = row;
+      saveRecords(records);
+      document.getElementById(targetLabelId).textContent = `${keyName.toUpperCase()}結果: ${result.overall}`;
+      renderTable();
+    }
+
+    function init() {
+      const dateInput = document.getElementById("opsDate");
+      dateInput.value = jstToday();
+      document.getElementById("todayBtn").addEventListener("click", () => {
+        dateInput.value = jstToday();
+      });
+
+      const amContainer = document.getElementById("amSteps");
+      const pmContainer = document.getElementById("pmSteps");
+      amChecklist.forEach((item) => createStep(amContainer, item, "am"));
+      pmChecklist.forEach((item) => createStep(pmContainer, item, "pm"));
+
+      document.getElementById("amStartBtn").addEventListener("click", () => {
+        amContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      document.getElementById("pmStartBtn").addEventListener("click", () => {
+        pmContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      document.getElementById("amSaveBtn").addEventListener("click", () => {
+        saveSection("amSection", "amStatus", "am");
+      });
+      document.getElementById("pmSaveBtn").addEventListener("click", () => {
+        saveSection("pmSection", "pmStatus", "pm");
+      });
+      document.getElementById("saveAllBtn").addEventListener("click", () => {
+        saveSection("amSection", "amStatus", "am");
+        saveSection("pmSection", "pmStatus", "pm");
+      });
+      document.getElementById("clearBtn").addEventListener("click", () => {
+        if (!confirm("全ログを削除します。よろしいですか？")) return;
+        localStorage.removeItem(STORAGE_KEY);
+        renderTable();
+      });
+
+      renderTable();
+    }
+
+    init();
+  </script>
+</body>
+</html>
