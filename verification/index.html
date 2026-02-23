@@ -41,6 +41,12 @@
       letter-spacing:.06em;
       text-transform:uppercase;
     }
+    .lang a.active {
+      color:var(--text);
+      border-color:var(--gold);
+      background:rgba(216,178,74,.14);
+    }
+    .lang-section[hidden] { display:none; }
     .panel {
       background:var(--panel);
       border:1px solid var(--line);
@@ -149,11 +155,11 @@
 <body>
   <div class="wrap">
     <nav class="lang" aria-label="Language switch">
-      <a href="/genki-btc-archive-public/verification/index.html">EN</a>
-      <a href="/genki-btc-archive-public/verification/index.html#ja">JA</a>
+      <a href="#en" data-lang="en" aria-current="page">EN</a>
+      <a href="#ja" data-lang="ja">JA</a>
     </nav>
 
-    <section class="panel">
+    <section class="panel lang-section" id="en">
       <h1>Technical Verification & Reproducibility Center</h1>
       <p>Proprietary strategy logic remains private. Verification artifacts and reproducibility context are published here for transparency.</p>
 
@@ -239,7 +245,7 @@
       <p class="footnote">Past performance is not indicative of future results. Not investment advice.</p>
     </section>
 
-    <section class="panel" id="ja">
+    <section class="panel lang-section" id="ja">
       <h2>技術検証・再現性センター（上級者向け）</h2>
       <p>戦略ロジック本体（IP）は非公開のまま、検証可能性と再現性に必要な公開資料をここに集約します。</p>
 
@@ -406,6 +412,43 @@
         tbody.innerHTML = rows;
       }
 
+      function applyLang(lang) {
+        const chosen = lang === 'ja' ? 'ja' : 'en';
+        const enSection = document.getElementById('en');
+        const jaSection = document.getElementById('ja');
+        const links = document.querySelectorAll('.lang a[data-lang]');
+
+        if (enSection) enSection.hidden = chosen !== 'en';
+        if (jaSection) jaSection.hidden = chosen !== 'ja';
+
+        links.forEach((a) => {
+          const active = a.getAttribute('data-lang') === chosen;
+          a.classList.toggle('active', active);
+          if (active) a.setAttribute('aria-current', 'page');
+          else a.removeAttribute('aria-current');
+        });
+
+        try { localStorage.setItem('verification_lang', chosen); } catch (_) {}
+        if (location.hash !== `#${chosen}`) history.replaceState(null, '', `#${chosen}`);
+      }
+
+      function initLangSwitch() {
+        const nav = document.querySelector('.lang');
+        if (!nav) return;
+
+        nav.addEventListener('click', function (ev) {
+          const a = ev.target.closest('a[data-lang]');
+          if (!a) return;
+          ev.preventDefault();
+          applyLang(a.getAttribute('data-lang'));
+        });
+
+        const hashLang = (location.hash || '').replace('#', '').toLowerCase();
+        let saved = '';
+        try { saved = String(localStorage.getItem('verification_lang') || '').toLowerCase(); } catch (_) {}
+        applyLang(hashLang === 'ja' || hashLang === 'en' ? hashLang : (saved === 'ja' ? 'ja' : 'en'));
+      }
+
       async function hydrateProofTables() {
         const en = document.getElementById('proofRowsEn');
         const ja = document.getElementById('proofRowsJa');
@@ -426,6 +469,7 @@
         }
       }
 
+      initLangSwitch();
       hydrateProofTables();
     })();
   </script>
