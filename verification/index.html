@@ -335,18 +335,18 @@
       <h3 style="margin-top:14px">公開証跡ログ（読みやすい表示・最新20件）</h3>
       <p class="subtle"><code>log.json</code> の公開証跡を人間向けに整形表示しています。戦略ロジック本体は公開しません。</p>
       <div class="proof-summary" aria-label="公開証跡ログサマリー">
-        <div class="summary-item"><div class="summary-label">Total Records</div><div class="summary-value" id="summaryTotalJa">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">Latest Proof Time (UTC)</div><div class="summary-value" id="summaryTimeJa">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">Latest Chain Integrity</div><div class="summary-value" id="summaryIntegrityJa">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">Valid Records Ratio</div><div class="summary-value" id="summaryRatioJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">公開記録の件数</div><div class="summary-value" id="summaryTotalJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">最新の公開記録時刻（UTC）</div><div class="summary-value" id="summaryTimeJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">最新記録の整合性</div><div class="summary-value" id="summaryIntegrityJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">有効な記録の割合</div><div class="summary-value" id="summaryRatioJa">UNAVAILABLE</div></div>
       </div>
       <div class="audit-summary" aria-label="監査比較サマリー">
         <div class="summary-item"><div class="summary-label">監査ステータス</div><div class="summary-value" id="auditStatusJa">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">証跡チェーン検証</div><div class="summary-value" id="auditHashJa">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">監査指標の取得状態</div><div class="summary-value" id="auditMetricsJa">UNAVAILABLE</div></div>
-        <div class="summary-item"><div class="summary-label">生成時刻（UTC）</div><div class="summary-value" id="auditGeneratedJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">証跡の改ざんチェック</div><div class="summary-value" id="auditHashJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">監査データの準備状態</div><div class="summary-value" id="auditMetricsJa">UNAVAILABLE</div></div>
+        <div class="summary-item"><div class="summary-label">監査結果の作成時刻（UTC）</div><div class="summary-value" id="auditGeneratedJa">UNAVAILABLE</div></div>
       </div>
-      <p class="subtle">再現性と証跡整合性のクイック監査表示です。詳細証跡は comparison.json で確認できます。</p>
+      <p class="subtle">この欄は「公開記録が改ざんされていないか」「監査に必要なデータがそろっているか」をすぐ確認するための表示です。詳しい内容は comparison.json で確認できます。</p>
       <div class="log-table-wrap" aria-label="公開証跡ログ（読みやすい表示）">
         <table class="log-table">
           <thead>
@@ -573,15 +573,17 @@
         const hashMatch = checks.hash_match;
         const metricsReady = checks.metrics_ready;
         const generatedAt = String((comparison && comparison.generated_at_utc) || 'UNAVAILABLE');
+        const statusDisplay = status === 'MATCH' ? 'PASS' : (status === 'UNAVAILABLE' ? 'UNAVAILABLE' : 'FAIL');
 
-        statusEl.textContent = status;
+        statusEl.textContent = statusDisplay;
         hashEl.textContent = typeof hashMatch === 'boolean' ? (hashMatch ? 'PASS' : 'FAIL') : 'UNAVAILABLE';
         metricsEl.textContent = typeof metricsReady === 'boolean' ? (metricsReady ? 'PASS' : 'FAIL') : 'UNAVAILABLE';
         genEl.textContent = generatedAt;
 
         [statusEl, hashEl, metricsEl, genEl].forEach((el) => el.classList.remove('muted', 'ok', 'warn'));
-        if (status === 'MATCH') statusEl.classList.add('ok');
-        else statusEl.classList.add('warn');
+        if (statusDisplay === 'PASS') statusEl.classList.add('ok');
+        else if (statusDisplay === 'FAIL') statusEl.classList.add('warn');
+        else statusEl.classList.add('muted');
         if (hashMatch === true) hashEl.classList.add('ok');
         else if (hashMatch === false) hashEl.classList.add('warn');
         else hashEl.classList.add('muted');
