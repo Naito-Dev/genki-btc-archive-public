@@ -257,6 +257,16 @@
       letter-spacing: .02em;
       white-space: nowrap;
     }
+    .price-updated {
+      margin-top: 4px;
+      font-size: 11px;
+      color: rgba(214, 227, 255, 0.72);
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+    .price-updated.warn {
+      color: #f3c96b;
+    }
     .hero-cta-row {
       margin-top: 14px;
       display: grid;
@@ -482,14 +492,15 @@
           <div class="live-header">
             <img src="GenkiBTC.jpeg" alt="Genki" class="live-avatar">
             <div class="live-header__text">
-              <div class="live-label">LIVE TESTING:</div>
+              <div class="live-label">LIVE TESTING (EST.):</div>
               <div class="live-owner">Genki test portfolio</div>
             </div>
           </div>
           <div id="liveEquity" class="live-equity">-</div>
           <div id="sinceStart" class="since-start">Since test start: -</div>
+          <div id="priceUpdated" class="price-updated">Price Updated: -</div>
           <div id="pnlPct" class="pnl-pct" style="display:none"></div>
-          <div id="pnlNote" class="pnl-note" style="display:none">Performance vs start</div>
+          <div id="pnlNote" class="pnl-note" style="display:none">Test start baseline</div>
         </div>
       </section>
 
@@ -542,6 +553,18 @@
     function fmtNum(v, d=1) {
       if (v === null || v === undefined || Number.isNaN(Number(v))) return "-";
       return Number(v).toFixed(d);
+    }
+
+    function fmtUtc(v) {
+      if (!v) return "-";
+      const d = new Date(v);
+      if (!Number.isFinite(d.getTime())) return String(v);
+      const y = d.getUTCFullYear();
+      const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(d.getUTCDate()).padStart(2, "0");
+      const hh = String(d.getUTCHours()).padStart(2, "0");
+      const mm = String(d.getUTCMinutes()).padStart(2, "0");
+      return `${y}-${m}-${day} ${hh}:${mm} UTC`;
     }
 
     function parseFiniteNumber(v) {
@@ -746,6 +769,91 @@
       navigator.clipboard?.writeText(txt).catch(() => {});
     }
 
+    async function fetchLiveBtcPrice() {
+      const endpoints = [
+        async () => {
+          const r = await fetch("https://api.coinbase.com/v2/prices/BTC-USD/spot", { cache: "no-store" });
+          if (!r.ok) throw new Error(`coinbase_${r.status}`);
+          const j = await r.json();
+          const p = parseFiniteNumber(j?.data?.amount);
+          if (p === null) throw new Error("coinbase_parse");
+          return p;
+        },
+        async () => {
+          const r = await fetch("https://api.kraken.com/0/public/Ticker?pair=XBTUSD", { cache: "no-store" });
+          if (!r.ok) throw new Error(`kraken_${r.status}`);
+          const j = await r.json();
+          const p = parseFiniteNumber(j?.result?.XXBTZUSD?.c?.[0]);
+          if (p === null) throw new Error("kraken_parse");
+          return p;
+        }
+      ];
+      let lastErr = null;
+      for (const fn of endpoints) {
+        try {
+          return await fn();
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      throw lastErr || new Error("price_feed_failed");
+    }
+
+    function renderPnl(log, latest, equity) {
+      const pnl = resolvePnlPercent(log, latest, equity);
+      const pnlEl = document.getElementById("pnlPct");
+      const pnlNoteEl = document.getElementById("pnlNote");
+      const baseDetails = getBaseEquityDetails(log);
+      const resolvedBaseEquity = parseFiniteNumber(baseDetails.value);
+      const computedPnl = (equity !== null && resolvedBaseEquity !== null && resolvedBaseEquity > 0)
+        ? ((equity - resolvedBaseEquity) / resolvedBaseEquity) * 100
+        : null;
+      console.debug("[LIVE_TESTING_PNL]", {
+        pnl_percent: latest?.pnl_percent,
+        equity_usd: latest?.equity_usd,
+        live_equity_value: equity,
+        base_equity: resolvedBaseEquity,
+        base_source: baseDetails.source,
+        computedPnl
+      });
+      if (pnl === null || !Number.isFinite(Number(pnl))) {
+        pnlEl.textContent = "P/L unavailable";
+        pnlEl.style.display = "block";
+        pnlNoteEl.style.display = "none";
+        pnlEl.classList.remove("positive", "negative");
+        pnlEl.classList.add("flat");
+      } else {
+        const val = Number(pnl);
+        const sign = val > 0 ? "+" : "";
+        pnlEl.textContent = `P/L ${sign}${val.toFixed(2)}%`;
+        pnlEl.style.display = "block";
+        pnlNoteEl.style.display = "block";
+        pnlEl.classList.remove("positive", "negative", "flat");
+        pnlEl.classList.add(val > 0 ? "positive" : val < 0 ? "negative" : "flat");
+      }
+    }
+
+    function renderEstimationPriceStatus(tsUtc, delayed = false) {
+      const el = document.getElementById("priceUpdated");
+      if (!el) return;
+      el.textContent = delayed
+        ? `Price feed delayed (last update: ${fmtUtc(tsUtc)})`
+        : `Price Updated: ${fmtUtc(tsUtc)}`;
+      el.classList.toggle("warn", !!delayed);
+    }
+
+    function estimateEquityFromPrice(baseEquity, basePrice, btcRatio, livePrice) {
+      const be = parseFiniteNumber(baseEquity);
+      const bp = parseFiniteNumber(basePrice);
+      const br = parseFiniteNumber(btcRatio);
+      const lp = parseFiniteNumber(livePrice);
+      if (be === null || bp === null || br === null || lp === null || bp <= 0) return null;
+      const clamped = Math.max(0, Math.min(1, br));
+      const btcUnits = (be * clamped) / bp;
+      const cashPart = be * (1 - clamped);
+      return cashPart + btcUnits * lp;
+    }
+
     function toggleAudit() {
       const el = document.getElementById("auditContent");
       const chev = document.getElementById("auditChevron");
@@ -773,12 +881,15 @@
       actionEl.textContent = action;
       actionEl.classList.remove("state-wait", "state-defensive", "state-bullish", "state-strong-bullish");
       actionEl.classList.add(actionStateClassFromLabel(action));
-      document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(latest?.btc_price)}`;
-      document.getElementById("metaUpdated").textContent = `Updated ${latest?.updated_at_utc || "-"}`;
+      const signalUpdated = latest?.updated_at_utc || latest?.timestamp_utc || "-";
+      const basePrice = parseFiniteNumber(latest?.btc_price);
+      document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
+      document.getElementById("metaUpdated").textContent = `Signal Updated ${fmtUtc(signalUpdated)}`;
 
       const liveEquity = resolveLiveEquityDetails(log, latest);
       const equity = parseFiniteNumber(liveEquity.value);
       document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
+      renderEstimationPriceStatus(latest?.price_ts || latest?.updated_at_utc || latest?.timestamp_utc || null, false);
       const sinceStart = getSinceTestStart(log);
       const sinceStartEl = document.getElementById("sinceStart");
       if (sinceStart) {
@@ -789,38 +900,37 @@
         sinceStartEl.style.display = "none";
       }
 
-      const pnl = resolvePnlPercent(log, latest, equity);
-      const pnlEl = document.getElementById("pnlPct");
-      const pnlNoteEl = document.getElementById("pnlNote");
-      const baseDetails = getBaseEquityDetails(log);
-      const resolvedBaseEquity = parseFiniteNumber(baseDetails.value);
-      const computedPnl = (equity !== null && resolvedBaseEquity !== null && resolvedBaseEquity > 0)
-        ? ((equity - resolvedBaseEquity) / resolvedBaseEquity) * 100
-        : null;
-      console.debug("[LIVE_TESTING_PNL]", {
-        pnl_percent: latest?.pnl_percent,
-        equity_usd: latest?.equity_usd,
-        live_equity_source: liveEquity.source,
-        live_equity_value: equity,
-        base_equity: resolvedBaseEquity,
-        base_source: baseDetails.source,
-        computedPnl
-      });
-      if (pnl === null || !Number.isFinite(Number(pnl))) {
-        pnlEl.textContent = "P/L unavailable";
-        pnlEl.style.display = "block";
-        pnlNoteEl.style.display = "none";
-        pnlEl.classList.remove("positive", "negative");
-        pnlEl.classList.add("flat");
-      } else {
-        const val = Number(pnl);
-        const sign = val > 0 ? "+" : "";
-        pnlEl.textContent = `P/L ${sign}${val.toFixed(2)}%`;
-        pnlEl.style.display = "block";
-        pnlNoteEl.style.display = "block";
-        pnlEl.classList.remove("positive", "negative", "flat");
-        pnlEl.classList.add(val > 0 ? "positive" : val < 0 ? "negative" : "flat");
+      renderPnl(log, latest, equity);
+
+      const runtime = {
+        log,
+        latest,
+        baseEquity: equity,
+        basePrice,
+        btcRatio: parseFiniteNumber(latest?.actual_btc_ratio ?? latest?.target_btc_ratio),
+        lastPriceTs: latest?.price_ts || latest?.updated_at_utc || latest?.timestamp_utc || null,
+      };
+
+      async function refreshPriceAndEstimate() {
+        try {
+          const livePrice = await fetchLiveBtcPrice();
+          runtime.lastPriceTs = new Date().toISOString();
+          document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(livePrice)}`;
+          renderEstimationPriceStatus(runtime.lastPriceTs, false);
+
+          const estEquity = estimateEquityFromPrice(runtime.baseEquity, runtime.basePrice, runtime.btcRatio, livePrice);
+          if (estEquity !== null) {
+            document.getElementById("liveEquity").textContent = fmtUsd(estEquity);
+            renderPnl(runtime.log, runtime.latest, estEquity);
+          }
+        } catch (err) {
+          console.debug("[LIVE_PRICE_FEED]", { error: String(err) });
+          renderEstimationPriceStatus(runtime.lastPriceTs, true);
+        }
       }
+
+      setInterval(refreshPriceAndEstimate, 60 * 1000);
+      refreshPriceAndEstimate().catch(() => {});
 
       renderAudit(log, latest);
     }
