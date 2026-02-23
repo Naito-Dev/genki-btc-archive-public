@@ -527,7 +527,6 @@
           </div>
           <div class="audit-section">
             <div class="audit-title">Recent Verified Decisions</div>
-            <div class="proof-summary">State labels: WAIT / SAFETY HOLD / BULLISH / STRONG BULLISH</div>
             <ul id="auditRecentList" class="audit-list"><li>-</li></ul>
           </div>
           <div class="audit-section">
@@ -535,7 +534,7 @@
             <div id="proofSummary" class="proof-summary">Latest proof available • Hash verified record</div>
             <button id="proofToggleBtn" class="proof-toggle" type="button" onclick="toggleProofDetails()">Show raw proof</button>
             <div id="proofCode" class="proof-code" style="display:none">-</div>
-            <button id="copyProofBtn" class="proof-copy" type="button" onclick="copyLatestProof()">Copy Latest Proof</button>
+            <button id="copyProofBtn" class="proof-copy" type="button" onclick="copyLatestProof()" style="display:none">Copy Latest Proof</button>
           </div>
         </div>
         <div class="audit-cta-row">
@@ -877,8 +876,10 @@
     function toggleProofDetails() {
       const proofEl = document.getElementById("proofCode");
       const btn = document.getElementById("proofToggleBtn");
+      const copyBtn = document.getElementById("copyProofBtn");
       const isHidden = proofEl.style.display === "none";
       proofEl.style.display = isHidden ? "block" : "none";
+      if (copyBtn) copyBtn.style.display = isHidden ? "inline-flex" : "none";
       btn.textContent = isHidden ? "Hide raw proof" : "Show raw proof";
     }
 
