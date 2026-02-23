@@ -8,8 +8,8 @@ import pandas as pd
 
 ROOT = Path("/Users/Claw/tradep-test")
 OUT = ROOT / "output"
-EN_PATH = ROOT / "sales-page-en.html"
-JA_PATH = ROOT / "sales-page.html"
+EN_PATH = Path("/Users/Claw/genki-btc-archive-public/sales-page-en.html")
+JA_PATH = Path("/Users/Claw/genki-btc-archive-public/sales-page-ja.html")
 
 
 def load_inputs():

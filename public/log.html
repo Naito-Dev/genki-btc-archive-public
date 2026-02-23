@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTC SIGNAL</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: #eaf0ff;
+      background: #000;
+    }
+    .page {
+      min-height: 100svh;
+      padding: 16px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .hero-card {
+      background: linear-gradient(180deg, rgba(18,35,73,.95), rgba(10,25,55,.96));
+      border: 1px solid rgba(120,165,255,.22);
+      border-radius: 22px;
+      padding: 22px 18px 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .hero-header h1 {
+      margin: 0;
+      text-align: center;
+      font-size: clamp(34px, 8vw, 46px);
+      line-height: .95;
+      font-weight: 900;
+      letter-spacing: .02em;
+      color: #f4f7ff;
+    }
+    .hero-subtitle {
+      margin: 10px auto 0;
+      max-width: 310px;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.45;
+      color: rgba(230,238,255,.75);
+    }
+    .action-panel {
+      margin-top: 18px;
+      min-height: 290px;
+      background: linear-gradient(180deg, rgba(14,28,60,.92), rgba(10,22,49,.94));
+      border: 1px solid rgba(100,150,240,.22);
+      border-radius: 20px;
+      padding: 18px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      justify-content: flex-start;
+    }
+    .action-panel__label {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .10em;
+      color: rgba(236,243,255,.9);
+      text-transform: uppercase;
+    }
+    .action-panel__signal {
+      margin-top: 18px;
+      font-size: clamp(56px, 15vw, 84px);
+      line-height: .88;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      color: #ff9b68;
+      text-shadow: 0 2px 10px rgba(255,133,70,.08);
+      text-align: center;
+    }
+    .action-panel__price {
+      margin-top: 12px;
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 800;
+      color: rgba(237, 244, 255, .95);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .action-panel__updated {
+      margin-top: 6px;
+      font-size: 11px;
+      line-height: 1.2;
+      font-weight: 600;
+      color: rgba(200, 216, 245, .58);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .hero-bottom {
+      margin-top: 14px;
+      background: rgba(7,14,30,.55);
+      border-radius: 18px;
+      padding: 14px 14px 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+      align-items: end;
+    }
+    .live-label {
+      margin-bottom: 6px;
+      font-size: 11px;
+      letter-spacing: .14em;
+      font-weight: 800;
+      color: rgba(235,242,255,.9);
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+    .live-equity {
+      font-size: clamp(28px, 7.2vw, 38px);
+      line-height: .98;
+      font-weight: 900;
+      letter-spacing: -.015em;
+      color: #f5f8ff;
+      white-space: nowrap;
+      overflow-wrap: normal;
+    }
+    .pnl-pct {
+      margin-top: 4px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .pnl-pct.positive { color: #34d399; }
+    .pnl-pct.negative { color: #f87171; }
+    .pnl-pct.flat { color: #94a3b8; }
+    .pnl-note {
+      margin-top: 2px;
+      font-size: 11px;
+      color: rgba(214, 227, 255, 0.66);
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+    .since-start {
+      margin-top: 6px;
+      font-size: 11px;
+      color: rgba(214, 227, 255, 0.72);
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+    .hero-cta-row {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      align-items: center;
+    }
+    .hero-latest { min-width: 86px; }
+    .hero-latest__label {
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .12em;
+      font-weight: 800;
+      color: rgba(236,243,255,.85);
+      text-transform: uppercase;
+    }
+    .hero-latest__date {
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 1.05;
+      font-weight: 900;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 900;
+      color: #0d1730;
+      background: linear-gradient(180deg, #f8e8a4 0%, #efcd5d 100%);
+      border: 1px solid rgba(255,230,140,.55);
+      box-shadow: 0 8px 24px rgba(240,194,62,.2);
+      white-space: nowrap;
+      width: 100%;
+    }
+    .tech-card {
+      margin-top: 14px;
+      background: linear-gradient(180deg, rgba(12,26,56,.92), rgba(8,20,44,.94));
+      border: 1px solid rgba(100,150,240,.2);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    .tech-card__toggle {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid rgba(100,150,240,.18);
+      border-radius: 12px;
+      background: rgba(8,17,37,.28);
+      color: #eef3ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .tech-card__content {
+      margin-top: 10px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .tech-card__hint {
+      border-radius: 12px;
+      background: rgba(8,17,37,.2);
+      border: 1px dashed rgba(110,160,255,.18);
+      padding: 12px;
+      text-align: center;
+      color: rgba(230,238,255,.72);
+      font-size: 12px;
+    }
+    .audit-grid {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .audit-section {
+      border: 1px solid rgba(110,160,255,.16);
+      border-radius: 12px;
+      background: rgba(8,17,37,.22);
+      padding: 10px;
+    }
+    .audit-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(230,238,255,.88);
+      margin-bottom: 8px;
+    }
+    .audit-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px;
+      font-size: 12px;
+      color: rgba(230,238,255,.82);
+    }
+    .audit-row .k { color: rgba(180,200,230,.92); text-transform: uppercase; letter-spacing: .04em; }
+    .audit-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      font-size: 12px;
+      color: rgba(230,238,255,.82);
+    }
+    .proof-code {
+      margin-top: 8px;
+      border: 1px dashed rgba(110,160,255,.24);
+      border-radius: 10px;
+      background: rgba(8,17,37,.3);
+      padding: 8px;
+      font-size: 11px;
+      color: rgba(235,242,255,.86);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .proof-copy {
+      margin-top: 8px;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,230,140,.45);
+      background: rgba(248, 232, 164, .12);
+      color: rgba(252,211,77,.92);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    @media (max-width: 430px) {
+      .page { padding: 12px; }
+      .hero-card { padding: 18px 14px 14px; }
+      .action-panel { min-height: 260px; padding: 16px 14px 14px; }
+      .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
+      .action-panel__price { font-size: 13px; }
+      .hero-bottom { grid-template-columns: minmax(0,1fr); gap: 8px; padding: 12px 12px 10px; }
+      .hero-cta-row { grid-template-columns: 1fr; gap: 0; }
+      .hero-cta { width: 100%; }
+      .audit-row { grid-template-columns: 1fr; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero-card">
+      <header class="hero-header">
+        <h1>BTC SIGNAL</h1>
+        <p class="hero-subtitle">Premium BTC risk-control dashboard with full audit transparency.</p>
+      </header>
+
+      <section class="action-panel">
+        <div class="action-panel__label">GENKI'S LATEST ACTION</div>
+        <div id="actionSignal" class="action-panel__signal">Waiting</div>
+        <div id="actionPrice" class="action-panel__price">BTC -</div>
+        <div id="actionUpdated" class="action-panel__updated">Updated -</div>
+      </section>
+
+      <section class="hero-bottom">
+        <div class="hero-bottom__left">
+          <div class="live-label">LIVE TESTING:</div>
+          <div id="liveEquity" class="live-equity">-</div>
+          <div id="sinceStart" class="since-start">Since test start: -</div>
+          <div id="pnlPct" class="pnl-pct" style="display:none"></div>
+          <div id="pnlNote" class="pnl-note" style="display:none">Performance vs start</div>
+        </div>
+      </section>
+
+      <section class="hero-cta-row">
+        <a class="hero-cta" href="https://naito-dev.github.io/genki-btc-archive-public/sales-page-en.html">Unlock today's BTC risk signal</a>
+      </section>
+    </section>
+
+    <section class="tech-card">
+      <button class="tech-card__toggle" type="button" onclick="toggleAudit()">Technical Analysis <span id="auditChevron">⌄</span></button>
+      <div id="auditContent" class="tech-card__content" style="display:none">
+        <div class="tech-card__hint">Details hidden. Tap to expand.</div>
+        <div class="audit-grid">
+          <div class="audit-section">
+            <div class="audit-title">Chain Integrity</div>
+            <div class="audit-row"><div class="k">status</div><div id="auditChainStatus">-</div></div>
+            <div class="audit-row"><div class="k">logic</div><div id="auditLogicVersion">-</div></div>
+          </div>
+          <div class="audit-section">
+            <div class="audit-title">Allocation / Status</div>
+            <div class="audit-row"><div class="k">allocation</div><div id="auditAlloc">-</div></div>
+            <div class="audit-row"><div class="k">target_ratio</div><div id="auditTarget">-</div></div>
+            <div class="audit-row"><div class="k">status</div><div id="auditStatus">-</div></div>
+            <div class="audit-row"><div class="k">snapshot</div><div id="auditSnapshot">-</div></div>
+          </div>
+          <div class="audit-section">
+            <div class="audit-title">Recent Verified Decisions</div>
+            <ul id="auditRecentList" class="audit-list"><li>-</li></ul>
+          </div>
+          <div class="audit-section">
+            <div class="audit-title">Proof Block</div>
+            <div id="proofCode" class="proof-code">-</div>
+            <button id="copyProofBtn" class="proof-copy" type="button" onclick="copyLatestProof()">Copy Latest Proof</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function fmtUsd(v) {
+      if (v === null || v === undefined || Number.isNaN(Number(v))) return "-";
+      return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(v));
+    }
+
+    function fmtNum(v, d=1) {
+      if (v === null || v === undefined || Number.isNaN(Number(v))) return "-";
+      return Number(v).toFixed(d);
+    }
+
+    function parseDateAny(e) {
+      return e?.date_utc || e?.date || "-";
+    }
+
+    function normalizeRatio(raw, alloc) {
+      const r = Number(raw);
+      if (!Number.isNaN(r)) return r;
+      const a = Number(alloc);
+      if (Number.isNaN(a)) return null;
+      return a / 100;
+    }
+
+    function actionLabelFromTargetRatio(ratio) {
+      const r = Number(ratio);
+      if (Number.isNaN(r)) return "Waiting";
+      const eps = 0.0001;
+      if (Math.abs(r - 0.0) < eps) return "Wait";
+      if (Math.abs(r - 0.3) < eps) return "Defensive";
+      if (Math.abs(r - 0.7) < eps) return "Bullish";
+      if (Math.abs(r - 1.0) < eps) return "Strong Bullish";
+      return "Waiting";
+    }
+
+    function getBaseEquity(log) {
+      const latest = log?.latest || {};
+      if (typeof latest.base_equity === "number") return latest.base_equity;
+      if (typeof latest.initial_capital === "number") return latest.initial_capital;
+      const entries = Array.isArray(log?.entries) ? log.entries : [];
+      for (const e of entries) {
+        if (typeof e?.base_equity === "number") return e.base_equity;
+        if (typeof e?.initial_capital === "number") return e.initial_capital;
+      }
+      return null;
+    }
+
+    function getSinceTestStart(log) {
+      if (log?.start_date_utc) return String(log.start_date_utc);
+      const entries = Array.isArray(log?.entries) ? log.entries : [];
+      if (!entries.length) return null;
+      const dates = entries.map((e) => e?.date).filter(Boolean).sort();
+      return dates.length ? dates[0] : null;
+    }
+
+    function resolvePnlPercent(log, latest) {
+      const p = Number(latest?.pnl_percent);
+      if (!Number.isNaN(p)) return p;
+      const eq = Number(latest?.equity_usd);
+      const base = Number(getBaseEquity(log));
+      if (!Number.isNaN(eq) && !Number.isNaN(base) && base > 0) {
+        return ((eq - base) / base) * 100;
+      }
+      return null;
+    }
+
+    function renderAudit(log, latest) {
+      document.getElementById("auditChainStatus").textContent = latest?.chain_integrity ?? "-";
+      document.getElementById("auditLogicVersion").textContent = latest?.logic_version ?? "-";
+      document.getElementById("auditAlloc").textContent = latest?.allocation ?? "-";
+      document.getElementById("auditTarget").textContent = latest?.target_btc_ratio ?? "-";
+      document.getElementById("auditStatus").textContent = latest?.status ?? "-";
+      document.getElementById("auditSnapshot").textContent = latest?.snapshot_status ?? "-";
+
+      const entries = Array.isArray(log?.entries) ? log.entries.slice(-3).reverse() : [];
+      const list = document.getElementById("auditRecentList");
+      list.innerHTML = entries.length
+        ? entries.map((e) => `<li>${e?.date ?? "-"} | ${e?.status ?? "-"} | alloc ${e?.allocation ?? "-"}</li>`).join("")
+        : "<li>-</li>";
+
+      const proof = {
+        date: latest?.date ?? "-",
+        hash: latest?.hash ?? "-",
+        prev_hash: latest?.prev_hash ?? "-",
+        status: latest?.status ?? "-",
+      };
+      document.getElementById("proofCode").textContent = JSON.stringify(proof, null, 2);
+    }
+
+    function copyLatestProof() {
+      const txt = document.getElementById("proofCode").textContent || "";
+      if (!txt || txt === "-") return;
+      navigator.clipboard?.writeText(txt).catch(() => {});
+    }
+
+    function toggleAudit() {
+      const el = document.getElementById("auditContent");
+      const chev = document.getElementById("auditChevron");
+      const isHidden = el.style.display === "none";
+      el.style.display = isHidden ? "block" : "none";
+      chev.textContent = isHidden ? "⌃" : "⌄";
+    }
+
+    async function load() {
+      const res = await fetch(`log.json?ts=${Date.now()}`, { cache: "no-store" });
+      const log = await res.json();
+      const latest = log?.latest || {};
+      const ratio = normalizeRatio(latest?.target_btc_ratio, latest?.allocation);
+      const action = actionLabelFromTargetRatio(ratio);
+
+      document.getElementById("actionSignal").textContent = action;
+      document.getElementById("actionPrice").textContent = `BTC ${fmtUsd(latest?.btc_price)}`;
+      document.getElementById("actionUpdated").textContent = `Updated ${latest?.updated_at_utc || "-"}`;
+
+      const equity = Number(latest?.equity_usd);
+      document.getElementById("liveEquity").textContent = Number.isNaN(equity) ? "-" : fmtUsd(equity);
+      document.getElementById("sinceStart").textContent = `Since test start: ${getSinceTestStart(log) || "-"}`;
+
+      const pnl = resolvePnlPercent(log, latest);
+      const pnlEl = document.getElementById("pnlPct");
+      const pnlNoteEl = document.getElementById("pnlNote");
+      if (pnl === null || Number.isNaN(Number(pnl))) {
+        pnlEl.style.display = "none";
+        pnlNoteEl.style.display = "none";
+      } else {
+        const val = Number(pnl);
+        const sign = val > 0 ? "+" : "";
+        pnlEl.textContent = `(${sign}${val.toFixed(2)}%)`;
+        pnlEl.style.display = "block";
+        pnlNoteEl.style.display = "block";
+        pnlEl.classList.remove("positive", "negative", "flat");
+        pnlEl.classList.add(val > 0 ? "positive" : val < 0 ? "negative" : "flat");
+      }
+
+      renderAudit(log, latest);
+    }
+
+    load().catch((e) => {
+      console.error(e);
+      document.getElementById("actionSignal").textContent = "Waiting";
+    });
+  </script>
+</body>
+</html>
