@@ -739,19 +739,10 @@
           recordsEl.textContent = String(dayCount || 0);
           timeEl.textContent = formatUtc(proofTime);
 
-          let commitSha = 'UNAVAILABLE';
-          let commitUrl = 'https://github.com/Naito-Dev/genki-btc-archive-public/commits/main';
-          try {
-            const cres = await fetch('https://api.github.com/repos/Naito-Dev/genki-btc-archive-public/commits/main', { cache: 'no-store' });
-            if (cres.ok) {
-              const cj = await cres.json();
-              const fullSha = String(cj?.sha || '').trim();
-              if (fullSha) {
-                commitSha = fullSha.slice(0, 7);
-                commitUrl = String(cj?.html_url || '').trim() || (`https://github.com/Naito-Dev/genki-btc-archive-public/commit/${fullSha}`);
-              }
-            }
-          } catch (_) {}
+          const fullSha = String(log?.commit_sha || latest?.commit_sha || '').trim();
+          const commitSha = fullSha ? fullSha.slice(0, 7) : 'UNAVAILABLE';
+          const commitUrl = String(log?.commit_url || latest?.commit_url || '').trim() ||
+            (fullSha ? `https://github.com/Naito-Dev/genki-btc-archive-public/commit/${fullSha}` : 'https://github.com/Naito-Dev/genki-btc-archive-public/commits/main');
           commitEl.textContent = commitSha;
           commitLinkEl.href = commitUrl;
 
