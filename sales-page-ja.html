@@ -816,9 +816,9 @@
         } catch (_) {
           try {
             const key = 'genki_waitlist_leads_failed';
-            const failed = JSON.parse(localStorage.get項目(key) || '[]');
+            const failed = JSON.parse(localStorage.getItem(key) || '[]');
             failed.push(payload);
-            localStorage.set項目(key, JSON.stringify(failed));
+            localStorage.setItem(key, JSON.stringify(failed));
           } catch (__){}
           setStatus('送信に失敗しました。再度お試しください。');
           submitBtn.disabled = false;
