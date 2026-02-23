@@ -46,6 +46,28 @@
       border-color:var(--gold);
       background:rgba(216,178,74,.14);
     }
+    .back-nav {
+      margin:0 0 10px;
+    }
+    .back-btn {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      color:var(--muted);
+      text-decoration:none;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:6px 12px;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.02em;
+      background:rgba(8,18,36,.28);
+    }
+    .back-btn:hover {
+      color:var(--text);
+      border-color:var(--gold);
+      background:rgba(216,178,74,.10);
+    }
     .lang-section[hidden] { display:none; }
     .panel {
       background:var(--panel);
@@ -199,6 +221,9 @@
       <a href="#en" data-lang="en" aria-current="page">EN</a>
       <a href="#ja" data-lang="ja">JA</a>
     </nav>
+    <div class="back-nav">
+      <a class="back-btn" href="https://naito-dev.github.io/genki-btc-archive-public/" id="backLink">← Back</a>
+    </div>
 
     <section class="panel lang-section" id="en">
       <h1>Technical Verification & Reproducibility Center</h1>
@@ -517,6 +542,7 @@
         const enSection = document.getElementById('en');
         const jaSection = document.getElementById('ja');
         const links = document.querySelectorAll('.lang a[data-lang]');
+        const backLink = document.getElementById('backLink');
 
         if (enSection) enSection.hidden = chosen !== 'en';
         if (jaSection) jaSection.hidden = chosen !== 'ja';
@@ -527,6 +553,9 @@
           if (active) a.setAttribute('aria-current', 'page');
           else a.removeAttribute('aria-current');
         });
+        if (backLink) {
+          backLink.textContent = chosen === 'ja' ? '← ダッシュボードに戻る' : '← Back to dashboard';
+        }
 
         try { localStorage.setItem('verification_lang', chosen); } catch (_) {}
         if (location.hash !== `#${chosen}`) history.replaceState(null, '', `#${chosen}`);
@@ -547,6 +576,17 @@
         let saved = '';
         try { saved = String(localStorage.getItem('verification_lang') || '').toLowerCase(); } catch (_) {}
         applyLang(hashLang === 'ja' || hashLang === 'en' ? hashLang : (saved === 'ja' ? 'ja' : 'en'));
+      }
+
+      function initBackLink() {
+        const backLink = document.getElementById('backLink');
+        if (!backLink) return;
+        backLink.addEventListener('click', function (ev) {
+          if (window.history.length > 1) {
+            ev.preventDefault();
+            window.history.back();
+          }
+        });
       }
 
       function setAuditUnavailable(locale) {
@@ -633,6 +673,7 @@
       }
 
       initLangSwitch();
+      initBackLink();
       hydrateAuditSummary();
       hydrateProofTables();
     })();
