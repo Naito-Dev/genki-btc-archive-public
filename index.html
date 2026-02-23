@@ -527,6 +527,7 @@
           </div>
           <div class="audit-section">
             <div class="audit-title">Recent Verified Decisions</div>
+            <div class="proof-summary">State labels: WAIT / SAFETY HOLD / BULLISH / STRONG BULLISH</div>
             <ul id="auditRecentList" class="audit-list"><li>-</li></ul>
           </div>
           <div class="audit-section">
@@ -694,6 +695,17 @@
       return v;
     }
 
+    function mapStatusLabelForDecision(raw) {
+      if (raw === null || raw === undefined || raw === "") return "UNAVAILABLE";
+      const v = String(raw).trim();
+      const key = v.toUpperCase();
+      if (key === "NO_TRADE" || key === "WAIT" || key === "AWAITING CONDITIONS") return "WAIT";
+      if (key === "DATA_STALE" || key === "API_ERROR" || key === "SAFETY HOLD" || key.startsWith("SAFETY HOLD")) return "SAFETY HOLD";
+      if (key === "BULLISH") return "BULLISH";
+      if (key === "STRONG BULLISH" || key === "STRONG_BULLISH") return "STRONG BULLISH";
+      return key;
+    }
+
     function formatExposure(value) {
       const n = parseFiniteNumber(value);
       if (n === null) return "Unavailable";
@@ -745,8 +757,8 @@
       list.innerHTML = entries.length
         ? entries.map((e) => {
             const d = getEntryDate(e) || "Unavailable";
-            const s = mapStatusDisplay(e?.status, "status");
-            return `<li>${d} | ${s} | Allocation hidden</li>`;
+            const s = mapStatusLabelForDecision(e?.status);
+            return `<li>${d} | ${s}</li>`;
           }).join("")
         : "<li>Unavailable</li>";
 
