@@ -301,6 +301,28 @@
       color: var(--text);
       font-weight: 700;
     }
+    .status-legend {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .recent-verified {
+      margin-top: 14px;
+    }
+    .recent-verified h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .recent-verified-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      color: var(--text);
+      font-size: 13px;
+    }
     .proof-kpis .kpi {
       border: 1px solid rgba(122,159,225,.2);
       border-radius: 12px;
@@ -554,6 +576,13 @@
           <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" style="color:var(--muted)">Raw proof log (log.json)</a> •
           <a href="/genki-btc-archive-public/verification/index.html" style="color:var(--muted)">Technical verification center</a>
         </p>
+        <p class="status-legend">State labels used in records: WAIT / SAFETY HOLD / BULLISH / STRONG BULLISH</p>
+        <div class="recent-verified" aria-label="Recent verified decisions (free)">
+          <h3>Recent Verified Decisions</h3>
+          <ul id="recentVerifiedListEn" class="recent-verified-list">
+            <li>UNAVAILABLE</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -696,6 +725,46 @@
         return `${y}-${m}-${day} ${hh}:${mm}`;
       }
 
+      function formatDateOnly(ts) {
+        if (!ts) return '';
+        const d = new Date(ts);
+        if (!Number.isFinite(d.getTime())) {
+          const s = String(ts).trim();
+          return s.slice(0, 10);
+        }
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      function normalizeStatusLabel(raw) {
+        const s = String(raw || '').trim();
+        const lower = s.toLowerCase();
+        if (!s) return 'UNAVAILABLE';
+        if (lower === 'awaiting conditions' || lower === 'wait') return 'WAIT';
+        if (lower === 'safety hold' || lower.startsWith('safety hold') || lower === 'data_stale' || lower === 'api_error') return 'SAFETY HOLD';
+        if (lower === 'bullish') return 'BULLISH';
+        if (lower === 'strong bullish' || lower === 'strong_bullish') return 'STRONG BULLISH';
+        return s.toUpperCase();
+      }
+
+      function hydrateRecentVerified(entries) {
+        const listEl = document.getElementById('recentVerifiedListEn');
+        if (!listEl) return;
+        const recent = Array.isArray(entries) ? entries.slice(-3).reverse() : [];
+        if (!recent.length) {
+          listEl.innerHTML = '<li>UNAVAILABLE</li>';
+          return;
+        }
+        const rows = recent.map(function (entry) {
+          const date = formatDateOnly(entry?.date || entry?.date_utc || entry?.timestamp_utc || entry?.updated_at_utc);
+          const label = normalizeStatusLabel(entry?.status || entry?.reason_summary || entry?.signal || entry?.posture);
+          return `<li>${date || 'UNAVAILABLE'} | ${label}</li>`;
+        });
+        listEl.innerHTML = rows.join('');
+      }
+
       async function hydrateProofStatus() {
         const dayEl = document.getElementById('proofDay');
         const integrityEl = document.getElementById('proofIntegrity');
@@ -737,6 +806,7 @@
             commitLinkEl.hidden = true;
             commitLinkEl.removeAttribute('href');
           }
+          hydrateRecentVerified(entries);
         } catch (err) {
           dayEl.textContent = 'UNAVAILABLE';
           integrityEl.textContent = 'UNAVAILABLE';
@@ -746,6 +816,7 @@
           commitPlainEl.hidden = false;
           commitLinkEl.hidden = true;
           commitLinkEl.removeAttribute('href');
+          hydrateRecentVerified([]);
         }
       }
 

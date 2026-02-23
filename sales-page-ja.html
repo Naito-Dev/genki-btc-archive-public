@@ -301,6 +301,28 @@
       color: var(--text);
       font-weight: 700;
     }
+    .status-legend {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .recent-verified {
+      margin-top: 14px;
+    }
+    .recent-verified h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .recent-verified-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      color: var(--text);
+      font-size: 13px;
+    }
     .proof-kpis .kpi {
       border: 1px solid rgba(122,159,225,.2);
       border-radius: 12px;
@@ -553,6 +575,13 @@
         <p class="fine" style="margin-top:8px"><a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.ja.md" style="color:var(--muted)">バックテスト手法（参考）を見る</a> • <a href="https://naito-dev.github.io/genki-btc-archive-public/" style="color:var(--muted)">公開検証ダッシュボードを見る</a> • <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" style="color:var(--muted)">公開証跡（log.json）を見る</a></p>
         <p class="fine" style="margin-top:6px"><a href="/genki-btc-archive-public/verification/index.html" style="color:var(--muted)">技術検証・再現性センターを見る（上級者向け）</a></p>
         <p class="fine" style="margin-top:6px">この欄は公開検証の証跡表示であり、取引所のリアルタイム残高表示ではありません。</p>
+        <p class="status-legend">記録で使う状態ラベル: WAIT / SAFETY HOLD / BULLISH / STRONG BULLISH</p>
+        <div class="recent-verified" aria-label="Recent verified decisions (free)">
+          <h3>Recent Verified Decisions</h3>
+          <ul id="recentVerifiedListJa" class="recent-verified-list">
+            <li>UNAVAILABLE</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -703,6 +732,46 @@
         return `${y}-${m}-${day} ${hh}:${mm}`;
       }
 
+      function formatDateOnly(ts) {
+        if (!ts) return '';
+        const d = new Date(ts);
+        if (!Number.isFinite(d.getTime())) {
+          const s = String(ts).trim();
+          return s.slice(0, 10);
+        }
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      function normalizeStatusLabelJa(raw) {
+        const s = String(raw || '').trim();
+        const lower = s.toLowerCase();
+        if (!s) return 'UNAVAILABLE';
+        if (lower === 'awaiting conditions' || lower === 'wait') return '待機';
+        if (lower === 'safety hold' || lower.startsWith('safety hold') || lower === 'data_stale' || lower === 'api_error') return 'セーフティホールド';
+        if (lower === 'bullish') return '強気';
+        if (lower === 'strong bullish' || lower === 'strong_bullish') return 'かなり強気';
+        return s.toUpperCase();
+      }
+
+      function hydrateRecentVerified(entries) {
+        const listEl = document.getElementById('recentVerifiedListJa');
+        if (!listEl) return;
+        const recent = Array.isArray(entries) ? entries.slice(-3).reverse() : [];
+        if (!recent.length) {
+          listEl.innerHTML = '<li>UNAVAILABLE</li>';
+          return;
+        }
+        const rows = recent.map(function (entry) {
+          const date = formatDateOnly(entry?.date || entry?.date_utc || entry?.timestamp_utc || entry?.updated_at_utc);
+          const label = normalizeStatusLabelJa(entry?.status || entry?.reason_summary || entry?.signal || entry?.posture);
+          return `<li>${date || 'UNAVAILABLE'} | ${label}</li>`;
+        });
+        listEl.innerHTML = rows.join('');
+      }
+
       async function hydrateProofStatus() {
         const dayEl = document.getElementById('proofDay');
         const integrityEl = document.getElementById('proofIntegrity');
@@ -744,6 +813,7 @@
             commitLinkEl.hidden = true;
             commitLinkEl.removeAttribute('href');
           }
+          hydrateRecentVerified(entries);
 
           console.debug('[PROOF_STATUS]', {
             day: dayCount || 0,
@@ -760,6 +830,7 @@
           commitPlainEl.hidden = false;
           commitLinkEl.hidden = true;
           commitLinkEl.removeAttribute('href');
+          hydrateRecentVerified([]);
           console.debug('[PROOF_STATUS]', { error: String(err) });
         }
       }
