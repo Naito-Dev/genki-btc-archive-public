@@ -425,7 +425,7 @@
       <span class="eyebrow">BTC capital protection signal</span>
       <h1>Rules-based BTC risk signals for holders who care about survival first.</h1>
       <p class="lead">Free dashboard shows proof and status. Premium access reveals exact allocation and target ratios so you can act with confidence in minutes, not hours.</p>
-      <p class="phase-note">Current status: 60-day live verification in progress • Waitlist Open • Paid access opens after verification</p>
+      <p class="phase-note">Current status: verification phase in progress • Waitlist Open • Paid access opens after verification</p>
 
       <div class="hero-grid">
         <article class="card">
@@ -444,7 +444,7 @@
           <p class="mini-title">Who this is for</p>
           <ul class="list" style="padding-left:16px">
             <li>BTC spot holders prioritizing drawdown control over hype.</li>
-            <li>Founders/executives who want a short daily risk decision at 12:00 UTC.</li>
+            <li>Founders/executives who want a short daily risk decision on a scheduled daily cadence.</li>
             <li>Users willing to pay for clarity, discipline, and repeatability.</li>
           </ul>
         </article>
@@ -460,7 +460,7 @@
         <div class="unlock-grid">
           <div class="unlock-item"><strong>Rule-Based Allocation Band</strong>One of four preset levels (BTC 0% / 30% / 70% / 100%).</div>
           <div class="unlock-item"><strong>Execution Allocation Context</strong>Clear context around the active preset level for disciplined execution.</div>
-          <div class="unlock-item"><strong>Daily Delivery (12:00 UTC)</strong>Concise email report with today’s actionable posture.</div>
+          <div class="unlock-item"><strong>Daily Delivery (scheduled after verification checks)</strong>Concise email report with today’s actionable posture.</div>
           <div class="unlock-item"><strong>Full Decision Archive</strong>Historical signal log with allocation visibility for consistency checks.</div>
           <div class="unlock-item"><strong>Sync & Readiness Status</strong>Whether data is stable enough to act now or hold safely.</div>
           <div class="unlock-item"><strong>Proof-anchored Process</strong>Hash-linked records remain visible for transparency.</div>
@@ -482,7 +482,7 @@
               <tr><td>Today’s Signal</td><td>State only (Wait/Defensive/etc.)</td><td>State + allocation line</td></tr>
               <tr><td>Recent Decisions</td><td>Status text</td><td>Status + allocation context</td></tr>
               <tr><td>Data Sync / Readiness</td><td>Summary</td><td>Action-ready interpretation</td></tr>
-              <tr><td>Delivery Method</td><td>Public dashboard check</td><td>Daily email (12:00 UTC)</td></tr>
+              <tr><td>Delivery Method</td><td>Public dashboard check</td><td>Daily email (scheduled cadence)</td></tr>
               <tr><td>Historical Archive</td><td>Limited transparency layer</td><td>Full practical archive</td></tr>
               <tr><td>Proof of Integrity</td><td>Visible</td><td>Visible (same proof spine)</td></tr>
             </tbody>
@@ -494,7 +494,7 @@
           <article class="compare-card"><p class="item">Today’s Signal</p><p class="row"><strong>Free:</strong>State only (Wait/Defensive/etc.)</p><p class="row"><strong>Premium:</strong>State + allocation line</p></article>
           <article class="compare-card"><p class="item">Recent Decisions</p><p class="row"><strong>Free:</strong>Status text</p><p class="row"><strong>Premium:</strong>Status + allocation context</p></article>
           <article class="compare-card"><p class="item">Data Sync / Readiness</p><p class="row"><strong>Free:</strong>Summary</p><p class="row"><strong>Premium:</strong>Action-ready interpretation</p></article>
-          <article class="compare-card"><p class="item">Delivery Method</p><p class="row"><strong>Free:</strong>Public dashboard check</p><p class="row"><strong>Premium:</strong>Daily email (12:00 UTC)</p></article>
+          <article class="compare-card"><p class="item">Delivery Method</p><p class="row"><strong>Free:</strong>Public dashboard check</p><p class="row"><strong>Premium:</strong>Daily email (scheduled cadence)</p></article>
           <article class="compare-card"><p class="item">Historical Archive</p><p class="row"><strong>Free:</strong>Limited transparency layer</p><p class="row"><strong>Premium:</strong>Full practical archive</p></article>
           <article class="compare-card"><p class="item">Proof of Integrity</p><p class="row"><strong>Free:</strong>Visible</p><p class="row"><strong>Premium:</strong>Visible (same proof spine)</p></article>
         </div>
@@ -509,7 +509,7 @@
           <article class="step">
             <span class="n">1</span>
             <h3>Receive today’s report</h3>
-            <p>At 12:00 UTC, get a short update with risk posture and allocation context.</p>
+            <p>Get a short daily update with risk posture and allocation context after verification checks.</p>
           </article>
           <article class="step">
             <span class="n">2</span>
@@ -533,9 +533,9 @@
         <div class="proof-status" aria-label="Proof status summary">
           <p class="title">Proof Status</p>
           <div class="proof-status-grid">
-            <div><strong>Live Forward Test:</strong> <span id="proofDay">Day X / 30</span></div>
+            <div><strong>Live Forward Test:</strong> <span id="proofDay">UNAVAILABLE</span></div>
             <div><strong>Chain Integrity:</strong> <span id="proofIntegrity">VALID</span></div>
-            <div><strong>Records Published:</strong> <span id="proofRecords">N</span></div>
+            <div><strong>Records Published:</strong> <span id="proofRecords">UNAVAILABLE</span></div>
             <div><strong>Last Proof Time (UTC):</strong> <span id="proofTimeUtc">YYYY-MM-DD HH:MM</span></div>
             <div><strong>Last Commit SHA:</strong> <a id="proofCommitLink" href="" target="_blank" rel="noopener noreferrer" style="color:var(--muted)" hidden><span id="proofCommitShaLink">UNAVAILABLE</span></a><span id="proofCommitShaPlain" style="color:var(--muted)">UNAVAILABLE</span></div>
             <div><strong>Live Capital Test:</strong> In progress (public proof available)</div>
@@ -566,7 +566,7 @@
           <ul class="list">
             <li>No discounts.</li>
             <li>Initial capacity: 10 seats.</li>
-            <li>Current phase: waitlist during 60-day live verification.</li>
+            <li>Current phase: waitlist during the live verification phase.</li>
             <li>Paid access opens immediately after verification is complete.</li>
           </ul>
         </div>
@@ -591,7 +591,7 @@
           </details>
           <details>
             <summary>How often are signals updated?</summary>
-            <p>Once daily at 12:00 UTC (21:00 JST), with synchronization and proof checks.</p>
+            <p>Once daily on a scheduled cadence, with synchronization and proof checks.</p>
           </details>
           <details>
             <summary>What happens if market data is unstable?</summary>
@@ -607,7 +607,7 @@
           </details>
           <details>
             <summary>When does paid access begin?</summary>
-            <p>After the 60-day live verification period is completed and cohort access opens. Waitlist members are notified first.</p>
+            <p>After the live verification phase is completed and cohort access opens. Waitlist members are notified first.</p>
           </details>
         </div>
       </div>
@@ -627,7 +627,7 @@
           </label>
           <div class="full cta-row" style="margin-top:2px">
             <button id="waitlistSubmitBtn" class="btn primary" type="button" aria-label="Join waitlist">Join the Beta Cohort Waitlist</button>
-            <a class="btn secondary" aria-disabled="true" tabindex="-1" aria-label="Future checkout placeholder">Future checkout (placeholder)</a>
+            <span class="btn secondary" aria-disabled="true">Paid access opens after verification</span>
           </div>
           <p id="waitlistStatus" class="fine" aria-live="polite"></p>
         </form>
