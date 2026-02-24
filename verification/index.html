@@ -208,6 +208,12 @@
       background:rgba(8,18,36,.38);
       padding:10px;
     }
+    .alloc-locked {
+      font-size:11px;
+      color:var(--soft);
+      white-space:nowrap;
+      letter-spacing:.01em;
+    }
     @media (max-width: 820px) {
       .grid { grid-template-columns:1fr; }
       .proof-summary { grid-template-columns:1fr; }
@@ -445,12 +451,9 @@
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n);
       }
 
-      function fmtAllocation(e) {
-        const alloc = toNumber(e && e.allocation);
-        if (alloc !== null) return `${alloc}%`;
-        const ratio = toNumber(e && e.target_btc_ratio);
-        if (ratio !== null) return `${Math.round(ratio * 100)}%`;
-        return '—';
+      function fmtAllocation(_e, locale) {
+        const text = locale === 'ja' ? '会員限定' : 'Members only';
+        return `<span class="alloc-locked">${text}</span>`;
       }
 
       function fmtUtc(e) {
@@ -494,7 +497,7 @@
             <td>${fmtUtc(e)}</td>
             <td class="${integrity === 'VALID' ? 'ok' : ''}">${integrity}</td>
             <td>${trigger}</td>
-            <td>${fmtAllocation(e)}</td>
+            <td>${fmtAllocation(e, locale)}</td>
             <td>${fmtUsd(e && e.btc_price)}</td>
             <td class="hash" title="${String((e && e.hash) || '')}">${shortHash(e && e.hash)}</td>
             <td class="hash" title="${String((e && e.prev_hash) || '')}">${shortHash(e && e.prev_hash)}</td>

@@ -704,6 +704,29 @@
       return key;
     }
 
+    function formatRecentBtcPrice(raw) {
+      const p = parseFiniteNumber(raw);
+      return p === null ? "BTC N/A" : fmtUsd(p);
+    }
+
+    function resolveActualBtcRatio(log, latest) {
+      const direct = parseFiniteNumber(latest?.actual_btc_ratio);
+      if (direct !== null) return Math.max(0, Math.min(1, direct));
+
+      const snap = parseFiniteNumber(latest?.portfolio_snapshot?.actual_btc_ratio);
+      if (snap !== null) return Math.max(0, Math.min(1, snap));
+
+      const entries = Array.isArray(log?.entries) ? log.entries : [];
+      for (const e of entries) {
+        const r = parseFiniteNumber(e?.actual_btc_ratio);
+        if (r !== null) return Math.max(0, Math.min(1, r));
+      }
+
+      const pos = String(latest?.actual_position ?? latest?.position ?? "").toUpperCase();
+      if (pos === "CASH") return 0;
+      return null;
+    }
+
     function formatExposure(value) {
       const n = parseFiniteNumber(value);
       if (n === null) return "Unavailable";
@@ -756,7 +779,8 @@
         ? entries.map((e) => {
             const d = getEntryDate(e) || "Unavailable";
             const s = mapStatusLabelForDecision(e?.status);
-            return `<li>${d} | ${s}</li>`;
+            const p = formatRecentBtcPrice(e?.btc_price);
+            return `<li>${d} | ${s} | ${p}</li>`;
           }).join("")
         : "<li>Unavailable</li>";
 
@@ -781,27 +805,34 @@
 
     async function fetchLiveBtcPrice() {
       const endpoints = [
-        async () => {
-          const r = await fetch("https://api.coinbase.com/v2/prices/BTC-USD/spot", { cache: "no-store" });
-          if (!r.ok) throw new Error(`coinbase_${r.status}`);
-          const j = await r.json();
-          const p = parseFiniteNumber(j?.data?.amount);
-          if (p === null) throw new Error("coinbase_parse");
-          return p;
+        {
+          source: "coinbase",
+          fetcher: async () => {
+            const r = await fetch("https://api.coinbase.com/v2/prices/BTC-USD/spot", { cache: "no-store" });
+            if (!r.ok) throw new Error(`coinbase_${r.status}`);
+            const j = await r.json();
+            const p = parseFiniteNumber(j?.data?.amount);
+            if (p === null) throw new Error("coinbase_parse");
+            return p;
+          }
         },
-        async () => {
-          const r = await fetch("https://api.kraken.com/0/public/Ticker?pair=XBTUSD", { cache: "no-store" });
-          if (!r.ok) throw new Error(`kraken_${r.status}`);
-          const j = await r.json();
-          const p = parseFiniteNumber(j?.result?.XXBTZUSD?.c?.[0]);
-          if (p === null) throw new Error("kraken_parse");
-          return p;
+        {
+          source: "kraken",
+          fetcher: async () => {
+            const r = await fetch("https://api.kraken.com/0/public/Ticker?pair=XBTUSD", { cache: "no-store" });
+            if (!r.ok) throw new Error(`kraken_${r.status}`);
+            const j = await r.json();
+            const p = parseFiniteNumber(j?.result?.XXBTZUSD?.c?.[0]);
+            if (p === null) throw new Error("kraken_parse");
+            return p;
+          }
         }
       ];
       let lastErr = null;
-      for (const fn of endpoints) {
+      for (const ep of endpoints) {
         try {
-          return await fn();
+          const price = await ep.fetcher();
+          return { price, source: ep.source, fetchedAtUtc: new Date().toISOString() };
         } catch (e) {
           lastErr = e;
         }
@@ -857,8 +888,10 @@
       const bp = parseFiniteNumber(basePrice);
       const br = parseFiniteNumber(btcRatio);
       const lp = parseFiniteNumber(livePrice);
-      if (be === null || bp === null || br === null || lp === null || bp <= 0) return null;
+      if (be === null || br === null || lp === null) return null;
       const clamped = Math.max(0, Math.min(1, br));
+      if (clamped === 0) return be;
+      if (bp === null || bp <= 0) return null;
       const btcUnits = (be * clamped) / bp;
       const cashPart = be * (1 - clamped);
       return cashPart + btcUnits * lp;
@@ -897,6 +930,7 @@
       const basePrice = parseFiniteNumber(latest?.btc_price);
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
       document.getElementById("metaUpdated").textContent = `Signal Updated ${fmtUtc(signalUpdated)}`;
+      console.debug("[SIGNAL_SOURCE]", { source: "log.json.latest", signal_updated_utc: signalUpdated, price_ts_utc: latest?.price_ts || null });
 
       const liveEquity = resolveLiveEquityDetails(log, latest);
       const equity = parseFiniteNumber(liveEquity.value);
@@ -917,31 +951,47 @@
       const runtime = {
         log,
         latest,
-        baseEquity: equity,
-        basePrice,
-        btcRatio: parseFiniteNumber(latest?.actual_btc_ratio ?? latest?.target_btc_ratio),
+        snapshotEquity: equity,
+        snapshotPrice: basePrice,
+        btcRatio: resolveActualBtcRatio(log, latest),
         lastPriceTs: latest?.price_ts || latest?.updated_at_utc || latest?.timestamp_utc || null,
+        lastPriceSource: latest?.price_source || "log.json",
+        lastLivePrice: basePrice,
       };
 
       async function refreshPriceAndEstimate() {
         try {
-          const livePrice = await fetchLiveBtcPrice();
-          runtime.lastPriceTs = new Date().toISOString();
+          const liveFeed = await fetchLiveBtcPrice();
+          const livePrice = parseFiniteNumber(liveFeed?.price);
+          if (livePrice === null) throw new Error("live_price_parse");
+
+          runtime.lastLivePrice = livePrice;
+          runtime.lastPriceTs = liveFeed?.fetchedAtUtc || new Date().toISOString();
+          runtime.lastPriceSource = liveFeed?.source || "realtime";
+
           document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(livePrice)}`;
           renderEstimationPriceStatus(runtime.lastPriceTs, false);
 
-          const estEquity = estimateEquityFromPrice(runtime.baseEquity, runtime.basePrice, runtime.btcRatio, livePrice);
+          const estEquity = estimateEquityFromPrice(runtime.snapshotEquity, runtime.snapshotPrice, runtime.btcRatio, livePrice);
           if (estEquity !== null) {
             document.getElementById("liveEquity").textContent = fmtUsd(estEquity);
             renderPnl(runtime.log, runtime.latest, estEquity);
           }
+
+          console.debug("[LIVE_PRICE_FEED]", {
+            source: runtime.lastPriceSource,
+            fetched_at_utc: runtime.lastPriceTs,
+            btc_price_usd: livePrice,
+            signal_source: "log.json.latest",
+            estimated_equity_source: "latest.equity_usd + snapshot_ratio + realtime_btc"
+          });
         } catch (err) {
-          console.debug("[LIVE_PRICE_FEED]", { error: String(err) });
+          console.debug("[LIVE_PRICE_FEED]", { error: String(err), last_price_ts: runtime.lastPriceTs, source: runtime.lastPriceSource });
           renderEstimationPriceStatus(runtime.lastPriceTs, true);
         }
       }
 
-      setInterval(refreshPriceAndEstimate, 60 * 1000);
+      setInterval(refreshPriceAndEstimate, 30 * 1000);
       refreshPriceAndEstimate().catch(() => {});
 
       renderAudit(log, latest);
