@@ -1,0 +1,94 @@
+name: Daily Archive Update
+
+on:
+  schedule:
+    - cron: "5 0 * * *" # 00:05 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-archive-update
+  cancel-in-progress: true
+
+jobs:
+  run-daily:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run daily log update
+        env:
+          DRY_RUN: "0"
+        run: |
+          python scripts/run_daily.py
+
+      - name: Run daily report generation
+        id: report_generation
+        continue-on-error: true
+        run: |
+          set +e
+          python scripts/generate_daily_report.py
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Notify Discord on report generation failure
+        if: steps.report_generation.outputs.rc != '0'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          run_date_jst=$(python - <<'PY'
+import json
+try:
+    j = json.load(open('output/report_status.json', 'r', encoding='utf-8'))
+    print(j.get('run_date_jst') or '')
+except Exception:
+    print('')
+PY
+)
+          reason_code=$(python - <<'PY'
+import json
+try:
+    j = json.load(open('output/report_status.json', 'r', encoding='utf-8'))
+    print(j.get('reason_code') or 'UNKNOWN')
+except Exception:
+    print('UNKNOWN')
+PY
+)
+          if [ -n "${DISCORD_WEBHOOK_URL:-}" ]; then
+            payload=$(python - <<PY
+import json
+print(json.dumps({"content": "task=daily_report_generation status=FAIL run_date_jst=${run_date_jst} reason_code=${reason_code}"}))
+PY
+)
+            curl -sS -X POST "$DISCORD_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$payload" \
+              >/dev/null || true
+          fi
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add public/log.json
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: daily log update"
+          git push
