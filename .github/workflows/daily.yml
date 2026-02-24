@@ -3,6 +3,7 @@ name: Daily Archive Update
 on:
   schedule:
     - cron: "5 0 * * *" # 00:05 UTC daily
+    - cron: "20 0 * * *" # 00:20 UTC missed-run check
   workflow_dispatch:
 
 permissions:
@@ -14,6 +15,7 @@ concurrency:
 
 jobs:
   run-daily:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '5 0 * * *' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -48,3 +50,122 @@ jobs:
 
           git commit -m "chore: daily log update"
           git push
+
+      - name: Collect run context
+        if: ${{ always() }}
+        run: |
+          echo "EXPECTED_DATE_UTC=$(date -u +%F)" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("log.json")
+          latest_date = "UNAVAILABLE"
+          latest_updated = "UNAVAILABLE"
+          try:
+              j = json.loads(p.read_text(encoding="utf-8"))
+              latest = j.get("latest") or {}
+              latest_date = str(latest.get("date") or "UNAVAILABLE")
+              latest_updated = str(latest.get("updated_at_utc") or "UNAVAILABLE")
+          except Exception:
+              pass
+          with open(".run_ctx.env", "w", encoding="utf-8") as f:
+              f.write(f"ACTUAL_LATEST_DATE={latest_date}\n")
+              f.write(f"LATEST_UPDATED_AT_UTC={latest_updated}\n")
+          PY
+          cat .run_ctx.env >> "$GITHUB_ENV"
+
+      - name: Notify Discord on daily run failure
+        if: ${{ failure() && secrets.DISCORD_WEBHOOK_URL != '' }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RUN_ID: ${{ github.run_id }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          JOB_NAME: run-daily
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          webhook = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
+          if not webhook:
+              raise SystemExit(0)
+          msg = (
+              f"🚨 Daily run failed\n"
+              f"workflow={os.environ.get('WORKFLOW_NAME')}\n"
+              f"job={os.environ.get('JOB_NAME')}\n"
+              f"run_id={os.environ.get('RUN_ID')}\n"
+              f"expected_date_utc={os.environ.get('EXPECTED_DATE_UTC','UNAVAILABLE')}\n"
+              f"actual_latest_date={os.environ.get('ACTUAL_LATEST_DATE','UNAVAILABLE')}\n"
+              f"latest_updated_at_utc={os.environ.get('LATEST_UPDATED_AT_UTC','UNAVAILABLE')}\n"
+              f"reason=daily_run_failed"
+          )
+          data = json.dumps({"content": msg}).encode("utf-8")
+          req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"}, method="POST")
+          urllib.request.urlopen(req, timeout=10).read()
+          PY
+
+  missed-run-check:
+    if: ${{ github.event_name == 'schedule' && github.event.schedule == '20 0 * * *' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Verify latest signal/proof date (UTC)
+        id: verify
+        run: |
+          EXPECTED_DATE_UTC="$(date -u +%F)"
+          echo "EXPECTED_DATE_UTC=$EXPECTED_DATE_UTC" >> "$GITHUB_ENV"
+          set +e
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          expected = os.environ["EXPECTED_DATE_UTC"]
+          p = Path("log.json")
+          latest_date = "UNAVAILABLE"
+          latest_updated = "UNAVAILABLE"
+          try:
+              j = json.loads(p.read_text(encoding="utf-8"))
+              latest = j.get("latest") or {}
+              latest_date = str(latest.get("date") or "UNAVAILABLE")
+              latest_updated = str(latest.get("updated_at_utc") or "UNAVAILABLE")
+          except Exception:
+              pass
+          with open(".missed_ctx.env", "w", encoding="utf-8") as f:
+              f.write(f"ACTUAL_LATEST_DATE={latest_date}\n")
+              f.write(f"LATEST_UPDATED_AT_UTC={latest_updated}\n")
+          if latest_date != expected:
+              raise SystemExit(1)
+          PY
+          rc=$?
+          set -e
+          cat .missed_ctx.env >> "$GITHUB_ENV"
+          exit $rc
+
+      - name: Notify Discord on missed run
+        if: ${{ failure() && secrets.DISCORD_WEBHOOK_URL != '' }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RUN_ID: ${{ github.run_id }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          JOB_NAME: missed-run-check
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          webhook = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
+          if not webhook:
+              raise SystemExit(0)
+          msg = (
+              f"⚠️ Missed daily signal/proof update\n"
+              f"workflow={os.environ.get('WORKFLOW_NAME')}\n"
+              f"job={os.environ.get('JOB_NAME')}\n"
+              f"run_id={os.environ.get('RUN_ID')}\n"
+              f"expected_date_utc={os.environ.get('EXPECTED_DATE_UTC','UNAVAILABLE')}\n"
+              f"actual_latest_date={os.environ.get('ACTUAL_LATEST_DATE','UNAVAILABLE')}\n"
+              f"latest_updated_at_utc={os.environ.get('LATEST_UPDATED_AT_UTC','UNAVAILABLE')}\n"
+              f"reason=missed_run_check_failed"
+          )
+          data = json.dumps({"content": msg}).encode("utf-8")
+          req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"}, method="POST")
+          urllib.request.urlopen(req, timeout=10).read()
+          PY
