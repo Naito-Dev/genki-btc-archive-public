@@ -689,7 +689,7 @@ def main() -> None:
         except Exception:
             pass
 
-    print("Updated: public/log.json")
+    print("Updated: log.json")
     print(msg)
 
 

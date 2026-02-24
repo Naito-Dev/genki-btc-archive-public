@@ -46,6 +46,6 @@
     "comparison_output": "output/audit/comparison.json",
     "live_state": "output/state_live.json",
     "live_trades": "output/trades_live.csv",
-    "public_log": "public/log.json"
+    "public_log": "log.json"
   }
 }
