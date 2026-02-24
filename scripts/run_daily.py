@@ -29,8 +29,8 @@ except Exception:
 
 ROOT = Path(__file__).resolve().parent.parent
 D1_PATH = ROOT / "data/Binance_BTCUSDT_D1.csv"
-LOG_JSON = ROOT / "public/log.json"
-LOGS_DIR = ROOT / "public/logs"
+LOG_JSON = ROOT / "log.json"
+LOGS_DIR = ROOT / "logs"
 STATE_JSON = ROOT / "output/state_live.json"
 DAILY_INPUT_ENV = ROOT / "daily_input.env"
 
