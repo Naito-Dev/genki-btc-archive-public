@@ -548,7 +548,7 @@ def _validate_chain(entries: list[dict]) -> tuple[bool, str]:
     for i, e in enumerate(ordered):
         prev_hash = e.get("prev_hash")
         if i == 0:
-            if prev_hash is not None:
+            if prev_hash not in (None, ""):
                 return False, "genesis prev_hash must be null"
         else:
             if prev_hash != prev:
