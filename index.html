@@ -124,14 +124,14 @@
       align-items: center;
       justify-content: center;
       border-radius: 999px;
-      border: 1px solid rgba(178, 150, 79, .22);
-      background: rgba(10,17,34,.12);
-      color: rgba(210,220,240,.72);
+      border: 1px solid rgba(178, 150, 79, .16);
+      background: rgba(10,17,34,.08);
+      color: rgba(198,210,233,.58);
       white-space: nowrap;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       letter-spacing: .03em;
-      padding: 5px 9px;
+      padding: 4px 8px;
     }
     .action-panel__metaDock {
       position: absolute;
@@ -162,10 +162,12 @@
       font-feature-settings: "tnum" 1, "lnum" 1;
     }
     .meta-pill--updated {
-      padding: 6px 11px;
-      font-size: 11px;
-      font-weight: 700;
-      color: rgba(230,238,255,.78);
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(237,244,255,.94);
+      background: rgba(10,17,34,.22);
+      border-color: rgba(190, 205, 240, .30);
       font-variant-numeric: tabular-nums lining-nums;
       font-feature-settings: "tnum" 1, "lnum" 1;
     }
@@ -451,7 +453,7 @@
       .action-panel { min-height: 260px; padding: 16px 14px 84px; }
       .action-panel__signal { font-size: clamp(52px, 14vw, 74px); }
       .action-panel__trustPills { margin-top: 6px; gap: 5px; }
-      .trust-pill { font-size: 10px; padding: 5px 8px; }
+      .trust-pill { font-size: 9px; padding: 4px 8px; }
       .action-panel__metaDock {
         right: 14px;
         bottom: 10px;
@@ -491,15 +493,12 @@
           <div class="live-header">
             <img src="GenkiBTC.jpeg" alt="Genki" class="live-avatar">
             <div class="live-header__text">
-              <div class="live-label">LIVE TESTING (EST.):</div>
-              <div class="live-owner">Genki test portfolio</div>
+              <div class="live-label">LIVE TESTING</div>
             </div>
           </div>
           <div id="liveEquity" class="live-equity">-</div>
-          <div id="sinceStart" class="since-start">Since test start: -</div>
-          <div id="priceUpdated" class="price-updated">Price Updated: -</div>
           <div id="pnlPct" class="pnl-pct" style="display:none"></div>
-          <div id="pnlNote" class="pnl-note" style="display:none">Test start baseline</div>
+          <div id="sinceStart" class="since-start">Since start: -</div>
         </div>
       </section>
 
@@ -803,6 +802,20 @@
       navigator.clipboard?.writeText(txt).catch(() => {});
     }
 
+    async function fetchLivePortfolioSnapshot() {
+      const res = await fetch(`data/live_portfolio_snapshot.json?ts=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`snapshot_${res.status}`);
+      const j = await res.json();
+      return {
+        usdtBalance: parseFiniteNumber(j?.usdt_balance),
+        btcBalance: parseFiniteNumber(j?.btc_balance),
+        updatedAtUtc: j?.updated_at_utc || j?.balance_ts_utc || null,
+        source: j?.source || "snapshot",
+        status: j?.snapshot_status || null,
+        priceAtSnapshot: parseFiniteNumber(j?.price_at_snapshot),
+      };
+    }
+
     async function fetchLiveBtcPrice() {
       const endpoints = [
         {
@@ -860,7 +873,7 @@
       if (pnl === null || !Number.isFinite(Number(pnl))) {
         pnlEl.textContent = "P/L unavailable";
         pnlEl.style.display = "block";
-        pnlNoteEl.style.display = "none";
+        if (pnlNoteEl) pnlNoteEl.style.display = "none";
         pnlEl.classList.remove("positive", "negative");
         pnlEl.classList.add("flat");
       } else {
@@ -868,7 +881,7 @@
         const sign = val > 0 ? "+" : "";
         pnlEl.textContent = `P/L ${sign}${val.toFixed(2)}%`;
         pnlEl.style.display = "block";
-        pnlNoteEl.style.display = "block";
+        if (pnlNoteEl) pnlNoteEl.style.display = "block";
         pnlEl.classList.remove("positive", "negative", "flat");
         pnlEl.classList.add(val > 0 ? "positive" : val < 0 ? "negative" : "flat");
       }
@@ -939,7 +952,7 @@
       const sinceStart = getSinceTestStart(log);
       const sinceStartEl = document.getElementById("sinceStart");
       if (sinceStart) {
-        sinceStartEl.textContent = `Since test start: ${sinceStart}`;
+        sinceStartEl.textContent = `Since start: ${sinceStart}`;
         sinceStartEl.style.display = "block";
       } else {
         sinceStartEl.textContent = "";
@@ -954,6 +967,7 @@
         snapshotEquity: equity,
         snapshotPrice: basePrice,
         btcRatio: resolveActualBtcRatio(log, latest),
+        portfolioSnapshot: null,
         lastPriceTs: latest?.price_ts || latest?.updated_at_utc || latest?.timestamp_utc || null,
         lastPriceSource: latest?.price_source || "log.json",
         lastLivePrice: basePrice,
@@ -972,7 +986,26 @@
           document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(livePrice)}`;
           renderEstimationPriceStatus(runtime.lastPriceTs, false);
 
-          const estEquity = estimateEquityFromPrice(runtime.snapshotEquity, runtime.snapshotPrice, runtime.btcRatio, livePrice);
+          try {
+            const snapshot = await fetchLivePortfolioSnapshot();
+            if (snapshot && (snapshot.usdtBalance !== null || snapshot.btcBalance !== null)) {
+              runtime.portfolioSnapshot = snapshot;
+            }
+          } catch (snapshotErr) {
+            console.debug("[LIVE_PORTFOLIO_SNAPSHOT]", { error: String(snapshotErr) });
+          }
+
+          let estEquity = null;
+          if (
+            runtime.portfolioSnapshot &&
+            runtime.portfolioSnapshot.usdtBalance !== null &&
+            runtime.portfolioSnapshot.btcBalance !== null
+          ) {
+            estEquity = runtime.portfolioSnapshot.usdtBalance + (runtime.portfolioSnapshot.btcBalance * livePrice);
+          } else {
+            estEquity = estimateEquityFromPrice(runtime.snapshotEquity, runtime.snapshotPrice, runtime.btcRatio, livePrice);
+          }
+
           if (estEquity !== null) {
             document.getElementById("liveEquity").textContent = fmtUsd(estEquity);
             renderPnl(runtime.log, runtime.latest, estEquity);
@@ -983,7 +1016,13 @@
             fetched_at_utc: runtime.lastPriceTs,
             btc_price_usd: livePrice,
             signal_source: "log.json.latest",
-            estimated_equity_source: "latest.equity_usd + snapshot_ratio + realtime_btc"
+            snapshot_source: runtime.portfolioSnapshot?.source || "fallback_log_snapshot",
+            snapshot_updated_at_utc: runtime.portfolioSnapshot?.updatedAtUtc || null,
+            balances_used: runtime.portfolioSnapshot ? {
+              usdt: runtime.portfolioSnapshot.usdtBalance,
+              btc: runtime.portfolioSnapshot.btcBalance,
+            } : null,
+            estimated_equity_usd: estEquity
           });
         } catch (err) {
           console.debug("[LIVE_PRICE_FEED]", { error: String(err), last_price_ts: runtime.lastPriceTs, source: runtime.lastPriceSource });
