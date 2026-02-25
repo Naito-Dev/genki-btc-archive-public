@@ -88,6 +88,8 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
+      flex-direction: column;
+      gap: 8px;
     }
     .action-panel__signal {
       margin-top: 18px;
@@ -109,6 +111,24 @@
     .action-panel__signal.state-defensive { color: var(--defensive-color); text-shadow: 0 8px 24px var(--defensive-glow); }
     .action-panel__signal.state-bullish { color: var(--bullish-color); text-shadow: 0 8px 24px var(--bullish-glow); }
     .action-panel__signal.state-strong-bullish { color: var(--strong-bullish-color); text-shadow: 0 8px 24px var(--strong-bullish-glow); }
+    .action-panel__reason {
+      margin: 0 auto;
+      font-size: 12px;
+      line-height: 1.35;
+      color: rgba(227, 237, 255, .84);
+      text-align: center;
+      max-width: 88%;
+    }
+    .action-panel__stale {
+      margin: 0 auto;
+      font-size: 10px;
+      line-height: 1.25;
+      color: rgba(255, 209, 120, .92);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      text-align: center;
+      display: none;
+    }
     .action-panel__trustPills {
       margin-top: 6px;
       display: flex;
@@ -481,6 +501,8 @@
         </div>
         <div class="action-panel__body">
           <div id="actionSignal" class="action-panel__signal">Wait</div>
+          <p id="actionReason" class="action-panel__reason">Verification check incomplete. No action taken.</p>
+          <p id="dataPending" class="action-panel__stale">Data update pending</p>
         </div>
         <div class="action-panel__metaDock">
           <div id="metaPrice" class="meta-pill meta-pill--price">BTC $67,950.98</div>
@@ -493,7 +515,7 @@
           <div class="live-header">
             <img src="GenkiBTC.jpeg" alt="Genki" class="live-avatar">
             <div class="live-header__text">
-              <div class="live-label">LIVE TESTING</div>
+              <div id="liveLabel" class="live-label">LIVE TESTING</div>
             </div>
           </div>
           <div id="liveEquity" class="live-equity">-</div>
@@ -503,7 +525,7 @@
       </section>
 
       <section class="hero-cta-row">
-        <a class="hero-cta" href="sales-page-en.html">Unlock today's BTC risk signal</a>
+        <a class="hero-cta" href="sales-page-en.html">Get daily signal by email</a>
       </section>
     </section>
 
@@ -543,6 +565,13 @@
   </main>
 
   <script>
+    // Display source map (single-source integrity rules):
+    // - Status label: log.json.latest.target_btc_ratio/allocation -> actionLabelFromTargetRatio()
+    // - Reason text: log.json.latest.status + error_type (+sync_status fallback) -> getDisplayReason()
+    // - Signal Updated timestamp: log.json.latest.updated_at_utc || timestamp_utc || price_ts
+    // - LIVE TESTING Day N: fixed TEST_START_DATE_JST + current JST date
+    const TEST_START_DATE_JST = "2026-02-18";
+
     function fmtUsd(v) {
       if (v === null || v === undefined || Number.isNaN(Number(v))) return "-";
       return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(v));
@@ -563,6 +592,25 @@
       const hh = String(d.getUTCHours()).padStart(2, "0");
       const mm = String(d.getUTCMinutes()).padStart(2, "0");
       return `${y}-${m}-${day} ${hh}:${mm} UTC`;
+    }
+
+    function isIsoDate(v) {
+      return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+    }
+
+    function nowJstDate() {
+      const now = new Date();
+      const jst = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+      return jst.toISOString().slice(0, 10);
+    }
+
+    function calcLiveDayN(startDateJst) {
+      if (!isIsoDate(startDateJst)) return null;
+      const today = nowJstDate();
+      const startMs = Date.parse(`${startDateJst}T00:00:00+09:00`);
+      const todayMs = Date.parse(`${today}T00:00:00+09:00`);
+      if (!Number.isFinite(startMs) || !Number.isFinite(todayMs) || todayMs < startMs) return null;
+      return Math.floor((todayMs - startMs) / 86400000) + 1;
     }
 
     function parseFiniteNumber(v) {
@@ -701,6 +749,58 @@
       if (key === "BULLISH") return "BULLISH";
       if (key === "STRONG BULLISH" || key === "STRONG_BULLISH") return "STRONG BULLISH";
       return key;
+    }
+
+    function normalizeErrorType(latest) {
+      const candidates = [
+        latest?.error_type,
+        latest?.reason_code,
+      ];
+      const text = candidates.filter(Boolean).join(" ").toUpperCase();
+      if (text.includes("DRYRUN_PRICE_UNAVAILABLE") || text.includes("UNKNOWN_PRICE_STALE")) return "DRYRUN_PRICE_UNAVAILABLE";
+      if (text.includes("OPEN_ORDERS_EXIST")) return "OPEN_ORDERS_EXIST";
+      if (text.includes("OPEN_ORDERS_CHECK_FAILED")) return "OPEN_ORDERS_CHECK_FAILED";
+      if (text.includes("INVALID_STATE")) return "INVALID_STATE";
+      return "";
+    }
+
+    function normalizeSyncStatus(latest) {
+      const sync = String(latest?.snapshot_status || "").toUpperCase();
+      if (sync === "SYNC_PENDING") return "SYNC_PENDING";
+      if (sync === "SYNCED") return "SYNCED";
+      return "";
+    }
+
+    function getDisplayReason(statusLabel, errorType, syncStatus, hasData = true) {
+      if (!hasData) return "Verification data unavailable. No action taken.";
+      const st = String(statusLabel || "").toUpperCase();
+      const err = String(errorType || "").toUpperCase();
+      if (st === "WAIT") {
+        if (err === "DRYRUN_PRICE_UNAVAILABLE") return "Defensive posture due to data instability.";
+        if (err === "OPEN_ORDERS_EXIST") return "Defensive posture while existing orders are being verified.";
+        if (err === "OPEN_ORDERS_CHECK_FAILED") return "Defensive posture due to exchange verification issue.";
+        if (err === "INVALID_STATE") return "Defensive posture due to system state verification.";
+        if (String(syncStatus || "").toUpperCase() === "SYNC_PENDING") return "Verification check incomplete. No action taken.";
+        return "Criteria not met. No position adjustment.";
+      }
+      return "Verification check incomplete. No action taken.";
+    }
+
+    function runReasonMappingSelfTest() {
+      const tests = [
+        { input: ["WAIT", "DRYRUN_PRICE_UNAVAILABLE", "", true], expected: "Defensive posture due to data instability." },
+        { input: ["WAIT", "OPEN_ORDERS_EXIST", "", true], expected: "Defensive posture while existing orders are being verified." },
+        { input: ["WAIT", "OPEN_ORDERS_CHECK_FAILED", "", true], expected: "Defensive posture due to exchange verification issue." },
+        { input: ["WAIT", "INVALID_STATE", "", true], expected: "Defensive posture due to system state verification." },
+        { input: ["WAIT", "", "SYNC_PENDING", true], expected: "Verification check incomplete. No action taken." },
+        { input: ["WAIT", "", "", true], expected: "Criteria not met. No position adjustment." },
+        { input: ["WAIT", "", "", false], expected: "Verification data unavailable. No action taken." },
+      ];
+      const result = tests.map((t) => ({
+        input: t.input,
+        ok: getDisplayReason(...t.input) === t.expected,
+      }));
+      console.debug("[REASON_MAPPING_TEST]", result);
     }
 
     function formatRecentBtcPrice(raw) {
@@ -932,18 +1032,33 @@
       const res = await fetch(`log.json?ts=${Date.now()}`, { cache: "no-store" });
       const log = await res.json();
       const latest = log?.latest || {};
+      const hasCoreSignalData = Boolean(latest?.status) && Boolean(latest?.updated_at_utc || latest?.timestamp_utc || latest?.price_ts);
       const ratio = normalizeRatio(latest?.target_btc_ratio, latest?.allocation);
       const action = actionLabelFromTargetRatio(ratio);
+      const errorType = normalizeErrorType(latest);
+      const syncStatus = normalizeSyncStatus(latest);
+      const displayAction = hasCoreSignalData ? action : "WAIT";
+      const displayReason = getDisplayReason(displayAction, errorType, syncStatus, hasCoreSignalData);
 
       const actionEl = document.getElementById("actionSignal");
-      actionEl.textContent = action;
+      actionEl.textContent = displayAction;
       actionEl.classList.remove("state-wait", "state-defensive", "state-bullish", "state-strong-bullish");
-      actionEl.classList.add(actionStateClassFromLabel(action));
-      const signalUpdated = latest?.updated_at_utc || latest?.timestamp_utc || "-";
+      actionEl.classList.add(actionStateClassFromLabel(displayAction));
+      document.getElementById("actionReason").textContent = displayReason;
+      const signalUpdated = latest?.updated_at_utc || latest?.timestamp_utc || latest?.price_ts || "-";
       const basePrice = parseFiniteNumber(latest?.btc_price);
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
       document.getElementById("metaUpdated").textContent = `Signal Updated ${fmtUtc(signalUpdated)}`;
+      const isDataPending = !hasCoreSignalData || syncStatus === "SYNC_PENDING";
+      document.getElementById("dataPending").style.display = isDataPending ? "block" : "none";
       console.debug("[SIGNAL_SOURCE]", { source: "log.json.latest", signal_updated_utc: signalUpdated, price_ts_utc: latest?.price_ts || null });
+      console.debug("[REASON_SOURCE]", {
+        source: "log.json.latest.status + error_type (+snapshot_status fallback)",
+        status: latest?.status || null,
+        error_type: errorType || null,
+        sync_status: syncStatus || null,
+        displayed_reason: displayReason,
+      });
 
       const liveEquity = resolveLiveEquityDetails(log, latest);
       const equity = parseFiniteNumber(liveEquity.value);
@@ -951,6 +1066,9 @@
       renderEstimationPriceStatus(latest?.price_ts || latest?.updated_at_utc || latest?.timestamp_utc || null, false);
       const sinceStart = getSinceTestStart(log);
       const sinceStartEl = document.getElementById("sinceStart");
+      const liveLabelEl = document.getElementById("liveLabel");
+      const dayN = calcLiveDayN(TEST_START_DATE_JST);
+      liveLabelEl.textContent = dayN ? `LIVE TESTING • Day ${dayN}` : "LIVE TESTING";
       if (sinceStart) {
         sinceStartEl.textContent = `Since start: ${sinceStart}`;
         sinceStartEl.style.display = "block";
@@ -1036,9 +1154,12 @@
       renderAudit(log, latest);
     }
 
+    runReasonMappingSelfTest();
     load().catch((e) => {
       console.error(e);
-      document.getElementById("actionSignal").textContent = "Waiting";
+      document.getElementById("actionSignal").textContent = "WAIT";
+      document.getElementById("actionReason").textContent = "Verification data unavailable. No action taken.";
+      document.getElementById("dataPending").style.display = "block";
     });
   </script>
 </body>
