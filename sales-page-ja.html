@@ -724,7 +724,7 @@
           const integrity = latest?.chain_integrity || 'UNAVAILABLE';
           const proofTime = latest?.updated_at_utc || latest?.timestamp_utc || log?.last_updated_utc || latest?.date || '';
 
-          dayEl.textContent = `Day ${dayCount || 0} / 30`;
+          dayEl.textContent = `Day ${dayCount || 0}`;
           integrityEl.textContent = String(integrity);
           recordsEl.textContent = String(dayCount || 0);
           timeEl.textContent = formatUtc(proofTime);

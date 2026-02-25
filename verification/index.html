@@ -470,7 +470,10 @@
       }
 
       function normDay(e, idx) {
-        if (e && e.day) return String(e.day);
+        if (e && e.day) {
+          const raw = String(e.day).trim();
+          return raw.replace(/\s*\/\s*\d+\b/g, '');
+        }
         return `Day ${idx + 1}`;
       }
 
