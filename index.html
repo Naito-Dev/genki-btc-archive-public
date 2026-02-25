@@ -576,7 +576,7 @@
     // - Status label: log.json.latest.target_btc_ratio/allocation -> actionLabelFromTargetRatio()
     // - Reason text: log.json.latest.status + error_type (+sync_status fallback) -> getDisplayReason()
     // - Signal Updated timestamp: log.json.latest.updated_at_utc || timestamp_utc || price_ts
-    // - LIVE TESTING Day N: fixed TEST_START_DATE_JST + current JST date
+    // - LIVE TESTING Day N: fixed TEST_START_DATE_JST + signal cycle date (latest.date or updated_at_utc)
     const TEST_START_DATE_JST = "2026-02-18";
 
     function fmtUsd(v) {
@@ -605,19 +605,23 @@
       return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
     }
 
-    function nowJstDate() {
-      const now = new Date();
-      const jst = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-      return jst.toISOString().slice(0, 10);
+    function calcLiveDayN(startDateJst, referenceDateJst) {
+      if (!isIsoDate(startDateJst)) return null;
+      const startMs = Date.parse(`${startDateJst}T00:00:00+09:00`);
+      const refMs = Date.parse(`${referenceDateJst}T00:00:00+09:00`);
+      if (!Number.isFinite(startMs) || !Number.isFinite(refMs) || refMs < startMs) return null;
+      return Math.floor((refMs - startMs) / 86400000) + 1;
     }
 
-    function calcLiveDayN(startDateJst) {
-      if (!isIsoDate(startDateJst)) return null;
-      const today = nowJstDate();
-      const startMs = Date.parse(`${startDateJst}T00:00:00+09:00`);
-      const todayMs = Date.parse(`${today}T00:00:00+09:00`);
-      if (!Number.isFinite(startMs) || !Number.isFinite(todayMs) || todayMs < startMs) return null;
-      return Math.floor((todayMs - startMs) / 86400000) + 1;
+    function getSignalCycleDateJst(latest) {
+      const latestDate = toDateOnly(latest?.date);
+      if (latestDate) return latestDate;
+      const ts = latest?.updated_at_utc || latest?.timestamp_utc || latest?.price_ts;
+      if (!ts) return null;
+      const d = new Date(ts);
+      if (!Number.isFinite(d.getTime())) return null;
+      const jst = new Date(d.getTime() + (9 * 60 * 60 * 1000));
+      return jst.toISOString().slice(0, 10);
     }
 
     function parseFiniteNumber(v) {
@@ -1076,7 +1080,8 @@
       const sinceStart = getSinceTestStart(log);
       const sinceStartEl = document.getElementById("sinceStart");
       const liveLabelEl = document.getElementById("liveLabel");
-      const dayN = calcLiveDayN(TEST_START_DATE_JST);
+      const signalCycleDateJst = getSignalCycleDateJst(latest);
+      const dayN = signalCycleDateJst ? calcLiveDayN(TEST_START_DATE_JST, signalCycleDateJst) : null;
       liveLabelEl.textContent = dayN ? `LIVE TESTING • Day ${dayN}` : "LIVE TESTING";
       if (sinceStart) {
         sinceStartEl.textContent = `Since start: ${sinceStart}`;
