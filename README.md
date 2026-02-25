@@ -10,10 +10,10 @@ Japanese version: [README.ja.md](./README.ja.md)
 
 This is the public proof archive for Genki BTC Signal — a daily risk-control service for BTC spot holders.
 
-Every day, the system evaluates market structure and outputs one of four allocation bands:
+Every day, the system evaluates market structure and outputs the current candidate allocation levels:
 
 ```text
-0% / 70% / 100% (current candidate behavior; 30% messaging on hold)
+0% / 70% / 100% (strict70_to0_rule_v1 candidate; 30% path not adopted)
 ```
 
 This repository does not contain strategy code, API credentials, or infrastructure details.
@@ -143,4 +143,4 @@ This separation is intentional: protecting the implementation does not require h
 
 This is the standard we hold ourselves to. You can verify it.
 
-Not financial advice. Past performance does not guarantee future results. All allocation decisions remain the responsibility of the individual.
+Not financial advice. Past performance does not guarantee future results. Live outcomes can vary with fees, slippage, taxes, and market conditions. All allocation decisions remain the responsibility of the individual.

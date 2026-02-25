@@ -459,7 +459,7 @@
         <h2>What premium unlocks</h2>
         <p class="sub">The free dashboard shows your safety state. Premium tells you the exact number to act on.</p>
         <div class="unlock-grid">
-          <div class="unlock-item"><strong>Current allocation guidance</strong>Current implementation candidate is oriented around BTC 0% / 70% / 100%. 30% messaging is currently on hold.</div>
+          <div class="unlock-item"><strong>Current allocation guidance</strong>Current implementation candidate is strict70_to0_rule_v1, oriented around BTC 0% / 70% / 100%. The 30% path is not adopted.</div>
           <div class="unlock-item"><strong>Why the signal is what it is</strong>Brief context behind the current level — so you understand the logic, not just the output.</div>
           <div class="unlock-item"><strong>Daily delivery — once, on schedule</strong>One email. Read the subject line, act if needed, close it. Average decision time: under 60 seconds.</div>
           <div class="unlock-item"><strong>Full historical archive</strong>Every past signal, every allocation, every reason. Consistency you can audit yourself.</div>
@@ -479,7 +479,7 @@
               <tr><th>Item</th><th>Free Dashboard</th><th>Premium Access</th></tr>
             </thead>
             <tbody>
-              <tr><td>Today's allocation</td><td>Hidden</td><td>Current candidate: 0% / 70% / 100% (30% messaging on hold)</td></tr>
+              <tr><td>Today's allocation</td><td>Hidden</td><td>Current candidate: 0% / 70% / 100% (strict70_to0_rule_v1, 30% not adopted)</td></tr>
               <tr><td>Signal context</td><td>State label only</td><td>State + allocation + reason</td></tr>
               <tr><td>Recent decisions</td><td>Status text</td><td>Full allocation history with context</td></tr>
               <tr><td>Data readiness</td><td>Summary only</td><td>Action-ready interpretation</td></tr>
@@ -490,7 +490,7 @@
           </table>
         </div>
         <div class="compare-cards" aria-label="Free vs Premium mobile comparison">
-          <article class="compare-card"><p class="item">Today's allocation</p><p class="row"><strong>Free:</strong>Hidden</p><p class="row"><strong>Premium:</strong>Current candidate: 0% / 70% / 100% (30% messaging on hold)</p></article>
+          <article class="compare-card"><p class="item">Today's allocation</p><p class="row"><strong>Free:</strong>Hidden</p><p class="row"><strong>Premium:</strong>Current candidate: 0% / 70% / 100% (strict70_to0_rule_v1, 30% not adopted)</p></article>
           <article class="compare-card"><p class="item">Signal context</p><p class="row"><strong>Free:</strong>State label only</p><p class="row"><strong>Premium:</strong>State + allocation + reason</p></article>
           <article class="compare-card"><p class="item">Recent decisions</p><p class="row"><strong>Free:</strong>Status text</p><p class="row"><strong>Premium:</strong>Full allocation history with context</p></article>
           <article class="compare-card"><p class="item">Data readiness</p><p class="row"><strong>Free:</strong>Summary only</p><p class="row"><strong>Premium:</strong>Action-ready interpretation</p></article>
@@ -547,7 +547,7 @@
           <div class="kpi"><div class="v">-19.79%</div><div class="k">Max Drawdown (backtest reference)</div></div>
           <div class="kpi"><div class="v">11.80%</div><div class="k">Avg Exposure (backtest reference)</div></div>
         </div>
-        <p class="fine">Backtest metrics are historical reference only. Not a guarantee of future performance. Not investment advice.</p>
+        <p class="fine">Backtest metrics are historical reference only and do not guarantee future performance. Live outcomes may vary due to fees, slippage, taxes, and market conditions. Not investment advice.</p>
         <p class="fine" style="margin-top:8px">
           <a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.md" style="color:var(--muted)">View methodology</a> •
           <a href="https://naito-dev.github.io/genki-btc-archive-public/" style="color:var(--muted)">Public dashboard</a> •
@@ -563,11 +563,11 @@
         <div class="faq">
           <details>
             <summary>What exactly do I receive as a premium subscriber?</summary>
-            <p>One daily email. The subject line tells you today's allocation guidance and the current signal state. Current implementation candidate under review: strict70_to0_rule_v1. 30% messaging is paused. The body adds brief context and a link to the public proof log.</p>
+            <p>One daily email. The subject line tells you today's allocation guidance and the current signal state. Current implementation candidate under review: strict70_to0_rule_v1. The 30% path is not adopted. The body adds brief context and a link to the public proof log.</p>
           </details>
           <details>
             <summary>Why is the allocation guidance kept simple?</summary>
-            <p>Because precision theater creates false confidence. The current candidate behavior is kept simple and auditable, with strict70_to0_rule_v1 under review and 30% messaging paused until validation is complete.</p>
+            <p>Because precision theater creates false confidence. The current candidate behavior is kept simple and auditable, with strict70_to0_rule_v1 under review and no intermediate 30% path in active messaging.</p>
           </details>
           <details>
             <summary>Is this for active traders?</summary>

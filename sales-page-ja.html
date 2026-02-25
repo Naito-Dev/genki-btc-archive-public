@@ -459,7 +459,7 @@
         <h2>有料版で解放される価値</h2>
         <p class="sub">無料ダッシュボードは証跡レイヤー。有料版は実行レイヤーです。</p>
         <div class="unlock-grid">
-          <div class="unlock-item"><strong>現在の配分ガイダンス</strong>現行の採用候補は BTC 0% / 70% / 100% 中心です。30%訴求は現在保留中です。</div>
+          <div class="unlock-item"><strong>現在の配分ガイダンス</strong>現行の採用候補は strict70_to0_rule_v1（BTC 0% / 70% / 100%中心）です。30%ルールは現行候補では不採用です。</div>
           <div class="unlock-item"><strong>なぜそのシグナルか</strong>当日のレベル背景を短く提示。出力だけでなく文脈も把握できます。</div>
           <div class="unlock-item"><strong>日次配信（定時・1回）</strong>件名を読んで必要時だけ対応。平均判断時間は1分未満を想定。</div>
           <div class="unlock-item"><strong>完全な履歴アーカイブ</strong>過去のシグナル・配分・理由を一貫して確認できます。</div>
@@ -478,7 +478,7 @@
               <tr><th>項目</th><th>無料ダッシュボード</th><th>有料アクセス</th></tr>
             </thead>
             <tbody>
-              <tr><td>ポジション配分</td><td>非表示 / 要約のみ</td><td>現行候補: 0% / 70% / 100%（30%訴求は保留）</td></tr>
+              <tr><td>ポジション配分</td><td>非表示 / 要約のみ</td><td>現行候補: 0% / 70% / 100%（strict70_to0_rule_v1、30%不採用）</td></tr>
               <tr><td>ターゲット配分バンド</td><td>非表示</td><td>現行候補（strict70_to0_rule_v1）を評価中</td></tr>
               <tr><td>本日のシグナル</td><td>状態ラベルのみ</td><td>状態 + 配分ライン</td></tr>
               <tr><td>直近の判断履歴</td><td>状態テキスト</td><td>状態 + 配分コンテキスト</td></tr>
@@ -490,7 +490,7 @@
           </table>
         </div>
         <div class="compare-cards" aria-label="無料版と有料版の比較 mobile comparison">
-          <article class="compare-card"><p class="item">ポジション配分</p><p class="row"><strong>Free:</strong>非表示 / 要約のみ</p><p class="row"><strong>Premium:</strong>現行候補: 0% / 70% / 100%（30%訴求は保留）</p></article>
+          <article class="compare-card"><p class="item">ポジション配分</p><p class="row"><strong>Free:</strong>非表示 / 要約のみ</p><p class="row"><strong>Premium:</strong>現行候補: 0% / 70% / 100%（strict70_to0_rule_v1、30%不採用）</p></article>
           <article class="compare-card"><p class="item">ターゲット配分バンド</p><p class="row"><strong>Free:</strong>非表示</p><p class="row"><strong>Premium:</strong>現行候補（strict70_to0_rule_v1）を評価中</p></article>
           <article class="compare-card"><p class="item">本日のシグナル</p><p class="row"><strong>Free:</strong>状態ラベルのみ</p><p class="row"><strong>Premium:</strong>状態 + 配分ライン</p></article>
           <article class="compare-card"><p class="item">直近の判断履歴</p><p class="row"><strong>Free:</strong>状態テキスト</p><p class="row"><strong>Premium:</strong>状態 + 配分コンテキスト</p></article>
@@ -548,7 +548,7 @@
           <div class="kpi"><div class="v">-19.79%</div><div class="k">最大ドローダウン（参考）</div></div>
           <div class="kpi"><div class="v">11.80%</div><div class="k">平均エクスポージャー（参考）</div></div>
         </div>
-        <p class="fine">将来収益は保証されません。投資助言ではありません。最終判断はご自身で行ってください。</p>
+        <p class="fine">将来収益は保証されません。実運用では手数料・スリッページ・税務・市場環境により結果が変わる可能性があります。投資助言ではありません。最終判断はご自身で行ってください。</p>
         <p class="fine" style="margin-top:6px">過去の参考値です — 技術検証情報を確認できます。</p>
         <p class="fine" style="margin-top:8px"><a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.ja.md" style="color:var(--muted)">バックテスト手法（参考）を見る</a> • <a href="https://naito-dev.github.io/genki-btc-archive-public/" style="color:var(--muted)">公開検証ダッシュボードを見る</a> • <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" style="color:var(--muted)">公開証跡（log.json）を見る</a></p>
         <p class="fine" style="margin-top:6px"><a href="/genki-btc-archive-public/verification/index.html" style="color:var(--muted)">技術検証・再現性センターを見る（上級者向け）</a></p>
@@ -570,7 +570,7 @@
           </details>
           <details>
             <summary>具体的に何が届きますか？</summary>
-            <p>現在のシグナル状態、ルール化された配分レベル（4段階固定）、実行コンテキスト、無料版では見えない履歴情報を含む短い日次メールです。</p>
+            <p>現在のシグナル状態、現行候補の配分レベル（strict70_to0_rule_v1、30%不採用）、実行コンテキスト、無料版では見えない履歴情報を含む短い日次メールです。</p>
           </details>
           <details>
             <summary>更新頻度は？</summary>
