@@ -33,6 +33,7 @@ LOG_JSON = ROOT / "log.json"
 LOGS_DIR = ROOT / "logs"
 STATE_JSON = ROOT / "output/state_live.json"
 DAILY_INPUT_ENV = ROOT / "daily_input.env"
+LIVE_SNAPSHOT_JSON = ROOT / "data/live_portfolio_snapshot.json"
 
 
 @dataclass
@@ -53,6 +54,9 @@ class DailyState:
     status: str
     position: str = "unknown"
     equity_usd: Optional[float] = None
+    base_equity: Optional[float] = None
+    initial_capital: Optional[float] = None
+    pnl_percent: Optional[float] = None
     pnl_usd: Optional[float] = None
     pnl_btc: Optional[float] = None
     snapshot_status: str = "SYNC_PENDING"
@@ -61,6 +65,8 @@ class DailyState:
     target_btc_ratio: float = 0.0
     actual_btc_ratio: Optional[float] = None
     actual_position: str = "unknown"
+    btc_units: Optional[float] = None
+    usdt_units: Optional[float] = None
 
 
 def _now_utc() -> datetime:
@@ -81,6 +87,118 @@ def _round_or_none(value: Optional[float], digits: int) -> Optional[float]:
     if value is None:
         return None
     return round(float(value), digits)
+
+
+def _compute_pnl_percent(equity_usd: Optional[float], base_equity: Optional[float]) -> Optional[float]:
+    if equity_usd is None or base_equity is None:
+        return None
+    if base_equity <= 0:
+        return None
+    return ((float(equity_usd) / float(base_equity)) - 1.0) * 100.0
+
+
+def _extract_base_equity(log: dict) -> Optional[float]:
+    latest = log.get("latest") if isinstance(log.get("latest"), dict) else {}
+    for k in ("base_equity", "initial_capital"):
+        v = latest.get(k)
+        try:
+            if v is not None:
+                return float(v)
+        except Exception:
+            pass
+
+    root_base = log.get("base_equity")
+    try:
+        if root_base is not None:
+            return float(root_base)
+    except Exception:
+        pass
+
+    entries = list(log.get("entries", [])) if isinstance(log.get("entries"), list) else []
+    entries.sort(key=lambda x: x.get("date", ""))
+    for e in entries:
+        for k in ("base_equity", "initial_capital"):
+            try:
+                v = e.get(k)
+                if v is not None:
+                    return float(v)
+            except Exception:
+                pass
+
+    # Derive from historical equity + pnl_percent when explicit base is absent.
+    # base = equity / (1 + pnl_percent/100)
+    for e in entries:
+        try:
+            eq = e.get("equity_usd")
+            pp = e.get("pnl_percent")
+            if eq is None or pp is None:
+                continue
+            eqf = float(eq)
+            ppf = float(pp)
+            denom = 1.0 + (ppf / 100.0)
+            if denom > 0:
+                return eqf / denom
+        except Exception:
+            pass
+    return None
+
+
+def _extract_last_known_equity(log: dict) -> Optional[float]:
+    latest = log.get("latest") if isinstance(log.get("latest"), dict) else {}
+    for key in ("equity_usd",):
+        try:
+            v = latest.get(key)
+            if v is not None:
+                return float(v)
+        except Exception:
+            pass
+
+    entries = list(log.get("entries", [])) if isinstance(log.get("entries"), list) else []
+    entries.sort(key=lambda x: x.get("date", ""))
+    for e in reversed(entries):
+        try:
+            v = e.get("equity_usd")
+            if v is not None:
+                return float(v)
+        except Exception:
+            pass
+    return None
+
+
+def _enrich_latest_financials(log: dict) -> tuple[dict, bool]:
+    latest = log.get("latest") if isinstance(log.get("latest"), dict) else {}
+    if not latest:
+        return log, False
+
+    changed = False
+    eq = latest.get("equity_usd")
+    base = latest.get("base_equity") or latest.get("initial_capital")
+
+    if eq is None:
+        fallback_eq = _extract_last_known_equity(log)
+        if fallback_eq is not None:
+            latest["equity_usd"] = _round_or_none(fallback_eq, 2)
+            eq = latest["equity_usd"]
+            changed = True
+
+    if base is None:
+        fallback_base = _extract_base_equity(log)
+        if fallback_base is not None:
+            rounded_base = _round_or_none(fallback_base, 2)
+            latest["base_equity"] = rounded_base
+            latest["initial_capital"] = rounded_base
+            base = rounded_base
+            changed = True
+
+    if latest.get("pnl_percent") is None:
+        pnl = _round_or_none(_compute_pnl_percent(eq, base), 2)
+        if pnl is not None:
+            latest["pnl_percent"] = pnl
+            changed = True
+
+    if changed:
+        log["latest"] = latest
+    return log, changed
 
 
 def _env_float(name: str) -> Optional[float]:
@@ -508,6 +626,8 @@ def build_daily_state(start_date_utc: str) -> DailyState:
         target_btc_ratio=target_btc_ratio,
         actual_btc_ratio=actual_btc_ratio,
         actual_position=actual_position,
+        btc_units=btc_units,
+        usdt_units=usdt_units,
     )
 
 
@@ -540,6 +660,46 @@ def save_daily_file(entry: dict, date_utc: str) -> None:
         encoding="utf-8",
     )
     os.replace(tmp, out)
+
+
+def save_live_portfolio_snapshot(state: DailyState) -> None:
+    payload = {
+        "updated_at_utc": state.updated_at_utc,
+        "balance_ts_utc": state.balance_ts_utc,
+        "usdt_balance": _round_or_none(state.usdt_units, 8),
+        "btc_balance": _round_or_none(state.btc_units, 8),
+        "source": state.balance_source or "BITGET_READONLY",
+        "price_at_snapshot": _round_or_none(state.btc_price_ref, 2),
+        "snapshot_status": state.snapshot_status,
+    }
+    LIVE_SNAPSHOT_JSON.parent.mkdir(parents=True, exist_ok=True)
+    tmp = LIVE_SNAPSHOT_JSON.with_suffix(".json.tmp")
+    tmp.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    os.replace(tmp, LIVE_SNAPSHOT_JSON)
+
+
+def save_live_portfolio_snapshot_from_latest(latest: dict) -> None:
+    payload = {
+        "updated_at_utc": latest.get("updated_at_utc"),
+        "balance_ts_utc": latest.get("balance_ts_utc"),
+        "usdt_balance": None,
+        "btc_balance": None,
+        "source": latest.get("balance_source") or "BITGET_READONLY",
+        "price_at_snapshot": _round_or_none(latest.get("btc_price"), 2)
+        if latest.get("btc_price") is not None
+        else None,
+        "snapshot_status": latest.get("snapshot_status") or "SYNC_PENDING",
+    }
+    LIVE_SNAPSHOT_JSON.parent.mkdir(parents=True, exist_ok=True)
+    tmp = LIVE_SNAPSHOT_JSON.with_suffix(".json.tmp")
+    tmp.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    os.replace(tmp, LIVE_SNAPSHOT_JSON)
 
 
 def _validate_chain(entries: list[dict]) -> tuple[bool, str]:
@@ -592,6 +752,9 @@ def upsert_today(log: dict, state: DailyState) -> dict:
         "actual_btc_ratio": _round_or_none(state.actual_btc_ratio, 4),
         "actual_position": state.actual_position,
         "equity_usd": _round_or_none(state.equity_usd, 2),
+        "base_equity": _round_or_none(state.base_equity, 2),
+        "initial_capital": _round_or_none(state.initial_capital, 2),
+        "pnl_percent": _round_or_none(state.pnl_percent, 2),
         "pnl_usd": _round_or_none(state.pnl_usd, 2),
         "pnl_btc": _round_or_none(state.pnl_btc, 8),
         "reason_summary": state.trigger,
@@ -660,9 +823,29 @@ def main() -> None:
     today_utc = _now_utc().date().isoformat()
     latest = log.get("latest") if isinstance(log.get("latest"), dict) else {}
     if latest.get("date") == today_utc and not force_today:
+        log, changed = _enrich_latest_financials(log)
+        latest = log.get("latest") if isinstance(log.get("latest"), dict) else latest
+        if changed:
+            save_log(log)
+            save_daily_file(latest, today_utc)
+            print("[Genki BTC Archive] backfilled latest financial fields (equity/base/pnl_percent).")
+        save_live_portfolio_snapshot_from_latest(latest)
         print("No changes: today's UTC entry already exists.")
         return
     state = build_daily_state(start_date)
+    if state.equity_usd is None:
+        fallback_eq = _extract_last_known_equity(log)
+        if fallback_eq is not None:
+            state.equity_usd = _round_or_none(fallback_eq, 2)
+            print("[Genki BTC Archive] equity fallback applied from latest historical snapshot.")
+    base_equity = _extract_base_equity(log)
+    state.base_equity = _round_or_none(base_equity, 2) if base_equity is not None else None
+    state.initial_capital = state.base_equity
+    state.pnl_percent = _round_or_none(_compute_pnl_percent(state.equity_usd, state.base_equity), 2)
+    if state.base_equity is None:
+        print("[Genki BTC Archive] pnl source missing: base_equity unavailable (pnl_percent will remain null)")
+    elif state.equity_usd is None:
+        print("[Genki BTC Archive] pnl source missing: equity_usd unavailable (pnl_percent will remain null)")
     if dry_run:
         state.notes = "Daily DRY_RUN update."
     else:
@@ -677,6 +860,7 @@ def main() -> None:
     save_log(log)
     if isinstance(log.get("latest"), dict):
         save_daily_file(log["latest"], state.date_utc)
+    save_live_portfolio_snapshot(state)
 
     msg = (
         f"[Genki BTC Archive] {state.date_utc} | {state.day} | allocation={state.allocation}% | "
