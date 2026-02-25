@@ -199,12 +199,14 @@
       grid-template-columns: minmax(0, 1fr);
       gap: 8px;
       align-items: end;
+      overflow: visible;
     }
     .hero-bottom__left {
       width: 100%;
       display: grid;
       justify-items: center;
       text-align: center;
+      overflow: visible;
     }
     .live-label {
       font-size: 11px;
@@ -244,7 +246,7 @@
     }
     .live-equity {
       font-size: clamp(28px, 7.2vw, 38px);
-      line-height: .98;
+      line-height: 1.05;
       font-weight: 900;
       letter-spacing: -.015em;
       color: #f5f8ff;
@@ -260,6 +262,7 @@
       line-height: 1.35;
       min-height: 1.35em;
       padding-top: 1px;
+      display: inline-block;
       position: relative;
       z-index: 1;
       white-space: nowrap;
