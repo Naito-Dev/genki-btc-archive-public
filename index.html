@@ -88,8 +88,6 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      flex-direction: column;
-      gap: 8px;
     }
     .action-panel__signal {
       margin-top: 18px;
@@ -118,6 +116,7 @@
       color: rgba(227, 237, 255, .84);
       text-align: center;
       max-width: 88%;
+      display: none;
     }
     .action-panel__stale {
       margin: 0 auto;
@@ -1044,13 +1043,15 @@
       actionEl.textContent = displayAction;
       actionEl.classList.remove("state-wait", "state-defensive", "state-bullish", "state-strong-bullish");
       actionEl.classList.add(actionStateClassFromLabel(displayAction));
-      document.getElementById("actionReason").textContent = displayReason;
+      const reasonEl = document.getElementById("actionReason");
+      if (reasonEl) reasonEl.textContent = displayReason;
       const signalUpdated = latest?.updated_at_utc || latest?.timestamp_utc || latest?.price_ts || "-";
       const basePrice = parseFiniteNumber(latest?.btc_price);
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
       document.getElementById("metaUpdated").textContent = `Signal Updated ${fmtUtc(signalUpdated)}`;
       const isDataPending = !hasCoreSignalData || syncStatus === "SYNC_PENDING";
-      document.getElementById("dataPending").style.display = isDataPending ? "block" : "none";
+      const staleEl = document.getElementById("dataPending");
+      if (staleEl) staleEl.style.display = "none";
       console.debug("[SIGNAL_SOURCE]", { source: "log.json.latest", signal_updated_utc: signalUpdated, price_ts_utc: latest?.price_ts || null });
       console.debug("[REASON_SOURCE]", {
         source: "log.json.latest.status + error_type (+snapshot_status fallback)",
@@ -1158,8 +1159,10 @@
     load().catch((e) => {
       console.error(e);
       document.getElementById("actionSignal").textContent = "WAIT";
-      document.getElementById("actionReason").textContent = "Verification data unavailable. No action taken.";
-      document.getElementById("dataPending").style.display = "block";
+      const reasonEl = document.getElementById("actionReason");
+      if (reasonEl) reasonEl.textContent = "Verification data unavailable. No action taken.";
+      const staleEl = document.getElementById("dataPending");
+      if (staleEl) staleEl.style.display = "none";
     });
   </script>
 </body>
