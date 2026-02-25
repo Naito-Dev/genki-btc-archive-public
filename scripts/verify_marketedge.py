@@ -116,6 +116,22 @@ def build_regime_table(d1: pd.DataFrame, congestion_threshold: float) -> pd.Data
     min_history = max(MA_PERIODS)
     df = df.iloc[min_history:].copy()
     df["target_weight"] = df.apply(classify_target_weight, axis=1, congestion_threshold=congestion_threshold)
+
+    # strict70_to0_rule_v1:
+    # If previous day PPP was active and today's PPP breaks while still above MA100
+    # in non-bearish structure, force immediate risk-off (0.0).
+    bullish = (df["ma5"] > df["ma10"]) & (df["ma10"] > df["ma30"]) & (df["ma30"] > df["ma50"]) & (df["ma50"] > df["ma100"]) & (df["ma100"] > df["ma200"])
+    bearish = (df["ma5"] < df["ma10"]) & (df["ma10"] < df["ma30"]) & (df["ma30"] < df["ma50"]) & (df["ma50"] < df["ma100"]) & (df["ma100"] < df["ma200"])
+    ppp = bullish & (df["close"] >= df["ma5"])
+    prev_ppp = ppp.shift(1).fillna(False)
+    strict_trigger = prev_ppp & (~ppp) & (df["close"] >= df["ma100"]) & (~bearish)
+
+    df["bullish_structure"] = bullish
+    df["bearish_structure"] = bearish
+    df["ppp"] = ppp
+    df["prev_ppp"] = prev_ppp
+    df["strict70_to0_trigger"] = strict_trigger
+    df.loc[strict_trigger, "target_weight"] = 0.0
     return df
 
 
