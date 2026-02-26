@@ -1,2 +1,3 @@
 ts_utc,signal_date,state,side,qty,price,notional_usd,status,reason,order_id,dry_run
 2026-02-26T13:23:34Z,2026-02-26,CASH,SELL,0.00000000,67962.00,0.00,SKIPPED,SKIP_FUNDS_INSUFFICIENT,,1
+2026-02-26T13:25:09Z,2026-02-26,CASH,,,,,SKIPPED,ALREADY_RAN_TODAY,,1
