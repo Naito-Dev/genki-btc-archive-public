@@ -2,8 +2,8 @@ name: Daily Archive Update
 
 on:
   schedule:
-    - cron: "0 0 * * *" # 00:00 UTC daily (09:00 JST fixed)
-    - cron: "20 0 * * *" # 00:20 UTC missed-run check
+    - cron: "12 12 * * *" # 12:12 UTC daily (21:12 JST fixed)
+    - cron: "32 12 * * *" # 12:32 UTC missed-run check
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   run-daily:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '0 0 * * *' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '12 12 * * *' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -144,7 +144,7 @@ jobs:
           PY
 
   missed-run-check:
-    if: ${{ github.event_name == 'schedule' && github.event.schedule == '20 0 * * *' }}
+    if: ${{ github.event_name == 'schedule' && github.event.schedule == '32 12 * * *' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
