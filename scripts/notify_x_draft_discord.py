@@ -24,6 +24,7 @@ def load_latest() -> tuple[dict, list[str], int]:
         data = json.loads(BTCSIGNAL_LOG.read_text(encoding="utf-8"))
     except Exception:
         return ({}, [], 0)
+
     entries = data.get("entries") if isinstance(data, dict) else None
     if not isinstance(entries, list) or not entries:
         return ({}, [], 0)
@@ -38,13 +39,6 @@ def load_latest() -> tuple[dict, list[str], int]:
     return (last, states, len(entries))
 
 
-def fmt_num(v: object) -> str:
-    try:
-        return f"{float(v):.2f}"
-    except Exception:
-        return "unavailable"
-
-
 def make_message(last: dict, states: list[str], day_n: int, ops_status: str, dashboard_url: str) -> str:
     status = str(last.get("state") or "").strip().upper()
     if status not in {"HOLD", "CASH"}:
@@ -52,9 +46,7 @@ def make_message(last: dict, states: list[str], day_n: int, ops_status: str, das
 
     reason = str(last.get("reason") or "").strip() or "unavailable"
     updated = str(last.get("date") or "").strip()[:10] or "unavailable"
-    close = fmt_num(last.get("close"))
-    sma50 = fmt_num(last.get("sma50"))
-    last3 = " -> ".join(states) if len(states) == 3 else "unavailable"
+    last3 = "->".join(states) if len(states) == 3 else "unavailable"
 
     day = day_n if day_n > 0 else 0
     ops = ops_status.strip().upper()
@@ -62,13 +54,11 @@ def make_message(last: dict, states: list[str], day_n: int, ops_status: str, das
         ops = "unavailable"
 
     return (
-        f"Genki Verification — Day {day}/60\n\n"
+        f"Genki Verification — Day {day}/365\n\n"
         f"Status: {status}\n"
         f"Reason: {reason}\n"
         f"Ops: {ops}\n"
         f"Updated: {updated}\n\n"
-        f"Close: {close}\n"
-        f"SMA50: {sma50}\n"
         f"Last 3: {last3}\n\n"
         f"No prediction. Just the record.\n"
         f"{dashboard_url}"
