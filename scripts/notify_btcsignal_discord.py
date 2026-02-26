@@ -120,7 +120,10 @@ def post_discord(message: str) -> int:
     req = request.Request(
         webhook,
         data=body,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "GitHubActions/1.0 (https://github.com/Naito-Dev/genki-btc-archive-public)",
+        },
         method="POST",
     )
     try:
