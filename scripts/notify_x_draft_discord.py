@@ -57,7 +57,6 @@ def make_message(last: dict, states: list[str], day_n: int, ops_status: str, das
         f"Genki Verification — Day {day}/365\n\n"
         f"Status: {status}\n"
         f"Reason: {reason}\n"
-        f"Ops: {ops}\n"
         f"Updated: {updated}\n\n"
         f"Last 3: {last3}\n\n"
         f"No prediction. Just the record.\n"
