@@ -557,6 +557,7 @@
             <div class="audit-title">Recent Verified Decisions</div>
             <ul id="auditRecentList" class="audit-list"><li>-</li></ul>
             <button id="auditRecentMoreBtn" class="proof-toggle" type="button" onclick="showMoreDecisions()" style="display:none; margin-top:8px;">Show more</button>
+            <button id="auditRecentCollapseBtn" class="proof-toggle" type="button" onclick="collapseDecisions()" style="display:none; margin-top:8px;">Collapse</button>
           </div>
           <div class="audit-section">
             <div class="audit-title">Proof of Integrity</div>
@@ -577,12 +578,13 @@
     // Display source map (single-source integrity rules):
     // - Status label: btcsignal_log.json.entries[-1].state -> BTC/CASH
     // - Reason text: btcsignal_log.json.entries[-1].reason
-    // - Signal Updated timestamp: btcsignal_log.json.entries[-1].date (UTC 00:00)
-    // - LIVE TESTING Day N: fixed TEST_START_DATE_JST + btcsignal latest date
-    // - LIVE TESTING equity/P&L: data/live_portfolio_snapshot.json only (no estimation fallback)
+    // - Signal Updated timestamp: log.json.latest.updated_at_utc
+    // - LIVE TESTING Day N: TEST_START_DATE_JST + log.json.latest.date
+    // - LIVE TESTING equity/P&L: data/live_portfolio_snapshot.json + data/live_test_baseline.json
     const TEST_START_DATE_JST = "2026-02-26";
-    const RECENT_PAGE_SIZE = 30;
-    let recentOffset = 0;
+    const RECENT_INITIAL_COUNT = 10;
+    const RECENT_PAGE_INCREMENT = 20;
+    let recentVisibleCount = RECENT_INITIAL_COUNT;
     let recentDecisionRows = [];
 
     function fmtUsd(v) {
@@ -690,7 +692,8 @@
     function renderRecentDecisions() {
       const list = document.getElementById("auditRecentList");
       const moreBtn = document.getElementById("auditRecentMoreBtn");
-      const limit = Math.min(recentOffset + RECENT_PAGE_SIZE, recentDecisionRows.length);
+      const collapseBtn = document.getElementById("auditRecentCollapseBtn");
+      const limit = Math.min(recentVisibleCount, recentDecisionRows.length);
       const rows = recentDecisionRows.slice(0, limit);
       list.innerHTML = rows.length
         ? rows.map((r) => `<li>${r.date} | ${r.status}</li>`).join("")
@@ -698,10 +701,18 @@
       if (moreBtn) {
         moreBtn.style.display = limit < recentDecisionRows.length ? "inline-flex" : "none";
       }
+      if (collapseBtn) {
+        collapseBtn.style.display = recentDecisionRows.length > RECENT_INITIAL_COUNT && limit > RECENT_INITIAL_COUNT ? "inline-flex" : "none";
+      }
     }
 
     function showMoreDecisions() {
-      recentOffset += RECENT_PAGE_SIZE;
+      recentVisibleCount += RECENT_PAGE_INCREMENT;
+      renderRecentDecisions();
+    }
+
+    function collapseDecisions() {
+      recentVisibleCount = RECENT_INITIAL_COUNT;
       renderRecentDecisions();
     }
 
@@ -936,7 +947,7 @@
       document.getElementById("auditStatus").textContent = mapStatusDisplay(latest?.status, "status");
       document.getElementById("auditSnapshot").textContent = mapStatusDisplay(latest?.snapshot_status, "sync");
 
-      recentOffset = 0;
+      recentVisibleCount = RECENT_INITIAL_COUNT;
       recentDecisionRows = buildRecentDecisionRows(btLog);
       renderRecentDecisions();
 
@@ -970,6 +981,21 @@
         source: j?.source || "snapshot",
         status: j?.snapshot_status || null,
         priceAtSnapshot: parseFiniteNumber(j?.price_at_snapshot),
+      };
+    }
+
+    async function fetchLiveTestBaseline() {
+      const res = await fetch(`data/live_test_baseline.json?ts=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) return null;
+      const j = await res.json();
+      return {
+        startDateJst: toDateOnly(j?.start_date_jst || j?.start_date_utc) || TEST_START_DATE_JST,
+        equityUsd: parseFiniteNumber(j?.equity_usd),
+        usdtBalance: parseFiniteNumber(j?.usdt_balance),
+        btcBalance: parseFiniteNumber(j?.btc_balance),
+        priceAtBaseline: parseFiniteNumber(j?.price_at_baseline),
+        source: j?.source || "BITGET_READONLY",
+        createdAtUtc: j?.created_at_utc || null,
       };
     }
 
@@ -1010,23 +1036,17 @@
       throw lastErr || new Error("price_feed_failed");
     }
 
-    function renderPnl(log, latest, equity) {
-      const pnl = resolvePnlPercent(log, latest, equity);
+    function renderPnlFromBaseline(equity, baseline, snapshotAvailable) {
       const pnlEl = document.getElementById("pnlPct");
       const pnlNoteEl = document.getElementById("pnlNote");
-      const baseDetails = getBaseEquityDetails(log);
-      const resolvedBaseEquity = parseFiniteNumber(baseDetails.value);
-      const computedPnl = (equity !== null && resolvedBaseEquity !== null && resolvedBaseEquity > 0)
-        ? ((equity - resolvedBaseEquity) / resolvedBaseEquity) * 100
-        : null;
-      console.debug("[LIVE_TESTING_PNL]", {
-        pnl_percent: latest?.pnl_percent,
-        equity_usd: latest?.equity_usd,
-        live_equity_value: equity,
-        base_equity: resolvedBaseEquity,
-        base_source: baseDetails.source,
-        computedPnl
-      });
+      let pnl = null;
+      if (snapshotAvailable && equity !== null) {
+        if (!baseline || baseline.equityUsd === null || baseline.equityUsd <= 0) {
+          pnl = 0.0;
+        } else {
+          pnl = ((equity - baseline.equityUsd) / baseline.equityUsd) * 100;
+        }
+      }
       if (pnl === null || !Number.isFinite(Number(pnl))) {
         pnlEl.textContent = "P/L unavailable";
         pnlEl.style.display = "block";
@@ -1108,8 +1128,8 @@
       const reasonEl = document.getElementById("actionReason");
       if (reasonEl) reasonEl.textContent = displayReason;
 
-      const cycleDate = toDateOnly(btLatest?.date);
-      const signalUpdated = cycleDate ? `${cycleDate}T00:00:00Z` : (latest?.updated_at_utc || latest?.timestamp_utc || latest?.price_ts || "-");
+      const cycleDate = toDateOnly(latest?.date);
+      const signalUpdated = latest?.updated_at_utc || "unavailable";
       const basePrice = parseFiniteNumber(latest?.btc_price);
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
       document.getElementById("metaUpdated").textContent = `Signal Updated ${fmtUtc(signalUpdated)}`;
@@ -1123,11 +1143,18 @@
       } catch (_) {
         snapshot = null;
       }
+      let baseline = null;
+      try {
+        baseline = await fetchLiveTestBaseline();
+      } catch (_) {
+        baseline = null;
+      }
 
       const usdt = parseFiniteNumber(snapshot?.usdtBalance);
       const btc = parseFiniteNumber(snapshot?.btcBalance);
       const px = parseFiniteNumber(snapshot?.priceAtSnapshot ?? latest?.btc_price);
-      const equity = (usdt !== null && btc !== null && px !== null) ? (usdt + btc * px) : null;
+      const snapshotAvailable = usdt !== null && btc !== null && px !== null;
+      const equity = snapshotAvailable ? (usdt + btc * px) : null;
       document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
 
       const balanceSourceEl = document.getElementById("balanceSource");
@@ -1137,14 +1164,14 @@
       }
 
       const sinceStartEl = document.getElementById("sinceStart");
-      sinceStartEl.textContent = `Since start: ${TEST_START_DATE_JST}`;
+      sinceStartEl.textContent = `Since start: ${baseline?.startDateJst || TEST_START_DATE_JST}`;
       sinceStartEl.style.display = "block";
 
       const liveLabelEl = document.getElementById("liveLabel");
       const dayN = cycleDate ? calcLiveDayN(TEST_START_DATE_JST, cycleDate) : null;
       liveLabelEl.textContent = dayN ? `LIVE TESTING • Day ${dayN}` : "LIVE TESTING";
 
-      renderPnl(log, latest, equity);
+      renderPnlFromBaseline(equity, baseline, snapshotAvailable);
       renderAudit(log, latest, btLog);
     }
 
