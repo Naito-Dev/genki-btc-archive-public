@@ -49,8 +49,10 @@ jobs:
           BITGET_SYMBOL: ${{ vars.BITGET_SYMBOL || 'BTC/USDT' }}
           MIN_TRADE_USD: ${{ vars.MIN_TRADE_USD || '5' }}
           MIN_BTC_QTY: ${{ vars.MIN_BTC_QTY || '0.00001' }}
-          EXECUTE_USDT_FRACTION: ${{ vars.EXECUTE_USDT_FRACTION || '1.0' }}
-          EXECUTE_BTC_FRACTION: ${{ vars.EXECUTE_BTC_FRACTION || '1.0' }}
+          MAX_NOTIONAL_USD: ${{ vars.MAX_NOTIONAL_USD || '10' }}
+          EXECUTE_USDT_FRACTION: ${{ vars.EXECUTE_USDT_FRACTION || '0.1' }}
+          EXECUTE_BTC_FRACTION: ${{ vars.EXECUTE_BTC_FRACTION || '0.1' }}
+          ALLOW_LIVE: ${{ vars.ALLOW_LIVE || 'NO' }}
           BITGET_API_KEY: ${{ secrets.BITGET_API_KEY }}
           BITGET_API_SECRET: ${{ secrets.BITGET_API_SECRET }}
           BITGET_API_PASSPHRASE: ${{ secrets.BITGET_API_PASSPHRASE }}

@@ -67,9 +67,11 @@ def append_exec_log(row: dict[str, Any]) -> None:
 class ExecConfig:
     dry_run: bool
     enabled: bool
+    allow_live: bool
     symbol: str
     min_trade_usd: float
     min_btc_qty: float
+    max_notional_usd: float
     usdt_fraction: float
     btc_fraction: float
 
@@ -78,11 +80,13 @@ def cfg() -> ExecConfig:
     return ExecConfig(
         dry_run=os.getenv("DRY_RUN", "1").strip() != "0",
         enabled=os.getenv("BITGET_EXECUTE_ENABLED", "0").strip() == "1",
+        allow_live=os.getenv("ALLOW_LIVE", "NO").strip().upper() == "YES",
         symbol=os.getenv("BITGET_SYMBOL", "BTC/USDT").strip() or "BTC/USDT",
         min_trade_usd=float(os.getenv("MIN_TRADE_USD", "5")),
         min_btc_qty=float(os.getenv("MIN_BTC_QTY", "0.00001")),
-        usdt_fraction=float(os.getenv("EXECUTE_USDT_FRACTION", "1.0")),
-        btc_fraction=float(os.getenv("EXECUTE_BTC_FRACTION", "1.0")),
+        max_notional_usd=float(os.getenv("MAX_NOTIONAL_USD", "10")),
+        usdt_fraction=float(os.getenv("EXECUTE_USDT_FRACTION", "0.1")),
+        btc_fraction=float(os.getenv("EXECUTE_BTC_FRACTION", "0.1")),
     )
 
 
@@ -214,6 +218,35 @@ def main() -> int:
         print("SKIPPED: ALREADY_RAN_TODAY")
         return 0
 
+    if c.max_notional_usd <= 0:
+        append_exec_log(
+            {
+                "ts_utc": ts,
+                "signal_date": signal_date,
+                "state": state,
+                "status": "SAFE_STOP",
+                "reason": "INVALID_MAX_NOTIONAL_USD",
+                "dry_run": int(c.dry_run),
+            }
+        )
+        print("SAFE_STOP: INVALID_MAX_NOTIONAL_USD")
+        return 0
+
+    if not c.dry_run and not c.allow_live:
+        append_exec_log(
+            {
+                "ts_utc": ts,
+                "signal_date": signal_date,
+                "state": state,
+                "status": "SKIPPED",
+                "reason": "LIVE_GUARD_BLOCKED",
+                "dry_run": int(c.dry_run),
+            }
+        )
+        save_state(signal_date, state, "SKIPPED")
+        print("SKIPPED: LIVE_GUARD_BLOCKED")
+        return 0
+
     if not c.enabled:
         append_exec_log(
             {
@@ -259,12 +292,18 @@ def main() -> int:
         print(f"SAFE_STOP: {reason}")
         return 0
 
+    cap_applied = False
     if state == "HOLD":
-        trade_usd = max(0.0, usdt_free * c.usdt_fraction)
+        desired_trade_usd = max(0.0, usdt_free * c.usdt_fraction)
+        trade_usd = min(desired_trade_usd, c.max_notional_usd)
+        cap_applied = trade_usd < desired_trade_usd
         qty = trade_usd / price if price > 0 else 0.0
     else:
-        qty = max(0.0, btc_free * c.btc_fraction)
-        trade_usd = qty * price
+        desired_qty = max(0.0, btc_free * c.btc_fraction)
+        desired_trade_usd = desired_qty * price
+        trade_usd = min(desired_trade_usd, c.max_notional_usd)
+        cap_applied = trade_usd < desired_trade_usd
+        qty = trade_usd / price if price > 0 else 0.0
 
     if trade_usd < c.min_trade_usd or qty < c.min_btc_qty:
         append_exec_log(
@@ -288,6 +327,8 @@ def main() -> int:
     order_id = ""
     status = "SIMULATED" if c.dry_run else "EXECUTED"
     reason = "DRY_RUN_SYNC" if c.dry_run else "LIVE_SYNC"
+    if cap_applied:
+        reason += "|CAPPED_MAX_NOTIONAL"
 
     if not c.dry_run:
         try:
