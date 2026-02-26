@@ -37,12 +37,16 @@ jobs:
         run: |
           python scripts/run_daily.py
 
+      - name: Generate BTCSIGNAL daily proof (HOLD/CASH)
+        run: |
+          python scripts/btcsignal_daily.py
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add log.json logs/*.json data/live_portfolio_snapshot.json
+          git add log.json logs/*.json data/live_portfolio_snapshot.json btcsignal_log.json
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
