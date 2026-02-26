@@ -527,7 +527,7 @@
           </div>
           <div id="liveEquity" class="live-equity">-</div>
           <div id="pnlPct" class="pnl-pct" style="display:none"></div>
-          <div id="balanceSource" class="pnl-note">Source: unavailable</div>
+          <div id="balanceSource" class="pnl-note" style="display:none;">Source: unavailable</div>
           <div id="sinceStart" class="since-start">Since start: -</div>
         </div>
       </section>
@@ -682,7 +682,7 @@
     function buildRecentDecisionRows(btLog, latestBtcPrice = null) {
       const entries = Array.isArray(btLog?.entries) ? btLog.entries : [];
       const latestPriceText = latestBtcPrice !== null
-        ? `${fmtUsd(latestBtcPrice)} (as of latest)`
+        ? `${fmtUsd(latestBtcPrice)}`
         : "unavailable";
       return entries
         .map((e) => {
