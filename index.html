@@ -679,12 +679,16 @@
       return await res.json();
     }
 
-    function buildRecentDecisionRows(btLog) {
+    function buildRecentDecisionRows(btLog, latestBtcPrice = null) {
       const entries = Array.isArray(btLog?.entries) ? btLog.entries : [];
+      const latestPriceText = latestBtcPrice !== null
+        ? `${fmtUsd(latestBtcPrice)} (as of latest)`
+        : "unavailable";
       return entries
         .map((e) => ({
           date: toDateOnly(e?.date) || "Unavailable",
           status: mapBtcsignalState(e?.state),
+          latestBtcPriceText: latestPriceText,
         }))
         .reverse();
     }
@@ -696,7 +700,7 @@
       const limit = Math.min(recentVisibleCount, recentDecisionRows.length);
       const rows = recentDecisionRows.slice(0, limit);
       list.innerHTML = rows.length
-        ? rows.map((r) => `<li>${r.date} | ${r.status}</li>`).join("")
+        ? rows.map((r) => `<li>${r.date} | ${r.status} | BTC ${r.latestBtcPriceText}</li>`).join("")
         : "<li>Unavailable</li>";
       if (moreBtn) {
         moreBtn.style.display = limit < recentDecisionRows.length ? "inline-flex" : "none";
@@ -948,7 +952,8 @@
       document.getElementById("auditSnapshot").textContent = mapStatusDisplay(latest?.snapshot_status, "sync");
 
       recentVisibleCount = RECENT_INITIAL_COUNT;
-      recentDecisionRows = buildRecentDecisionRows(btLog);
+      const latestBtcPrice = parseFiniteNumber(latest?.btc_price);
+      recentDecisionRows = buildRecentDecisionRows(btLog, latestBtcPrice);
       renderRecentDecisions();
 
       const proof = {
