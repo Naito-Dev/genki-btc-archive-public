@@ -30,6 +30,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Generate daily_input.env from Bitget read-only snapshot
+        env:
+          BITGET_API_KEY: ${{ secrets.BITGET_API_KEY }}
+          BITGET_API_SECRET: ${{ secrets.BITGET_API_SECRET }}
+          BITGET_API_PASSPHRASE: ${{ secrets.BITGET_API_PASSPHRASE }}
+        run: |
+          python scripts/generate_daily_input_env.py
+
       - name: Run daily log update
         env:
           DRY_RUN: "0"
