@@ -73,6 +73,25 @@ def _now_utc() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _fixed_updated_at_utc(date_utc: str, cutoff_jst: Optional[str] = None) -> str:
+    cutoff = (cutoff_jst or os.getenv("DAILY_CUTOFF_JST", "09:00")).strip()
+    hh, mm = 9, 0
+    try:
+        p = cutoff.split(":")
+        if len(p) == 2:
+            hh = max(0, min(23, int(p[0])))
+            mm = max(0, min(59, int(p[1])))
+    except Exception:
+        hh, mm = 9, 0
+
+    # Convert JST cutoff for the logical UTC date into canonical UTC timestamp.
+    # Example default:
+    # date_utc=2026-02-26 + cutoff_jst=09:00 -> 2026-02-26T00:00:00Z
+    base_utc = datetime.fromisoformat(date_utc).replace(tzinfo=timezone.utc)
+    cutoff_utc = base_utc + timedelta(hours=hh - 9, minutes=mm)
+    return cutoff_utc.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
 def _allocation_from_weight(w: float) -> int:
     if w >= 0.999:
         return 100
@@ -194,6 +213,13 @@ def _enrich_latest_financials(log: dict) -> tuple[dict, bool]:
         pnl = _round_or_none(_compute_pnl_percent(eq, base), 2)
         if pnl is not None:
             latest["pnl_percent"] = pnl
+            changed = True
+
+    latest_date = latest.get("date")
+    if isinstance(latest_date, str) and latest_date:
+        fixed_updated = _fixed_updated_at_utc(latest_date)
+        if latest.get("updated_at_utc") != fixed_updated:
+            latest["updated_at_utc"] = fixed_updated
             changed = True
 
     if changed:
@@ -477,6 +503,7 @@ def build_daily_state(start_date_utc: str) -> DailyState:
 
     today = _now_utc().date()
     now_iso = _now_utc().replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    fixed_updated_iso = _fixed_updated_at_utc(today.isoformat())
 
     allocation = 0
     trigger = "MINIMAL_MODE: regime unavailable"
@@ -608,7 +635,7 @@ def build_daily_state(start_date_utc: str) -> DailyState:
         allocation_changed=False,  # set after comparing with previous entry
         trigger=trigger,
         notes="Daily DRY_RUN update.",
-        updated_at_utc=now_iso,
+        updated_at_utc=fixed_updated_iso,
         data_source=data_source,
         price_source=price_source,
         price_ts=price_ts,
