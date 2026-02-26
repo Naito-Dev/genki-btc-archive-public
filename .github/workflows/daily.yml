@@ -66,6 +66,14 @@ jobs:
         run: |
           python scripts/notify_btcsignal_discord.py --ops-status PASS
 
+      - name: Notify Discord X draft (#x-posts)
+        continue-on-error: true
+        env:
+          DISCORD_X_WEBHOOK_URL: ${{ secrets.DISCORD_X_WEBHOOK_URL }}
+          DASHBOARD_URL: ${{ vars.DASHBOARD_URL || 'https://naito-dev.github.io/genki-btc-archive-public/' }}
+        run: |
+          python scripts/notify_x_draft_discord.py --ops-status PASS
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
