@@ -11,6 +11,14 @@ from urllib.error import HTTPError, URLError
 ROOT = Path(__file__).resolve().parent.parent
 BTCSIGNAL_LOG = ROOT / "btcsignal_log.json"
 
+REASON_MAP = {
+    "risk_off_not_confirmed": "Trend not confirmed. Staying in cash.",
+    "trend_confirmation_2d": "Trend confirmed. Holding BTC.",
+    "data_warmup": "Warm-up period. No action.",
+    "data_warmup_seed": "Warm-up period. No action.",
+    "unavailable": "Data unavailable. No action.",
+}
+
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Post daily X draft to Discord")
@@ -39,12 +47,19 @@ def load_latest() -> tuple[dict, list[str], int]:
     return (last, states, len(entries))
 
 
+def map_reason(reason_raw: object) -> str:
+    reason = str(reason_raw or "").strip()
+    if not reason:
+        return "unavailable"
+    return REASON_MAP.get(reason, reason)
+
+
 def make_message(last: dict, states: list[str], day_n: int, ops_status: str, dashboard_url: str) -> str:
     status = str(last.get("state") or "").strip().upper()
     if status not in {"HOLD", "CASH"}:
         status = "unavailable"
 
-    reason = str(last.get("reason") or "").strip() or "unavailable"
+    reason = map_reason(last.get("reason"))
     updated = str(last.get("date") or "").strip()[:10] or "unavailable"
     last3 = "->".join(states) if len(states) == 3 else "unavailable"
 
