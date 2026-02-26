@@ -714,21 +714,27 @@ def save_live_portfolio_snapshot(state: DailyState) -> None:
 
 
 def save_live_portfolio_snapshot_from_latest(latest: dict) -> None:
-    usdt_bal = None
-    btc_bal = None
-    src = latest.get("balance_source") or "unavailable"
-    if usdt_bal is None or btc_bal is None:
-        src = "unavailable"
+    _load_env_file(DAILY_INPUT_ENV)
+    input_fresh = _is_recent_file(DAILY_INPUT_ENV) and _is_recent_env_timestamp("BALANCE_TS_UTC")
+    env_status = os.getenv("SNAPSHOT_STATUS", "").strip().upper()
+    env_source = os.getenv("BALANCE_SOURCE", "").strip()
+    use_env = input_fresh and env_status == "SYNCED" and env_source == "BITGET_READONLY"
+
+    usdt_bal = _round_or_none(_env_float("USDT_UNITS"), 8) if use_env else None
+    btc_bal = _round_or_none(_env_float("BTC_UNITS"), 8) if use_env else None
+    src = "BITGET_READONLY" if use_env and usdt_bal is not None and btc_bal is not None else "unavailable"
+    bal_ts = os.getenv("BALANCE_TS_UTC", "").strip() if use_env else latest.get("balance_ts_utc")
+    snapshot_status = "SYNCED" if src == "BITGET_READONLY" else (latest.get("snapshot_status") or "SYNC_PENDING")
     payload = {
         "updated_at_utc": latest.get("updated_at_utc"),
-        "balance_ts_utc": latest.get("balance_ts_utc"),
+        "balance_ts_utc": bal_ts or None,
         "usdt_balance": usdt_bal,
         "btc_balance": btc_bal,
         "source": src,
         "price_at_snapshot": _round_or_none(latest.get("btc_price"), 2)
         if latest.get("btc_price") is not None
         else None,
-        "snapshot_status": latest.get("snapshot_status") or "SYNC_PENDING",
+        "snapshot_status": snapshot_status,
     }
     LIVE_SNAPSHOT_JSON.parent.mkdir(parents=True, exist_ok=True)
     tmp = LIVE_SNAPSHOT_JSON.with_suffix(".json.tmp")
