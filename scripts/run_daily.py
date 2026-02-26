@@ -690,12 +690,17 @@ def save_daily_file(entry: dict, date_utc: str) -> None:
 
 
 def save_live_portfolio_snapshot(state: DailyState) -> None:
+    usdt_bal = _round_or_none(state.usdt_units, 8)
+    btc_bal = _round_or_none(state.btc_units, 8)
+    src = state.balance_source or "unavailable"
+    if usdt_bal is None or btc_bal is None:
+        src = "unavailable"
     payload = {
         "updated_at_utc": state.updated_at_utc,
         "balance_ts_utc": state.balance_ts_utc,
-        "usdt_balance": _round_or_none(state.usdt_units, 8),
-        "btc_balance": _round_or_none(state.btc_units, 8),
-        "source": state.balance_source or "BITGET_READONLY",
+        "usdt_balance": usdt_bal,
+        "btc_balance": btc_bal,
+        "source": src,
         "price_at_snapshot": _round_or_none(state.btc_price_ref, 2),
         "snapshot_status": state.snapshot_status,
     }
@@ -709,12 +714,17 @@ def save_live_portfolio_snapshot(state: DailyState) -> None:
 
 
 def save_live_portfolio_snapshot_from_latest(latest: dict) -> None:
+    usdt_bal = None
+    btc_bal = None
+    src = latest.get("balance_source") or "unavailable"
+    if usdt_bal is None or btc_bal is None:
+        src = "unavailable"
     payload = {
         "updated_at_utc": latest.get("updated_at_utc"),
         "balance_ts_utc": latest.get("balance_ts_utc"),
-        "usdt_balance": None,
-        "btc_balance": None,
-        "source": latest.get("balance_source") or "BITGET_READONLY",
+        "usdt_balance": usdt_bal,
+        "btc_balance": btc_bal,
+        "source": src,
         "price_at_snapshot": _round_or_none(latest.get("btc_price"), 2)
         if latest.get("btc_price") is not None
         else None,

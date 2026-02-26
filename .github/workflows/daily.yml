@@ -30,6 +30,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Generate daily_input.env from Bitget read-only snapshot
+        env:
+          BITGET_API_KEY: ${{ secrets.BITGET_API_KEY }}
+          BITGET_API_SECRET: ${{ secrets.BITGET_API_SECRET }}
+          BITGET_API_PASSPHRASE: ${{ secrets.BITGET_API_PASSPHRASE }}
+        run: |
+          python scripts/generate_daily_input_env.py
+
       - name: Run daily log update
         env:
           DRY_RUN: "0"
@@ -40,6 +48,10 @@ jobs:
       - name: Generate BTCSIGNAL daily proof (HOLD/CASH)
         run: |
           python scripts/btcsignal_daily.py
+
+      - name: Ensure Live Testing baseline (2026-02-26)
+        run: |
+          python scripts/ensure_live_test_baseline.py --start-date-jst 2026-02-26
 
       - name: Execute Bitget from BTCSIGNAL (DRY_RUN first)
         continue-on-error: true
@@ -80,6 +92,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add log.json logs/*.json data/live_portfolio_snapshot.json btcsignal_log.json
+          [ -f data/live_test_baseline.json ] && git add data/live_test_baseline.json || true
           [ -f data/btcsignal_execution_log.csv ] && git add data/btcsignal_execution_log.csv || true
           [ -f data/btcsignal_execute_state.json ] && git add data/btcsignal_execute_state.json || true
 

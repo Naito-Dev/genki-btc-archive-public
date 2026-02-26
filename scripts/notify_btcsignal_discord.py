@@ -37,6 +37,18 @@ def btcsignal_paths(cli_path: str) -> list[Path]:
     return out
 
 
+def load_log_latest() -> dict:
+    root = Path(__file__).resolve().parent.parent
+    p = root / "log.json"
+    data = load_json(p)
+    if not isinstance(data, dict):
+        return {}
+    latest = data.get("latest")
+    if not isinstance(latest, dict):
+        return {}
+    return latest
+
+
 def load_latest(log_path: str) -> dict[str, str]:
     unavailable = {
         "status": "unavailable",
@@ -50,6 +62,13 @@ def load_latest(log_path: str) -> dict[str, str]:
     def display_state(raw: str) -> str:
         return "BTC" if raw == "HOLD" else "CASH" if raw == "CASH" else "unavailable"
 
+    latest = load_log_latest()
+    try:
+        close_from_log = f"{float(latest.get('btc_price')):.2f}"
+    except Exception:
+        close_from_log = "unavailable"
+    updated_from_log = str(latest.get("updated_at_utc") or "").strip() or "unavailable"
+
     for path in btcsignal_paths(log_path):
         data = load_json(path)
         if not isinstance(data, dict):
@@ -62,12 +81,8 @@ def load_latest(log_path: str) -> dict[str, str]:
         raw_state = str(last.get("state") or "").strip().upper()
         status = display_state(raw_state)
         reason = str(last.get("reason") or "").strip() or "unavailable"
-        updated = str(last.get("date") or "").strip()[:10] or "unavailable"
-
-        try:
-            close = f"{float(last.get('close')):.2f}"
-        except Exception:
-            close = "unavailable"
+        updated = updated_from_log
+        close = close_from_log
 
         try:
             sma50 = f"{float(last.get('sma50')):.2f}"
