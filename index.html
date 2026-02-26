@@ -1047,12 +1047,12 @@
       throw lastErr || new Error("price_feed_failed");
     }
 
-    function renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus) {
+    function renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus, auditHealthy = true) {
       const pnlEl = document.getElementById("pnlPct");
       const pnlNoteEl = document.getElementById("pnlNote");
       let pnl = null;
       const synced = String(snapshotStatus || "").toUpperCase() === "SYNCED";
-      if (synced && snapshotAvailable && equity !== null) {
+      if (auditHealthy && synced && snapshotAvailable && equity !== null) {
         if (!baseline || baseline.equityUsd === null || baseline.equityUsd <= 0) {
           pnl = 0.0;
         } else {
@@ -1167,6 +1167,8 @@
       const px = parseFiniteNumber(snapshot?.priceAtSnapshot ?? latest?.btc_price);
       const snapshotAvailable = usdt !== null && btc !== null && px !== null;
       const snapshotStatus = String(snapshot?.status || latest?.snapshot_status || "SYNC_PENDING").toUpperCase();
+      const chainIntegrity = String(latest?.chain_integrity || "").toUpperCase();
+      const auditHealthy = !chainIntegrity || chainIntegrity === "PASS";
       const snapshotSynced = snapshotStatus === "SYNCED";
       const equity = snapshotAvailable ? (usdt + btc * px) : null;
       document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
@@ -1185,7 +1187,7 @@
       const dayN = cycleDate ? calcLiveDayN(TEST_START_DATE_JST, cycleDate) : null;
       liveLabelEl.textContent = dayN ? `LIVE TESTING • Day ${dayN}` : "LIVE TESTING";
 
-      renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus);
+      renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus, auditHealthy);
       renderAudit(log, latest, btLog);
     }
 
