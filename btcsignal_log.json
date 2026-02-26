@@ -1,0 +1,480 @@
+{
+  "entries": [
+    {
+      "date": "2025-12-03",
+      "state": "CASH",
+      "close": 93429.95,
+      "sma50": 93429.95,
+      "reason": "seed_warmup(1/51)"
+    },
+    {
+      "date": "2025-12-04",
+      "state": "CASH",
+      "close": 92078.06,
+      "sma50": 92754.01,
+      "reason": "seed_warmup(2/51)"
+    },
+    {
+      "date": "2025-12-05",
+      "state": "CASH",
+      "close": 89330.04,
+      "sma50": 91612.68,
+      "reason": "seed_warmup(3/51)"
+    },
+    {
+      "date": "2025-12-06",
+      "state": "CASH",
+      "close": 89236.79,
+      "sma50": 91018.71,
+      "reason": "seed_warmup(4/51)"
+    },
+    {
+      "date": "2025-12-07",
+      "state": "CASH",
+      "close": 90395.31,
+      "sma50": 90894.03,
+      "reason": "seed_warmup(5/51)"
+    },
+    {
+      "date": "2025-12-08",
+      "state": "CASH",
+      "close": 90634.34,
+      "sma50": 90850.75,
+      "reason": "seed_warmup(6/51)"
+    },
+    {
+      "date": "2025-12-09",
+      "state": "CASH",
+      "close": 92678.8,
+      "sma50": 91111.9,
+      "reason": "seed_warmup(7/51)"
+    },
+    {
+      "date": "2025-12-10",
+      "state": "CASH",
+      "close": 92015.37,
+      "sma50": 91224.83,
+      "reason": "seed_warmup(8/51)"
+    },
+    {
+      "date": "2025-12-11",
+      "state": "CASH",
+      "close": 92513.38,
+      "sma50": 91368.0,
+      "reason": "seed_warmup(9/51)"
+    },
+    {
+      "date": "2025-12-12",
+      "state": "CASH",
+      "close": 90268.42,
+      "sma50": 91258.05,
+      "reason": "seed_warmup(10/51)"
+    },
+    {
+      "date": "2025-12-13",
+      "state": "CASH",
+      "close": 90240.01,
+      "sma50": 91165.5,
+      "reason": "seed_warmup(11/51)"
+    },
+    {
+      "date": "2025-12-14",
+      "state": "CASH",
+      "close": 88172.17,
+      "sma50": 90916.05,
+      "reason": "seed_warmup(12/51)"
+    },
+    {
+      "date": "2025-12-15",
+      "state": "CASH",
+      "close": 86432.08,
+      "sma50": 90571.13,
+      "reason": "seed_warmup(13/51)"
+    },
+    {
+      "date": "2025-12-16",
+      "state": "CASH",
+      "close": 87863.42,
+      "sma50": 90377.72,
+      "reason": "seed_warmup(14/51)"
+    },
+    {
+      "date": "2025-12-17",
+      "state": "CASH",
+      "close": 86243.22,
+      "sma50": 90102.09,
+      "reason": "seed_warmup(15/51)"
+    },
+    {
+      "date": "2025-12-18",
+      "state": "CASH",
+      "close": 85516.41,
+      "sma50": 89815.49,
+      "reason": "seed_warmup(16/51)"
+    },
+    {
+      "date": "2025-12-19",
+      "state": "CASH",
+      "close": 88136.94,
+      "sma50": 89716.75,
+      "reason": "seed_warmup(17/51)"
+    },
+    {
+      "date": "2025-12-20",
+      "state": "CASH",
+      "close": 88360.9,
+      "sma50": 89641.42,
+      "reason": "seed_warmup(18/51)"
+    },
+    {
+      "date": "2025-12-21",
+      "state": "CASH",
+      "close": 88658.86,
+      "sma50": 89589.71,
+      "reason": "seed_warmup(19/51)"
+    },
+    {
+      "date": "2025-12-22",
+      "state": "CASH",
+      "close": 88620.79,
+      "sma50": 89541.26,
+      "reason": "seed_warmup(20/51)"
+    },
+    {
+      "date": "2025-12-23",
+      "state": "CASH",
+      "close": 87486.0,
+      "sma50": 89443.39,
+      "reason": "seed_warmup(21/51)"
+    },
+    {
+      "date": "2025-12-24",
+      "state": "CASH",
+      "close": 87669.45,
+      "sma50": 89362.76,
+      "reason": "seed_warmup(22/51)"
+    },
+    {
+      "date": "2025-12-25",
+      "state": "CASH",
+      "close": 87225.27,
+      "sma50": 89269.83,
+      "reason": "seed_warmup(23/51)"
+    },
+    {
+      "date": "2025-12-26",
+      "state": "CASH",
+      "close": 87369.56,
+      "sma50": 89190.65,
+      "reason": "seed_warmup(24/51)"
+    },
+    {
+      "date": "2025-12-27",
+      "state": "CASH",
+      "close": 87877.01,
+      "sma50": 89138.1,
+      "reason": "seed_warmup(25/51)"
+    },
+    {
+      "date": "2025-12-28",
+      "state": "CASH",
+      "close": 87952.71,
+      "sma50": 89092.51,
+      "reason": "seed_warmup(26/51)"
+    },
+    {
+      "date": "2025-12-29",
+      "state": "CASH",
+      "close": 87237.13,
+      "sma50": 89023.79,
+      "reason": "seed_warmup(27/51)"
+    },
+    {
+      "date": "2025-12-30",
+      "state": "CASH",
+      "close": 88485.49,
+      "sma50": 89004.57,
+      "reason": "seed_warmup(28/51)"
+    },
+    {
+      "date": "2025-12-31",
+      "state": "CASH",
+      "close": 87648.22,
+      "sma50": 88957.8,
+      "reason": "seed_warmup(29/51)"
+    },
+    {
+      "date": "2026-01-01",
+      "state": "CASH",
+      "close": 88839.04,
+      "sma50": 88953.84,
+      "reason": "seed_warmup(30/51)"
+    },
+    {
+      "date": "2026-01-02",
+      "state": "CASH",
+      "close": 89995.13,
+      "sma50": 88987.43,
+      "reason": "seed_warmup(31/51)"
+    },
+    {
+      "date": "2026-01-03",
+      "state": "CASH",
+      "close": 90628.01,
+      "sma50": 89038.7,
+      "reason": "seed_warmup(32/51)"
+    },
+    {
+      "date": "2026-01-04",
+      "state": "CASH",
+      "close": 91529.73,
+      "sma50": 89114.18,
+      "reason": "seed_warmup(33/51)"
+    },
+    {
+      "date": "2026-01-05",
+      "state": "CASH",
+      "close": 93859.71,
+      "sma50": 89253.76,
+      "reason": "seed_warmup(34/51)"
+    },
+    {
+      "date": "2026-01-06",
+      "state": "CASH",
+      "close": 93747.97,
+      "sma50": 89382.16,
+      "reason": "seed_warmup(35/51)"
+    },
+    {
+      "date": "2026-01-07",
+      "state": "CASH",
+      "close": 91364.16,
+      "sma50": 89437.22,
+      "reason": "seed_warmup(36/51)"
+    },
+    {
+      "date": "2026-01-08",
+      "state": "CASH",
+      "close": 91099.99,
+      "sma50": 89482.16,
+      "reason": "seed_warmup(37/51)"
+    },
+    {
+      "date": "2026-01-09",
+      "state": "CASH",
+      "close": 90641.28,
+      "sma50": 89512.66,
+      "reason": "seed_warmup(38/51)"
+    },
+    {
+      "date": "2026-01-10",
+      "state": "CASH",
+      "close": 90504.7,
+      "sma50": 89538.1,
+      "reason": "seed_warmup(39/51)"
+    },
+    {
+      "date": "2026-01-11",
+      "state": "CASH",
+      "close": 91013.65,
+      "sma50": 89574.99,
+      "reason": "seed_warmup(40/51)"
+    },
+    {
+      "date": "2026-01-12",
+      "state": "CASH",
+      "close": 91296.2,
+      "sma50": 89616.97,
+      "reason": "seed_warmup(41/51)"
+    },
+    {
+      "date": "2026-01-13",
+      "state": "CASH",
+      "close": 95414.0,
+      "sma50": 89754.99,
+      "reason": "seed_warmup(42/51)"
+    },
+    {
+      "date": "2026-01-14",
+      "state": "CASH",
+      "close": 96951.78,
+      "sma50": 89922.36,
+      "reason": "seed_warmup(43/51)"
+    },
+    {
+      "date": "2026-01-15",
+      "state": "CASH",
+      "close": 95604.8,
+      "sma50": 90051.51,
+      "reason": "seed_warmup(44/51)"
+    },
+    {
+      "date": "2026-01-16",
+      "state": "CASH",
+      "close": 95550.94,
+      "sma50": 90173.72,
+      "reason": "seed_warmup(45/51)"
+    },
+    {
+      "date": "2026-01-17",
+      "state": "CASH",
+      "close": 95147.77,
+      "sma50": 90281.85,
+      "reason": "seed_warmup(46/51)"
+    },
+    {
+      "date": "2026-01-18",
+      "state": "CASH",
+      "close": 93673.14,
+      "sma50": 90354.0,
+      "reason": "seed_warmup(47/51)"
+    },
+    {
+      "date": "2026-01-19",
+      "state": "CASH",
+      "close": 92631.0,
+      "sma50": 90401.44,
+      "reason": "seed_warmup(48/51)"
+    },
+    {
+      "date": "2026-01-20",
+      "state": "CASH",
+      "close": 88427.66,
+      "sma50": 90361.16,
+      "reason": "seed_warmup(49/51)"
+    },
+    {
+      "date": "2026-01-21",
+      "state": "CASH",
+      "close": 89454.73,
+      "sma50": 90343.03,
+      "reason": "seed_warmup(50/51)"
+    },
+    {
+      "date": "2026-01-22",
+      "state": "CASH",
+      "close": 89559.67,
+      "sma50": 90265.62,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-01-23",
+      "state": "CASH",
+      "close": 89600.26,
+      "sma50": 90216.07,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-01-24",
+      "state": "CASH",
+      "close": 89225.34,
+      "sma50": 90213.97,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-01-25",
+      "state": "CASH",
+      "close": 86670.36,
+      "sma50": 90162.65,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-01-26",
+      "state": "CASH",
+      "close": 88347.08,
+      "sma50": 90121.68,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-01-27",
+      "state": "CASH",
+      "close": 89250.0,
+      "sma50": 90093.99,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-01-28",
+      "state": "CASH",
+      "close": 89299.99,
+      "sma50": 90026.42,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-01-29",
+      "state": "CASH",
+      "close": 84650.16,
+      "sma50": 89879.11,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-01-30",
+      "state": "CASH",
+      "close": 84260.49,
+      "sma50": 89714.06,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-01-31",
+      "state": "CASH",
+      "close": 78741.09,
+      "sma50": 89483.51,
+      "reason": "seed_source=csv;cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-02-18",
+      "state": "CASH",
+      "close": 67420.85,
+      "sma50": 89027.13,
+      "reason": "cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-02-20",
+      "state": "CASH",
+      "close": 67841.16,
+      "sma50": 88620.51,
+      "reason": "cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-02-21",
+      "state": "CASH",
+      "close": 67950.98,
+      "sma50": 88250.88,
+      "reason": "cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-02-22",
+      "state": "CASH",
+      "close": 68090.8,
+      "sma50": 87855.43,
+      "reason": "cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-02-23",
+      "state": "CASH",
+      "close": 67639.95,
+      "sma50": 87483.37,
+      "reason": "cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-02-24",
+      "state": "CASH",
+      "close": 64475.15,
+      "sma50": 87062.54,
+      "reason": "cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-02-25",
+      "state": "CASH",
+      "close": 66101.5,
+      "sma50": 86621.83,
+      "reason": "cash(not_hold_cond)"
+    },
+    {
+      "date": "2026-02-26",
+      "state": "CASH",
+      "close": 68426.27,
+      "sma50": 86223.14,
+      "reason": "cash(not_hold_cond)"
+    }
+  ]
+}
