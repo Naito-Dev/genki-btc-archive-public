@@ -38,12 +38,15 @@ def load_latest() -> tuple[dict, list[str], int]:
         return ({}, [], 0)
 
     last = entries[-1] if isinstance(entries[-1], dict) else {}
+    def display_state(raw: str) -> str:
+        return "BTC" if raw == "HOLD" else "CASH" if raw == "CASH" else "unavailable"
+
     states: list[str] = []
     for item in entries[-3:]:
         if isinstance(item, dict):
             st = str(item.get("state") or "").strip().upper()
             if st in {"HOLD", "CASH"}:
-                states.append(st)
+                states.append(display_state(st))
     return (last, states, len(entries))
 
 
@@ -55,9 +58,8 @@ def map_reason(reason_raw: object) -> str:
 
 
 def make_message(last: dict, states: list[str], day_n: int, ops_status: str, dashboard_url: str) -> str:
-    status = str(last.get("state") or "").strip().upper()
-    if status not in {"HOLD", "CASH"}:
-        status = "unavailable"
+    status_raw = str(last.get("state") or "").strip().upper()
+    status = "BTC" if status_raw == "HOLD" else "CASH" if status_raw == "CASH" else "unavailable"
 
     reason = map_reason(last.get("reason"))
     updated = str(last.get("date") or "").strip()[:10] or "unavailable"

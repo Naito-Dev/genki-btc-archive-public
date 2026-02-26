@@ -575,7 +575,7 @@
 
   <script>
     // Display source map (single-source integrity rules):
-    // - Status label: btcsignal_log.json.entries[-1].state -> BTC_HOLD/CASH
+    // - Status label: btcsignal_log.json.entries[-1].state -> BTC/CASH
     // - Reason text: btcsignal_log.json.entries[-1].reason
     // - Signal Updated timestamp: btcsignal_log.json.entries[-1].date (UTC 00:00)
     // - LIVE TESTING Day N: fixed TEST_START_DATE_JST + btcsignal latest date
@@ -654,13 +654,13 @@
 
     function mapBtcsignalState(raw) {
       const k = String(raw || "").trim().toUpperCase();
-      if (k === "HOLD") return "BTC_HOLD";
+      if (k === "HOLD") return "BTC";
       if (k === "CASH") return "CASH";
       return "unavailable";
     }
 
     function mapActionClassFromBtState(label) {
-      if (label === "BTC_HOLD") return "state-strong-bullish";
+      if (label === "BTC") return "state-strong-bullish";
       if (label === "CASH") return "state-wait";
       return "state-wait";
     }
