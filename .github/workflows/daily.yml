@@ -44,7 +44,7 @@ jobs:
       - name: Notify Discord BTCSIGNAL proof
         continue-on-error: true
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
         run: |
           python scripts/notify_btcsignal_discord.py --ops-status PASS
 
@@ -90,7 +90,7 @@ jobs:
         if: ${{ failure() }}
         continue-on-error: true
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
           RUN_ID: ${{ github.run_id }}
           WORKFLOW_NAME: ${{ github.workflow }}
           JOB_NAME: run-daily
@@ -159,7 +159,7 @@ jobs:
         if: ${{ failure() }}
         continue-on-error: true
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
           RUN_ID: ${{ github.run_id }}
           WORKFLOW_NAME: ${{ github.workflow }}
           JOB_NAME: missed-run-check
