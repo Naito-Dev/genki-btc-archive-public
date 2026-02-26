@@ -682,9 +682,15 @@
     function buildRecentDecisionRows(btLog) {
       const entries = Array.isArray(btLog?.entries) ? btLog.entries : [];
       return entries
-        .map((e) => ({
-          date: toDateOnly(e?.date) || "Unavailable",
-          status: mapBtcsignalState(e?.state),
+        .map((e) => {
+          const date = toDateOnly(e?.date);
+          const status = mapBtcsignalState(e?.state);
+          return { date, status };
+        })
+        .filter((r) => !!r.date && r.date >= TEST_START_DATE_JST && r.status !== "unavailable")
+        .map((r) => ({
+          date: r.date,
+          status: r.status,
         }))
         .reverse();
     }
@@ -1036,11 +1042,12 @@
       throw lastErr || new Error("price_feed_failed");
     }
 
-    function renderPnlFromBaseline(equity, baseline, snapshotAvailable) {
+    function renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus) {
       const pnlEl = document.getElementById("pnlPct");
       const pnlNoteEl = document.getElementById("pnlNote");
       let pnl = null;
-      if (snapshotAvailable && equity !== null) {
+      const synced = String(snapshotStatus || "").toUpperCase() === "SYNCED";
+      if (synced && snapshotAvailable && equity !== null) {
         if (!baseline || baseline.equityUsd === null || baseline.equityUsd <= 0) {
           pnl = 0.0;
         } else {
@@ -1154,12 +1161,14 @@
       const btc = parseFiniteNumber(snapshot?.btcBalance);
       const px = parseFiniteNumber(snapshot?.priceAtSnapshot ?? latest?.btc_price);
       const snapshotAvailable = usdt !== null && btc !== null && px !== null;
+      const snapshotStatus = String(snapshot?.status || latest?.snapshot_status || "SYNC_PENDING").toUpperCase();
+      const snapshotSynced = snapshotStatus === "SYNCED";
       const equity = snapshotAvailable ? (usdt + btc * px) : null;
       document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
 
       const balanceSourceEl = document.getElementById("balanceSource");
       if (balanceSourceEl) {
-        const src = String(snapshot?.source || latest?.balance_source || "unavailable");
+        const src = snapshotSynced ? String(snapshot?.source || latest?.balance_source || "unavailable") : "unavailable";
         balanceSourceEl.textContent = `Source: ${src}`;
       }
 
@@ -1171,7 +1180,7 @@
       const dayN = cycleDate ? calcLiveDayN(TEST_START_DATE_JST, cycleDate) : null;
       liveLabelEl.textContent = dayN ? `LIVE TESTING • Day ${dayN}` : "LIVE TESTING";
 
-      renderPnlFromBaseline(equity, baseline, snapshotAvailable);
+      renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus);
       renderAudit(log, latest, btLog);
     }
 
