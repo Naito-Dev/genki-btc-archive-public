@@ -11,6 +11,14 @@ from urllib.error import HTTPError, URLError
 ROOT = Path(__file__).resolve().parent.parent
 BTCSIGNAL_LOG = ROOT / "btcsignal_log.json"
 
+REASON_MAP = {
+    "risk_off_not_confirmed": "Trend not confirmed. Staying in cash.",
+    "trend_confirmation_2d": "Trend confirmed. Holding BTC.",
+    "data_warmup": "Warm-up period. No action.",
+    "data_warmup_seed": "Warm-up period. No action.",
+    "unavailable": "Data unavailable. No action.",
+}
+
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Post daily X draft to Discord")
@@ -30,21 +38,30 @@ def load_latest() -> tuple[dict, list[str], int]:
         return ({}, [], 0)
 
     last = entries[-1] if isinstance(entries[-1], dict) else {}
+    def display_state(raw: str) -> str:
+        return "BTC" if raw == "HOLD" else "CASH" if raw == "CASH" else "unavailable"
+
     states: list[str] = []
     for item in entries[-3:]:
         if isinstance(item, dict):
             st = str(item.get("state") or "").strip().upper()
             if st in {"HOLD", "CASH"}:
-                states.append(st)
+                states.append(display_state(st))
     return (last, states, len(entries))
 
 
-def make_message(last: dict, states: list[str], day_n: int, ops_status: str, dashboard_url: str) -> str:
-    status = str(last.get("state") or "").strip().upper()
-    if status not in {"HOLD", "CASH"}:
-        status = "unavailable"
+def map_reason(reason_raw: object) -> str:
+    reason = str(reason_raw or "").strip()
+    if not reason:
+        return "unavailable"
+    return REASON_MAP.get(reason, reason)
 
-    reason = str(last.get("reason") or "").strip() or "unavailable"
+
+def make_message(last: dict, states: list[str], day_n: int, ops_status: str, dashboard_url: str) -> str:
+    status_raw = str(last.get("state") or "").strip().upper()
+    status = "BTC" if status_raw == "HOLD" else "CASH" if status_raw == "CASH" else "unavailable"
+
+    reason = map_reason(last.get("reason"))
     updated = str(last.get("date") or "").strip()[:10] or "unavailable"
     last3 = "->".join(states) if len(states) == 3 else "unavailable"
 

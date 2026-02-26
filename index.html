@@ -527,6 +527,7 @@
           </div>
           <div id="liveEquity" class="live-equity">-</div>
           <div id="pnlPct" class="pnl-pct" style="display:none"></div>
+          <div id="balanceSource" class="pnl-note">Source: unavailable</div>
           <div id="sinceStart" class="since-start">Since start: -</div>
         </div>
       </section>
@@ -555,6 +556,7 @@
           <div class="audit-section">
             <div class="audit-title">Recent Verified Decisions</div>
             <ul id="auditRecentList" class="audit-list"><li>-</li></ul>
+            <button id="auditRecentMoreBtn" class="proof-toggle" type="button" onclick="showMoreDecisions()" style="display:none; margin-top:8px;">Show more</button>
           </div>
           <div class="audit-section">
             <div class="audit-title">Proof of Integrity</div>
@@ -573,11 +575,15 @@
 
   <script>
     // Display source map (single-source integrity rules):
-    // - Status label: log.json.latest.target_btc_ratio/allocation -> actionLabelFromTargetRatio()
-    // - Reason text: log.json.latest.status + error_type (+sync_status fallback) -> getDisplayReason()
-    // - Signal Updated timestamp: log.json.latest.updated_at_utc || timestamp_utc || price_ts
-    // - LIVE TESTING Day N: fixed TEST_START_DATE_JST + signal cycle date (latest.date or updated_at_utc)
-    const TEST_START_DATE_JST = "2026-02-18";
+    // - Status label: btcsignal_log.json.entries[-1].state -> BTC/CASH
+    // - Reason text: btcsignal_log.json.entries[-1].reason
+    // - Signal Updated timestamp: btcsignal_log.json.entries[-1].date (UTC 00:00)
+    // - LIVE TESTING Day N: fixed TEST_START_DATE_JST + btcsignal latest date
+    // - LIVE TESTING equity/P&L: data/live_portfolio_snapshot.json only (no estimation fallback)
+    const TEST_START_DATE_JST = "2026-02-26";
+    const RECENT_PAGE_SIZE = 30;
+    let recentOffset = 0;
+    let recentDecisionRows = [];
 
     function fmtUsd(v) {
       if (v === null || v === undefined || Number.isNaN(Number(v))) return "-";
@@ -645,6 +651,60 @@
       return m ? m[1] : null;
     }
 
+
+    function mapBtcsignalState(raw) {
+      const k = String(raw || "").trim().toUpperCase();
+      if (k === "HOLD") return "BTC";
+      if (k === "CASH") return "CASH";
+      return "unavailable";
+    }
+
+    function mapActionClassFromBtState(label) {
+      if (label === "BTC") return "state-strong-bullish";
+      if (label === "CASH") return "state-wait";
+      return "state-wait";
+    }
+
+    function mapBtReason(reasonRaw) {
+      const r = String(reasonRaw || "").trim();
+      if (!r) return "unavailable";
+      return r;
+    }
+
+    async function fetchBtSignalLog() {
+      const res = await fetch(`btcsignal_log.json?ts=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`btcsignal_${res.status}`);
+      return await res.json();
+    }
+
+    function buildRecentDecisionRows(btLog) {
+      const entries = Array.isArray(btLog?.entries) ? btLog.entries : [];
+      return entries
+        .map((e) => ({
+          date: toDateOnly(e?.date) || "Unavailable",
+          status: mapBtcsignalState(e?.state),
+        }))
+        .reverse();
+    }
+
+    function renderRecentDecisions() {
+      const list = document.getElementById("auditRecentList");
+      const moreBtn = document.getElementById("auditRecentMoreBtn");
+      const limit = Math.min(recentOffset + RECENT_PAGE_SIZE, recentDecisionRows.length);
+      const rows = recentDecisionRows.slice(0, limit);
+      list.innerHTML = rows.length
+        ? rows.map((r) => `<li>${r.date} | ${r.status}</li>`).join("")
+        : "<li>Unavailable</li>";
+      if (moreBtn) {
+        moreBtn.style.display = limit < recentDecisionRows.length ? "inline-flex" : "none";
+      }
+    }
+
+    function showMoreDecisions() {
+      recentOffset += RECENT_PAGE_SIZE;
+      renderRecentDecisions();
+    }
+
     function parseDateAny(e) {
       return e?.date_utc || e?.date || "-";
     }
@@ -676,26 +736,33 @@
       return "state-wait";
     }
 
-    function getBaseEquityDetails(log) {
+    function getBaseEquityDetails(log, startDate = TEST_START_DATE_JST) {
       const latest = log?.latest || {};
+      const entries = Array.isArray(log?.entries) ? [...log.entries] : [];
+      const candidates = [];
+
+      const latestDate = toDateOnly(latest?.date);
+      const latestEq = parseFiniteNumber(latest?.equity_usd);
+      if (latestDate && latestEq !== null && latestDate >= startDate) {
+        candidates.push({ date: latestDate, value: latestEq, source: "latest.equity_usd" });
+      }
+
+      for (const e of entries) {
+        const d = toDateOnly(e?.date);
+        const eq = parseFiniteNumber(e?.equity_usd);
+        if (d && eq !== null && d >= startDate) candidates.push({ date: d, value: eq, source: "entries[].equity_usd" });
+      }
+
+      candidates.sort((a, b) => dateSortValue(a.date) - dateSortValue(b.date));
+      if (candidates.length) return { value: candidates[0].value, source: candidates[0].source };
+
       const latestBase = parseFiniteNumber(latest.base_equity);
       if (latestBase !== null) return { value: latestBase, source: "latest.base_equity" };
-      const latestInit = parseFiniteNumber(latest.initial_capital);
-      if (latestInit !== null) return { value: latestInit, source: "latest.initial_capital" };
-      const logBase = parseFiniteNumber(log?.base_equity);
-      if (logBase !== null) return { value: logBase, source: "log.base_equity" };
-      const entries = Array.isArray(log?.entries) ? log.entries : [];
-      for (const e of entries) {
-        const b = parseFiniteNumber(e?.base_equity);
-        if (b !== null) return { value: b, source: "entries[].base_equity" };
-        const i = parseFiniteNumber(e?.initial_capital);
-        if (i !== null) return { value: i, source: "entries[].initial_capital" };
-      }
       return { value: null, source: "none" };
     }
 
     function getBaseEquity(log) {
-      return getBaseEquityDetails(log).value;
+      return getBaseEquityDetails(log, TEST_START_DATE_JST).value;
     }
 
     function getSinceTestStart(log) {
@@ -861,7 +928,7 @@
       return Number.isFinite(t) ? t : -Infinity;
     }
 
-    function renderAudit(log, latest) {
+    function renderAudit(log, latest, btLog) {
       document.getElementById("auditChainStatus").textContent = mapStatusDisplay(latest?.chain_integrity, "integrity");
       document.getElementById("auditLogicVersion").textContent = latest?.logic_version ?? "Unavailable";
       document.getElementById("auditAlloc").textContent = "Subscriber-only";
@@ -869,30 +936,9 @@
       document.getElementById("auditStatus").textContent = mapStatusDisplay(latest?.status, "status");
       document.getElementById("auditSnapshot").textContent = mapStatusDisplay(latest?.snapshot_status, "sync");
 
-      const entryList = Array.isArray(log?.entries) ? log.entries : [];
-      const merged = [{ ...latest }, ...entryList];
-      const withDate = merged
-        .map((e) => ({ e, d: getEntryDate(e) }))
-        .filter((x) => !!x.d)
-        .sort((a, b) => dateSortValue(b.d) - dateSortValue(a.d));
-      const seen = new Set();
-      const entries = [];
-      for (const item of withDate) {
-        const key = item.d;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        entries.push(item.e);
-        if (entries.length >= 3) break;
-      }
-      const list = document.getElementById("auditRecentList");
-      list.innerHTML = entries.length
-        ? entries.map((e) => {
-            const d = getEntryDate(e) || "Unavailable";
-            const s = mapStatusLabelForDecision(e?.status);
-            const p = formatRecentBtcPrice(e?.btc_price);
-            return `<li>${d} | ${s} | ${p}</li>`;
-          }).join("")
-        : "<li>Unavailable</li>";
+      recentOffset = 0;
+      recentDecisionRows = buildRecentDecisionRows(btLog);
+      renderRecentDecisions();
 
       const proof = {
         date: latest?.date ?? "-",
@@ -1040,132 +1086,66 @@
     }
 
     async function load() {
-      const res = await fetch(`log.json?ts=${Date.now()}`, { cache: "no-store" });
-      const log = await res.json();
+      const [logRes, btLogRes] = await Promise.all([
+        fetch(`log.json?ts=${Date.now()}`, { cache: "no-store" }),
+        fetch(`btcsignal_log.json?ts=${Date.now()}`, { cache: "no-store" }),
+      ]);
+      const log = await logRes.json();
+      const btLog = btLogRes.ok ? await btLogRes.json() : { entries: [] };
+
       const latest = log?.latest || {};
-      const hasCoreSignalData = Boolean(latest?.status) && Boolean(latest?.updated_at_utc || latest?.timestamp_utc || latest?.price_ts);
-      const ratio = normalizeRatio(latest?.target_btc_ratio, latest?.allocation);
-      const action = actionLabelFromTargetRatio(ratio);
-      const errorType = normalizeErrorType(latest);
-      const syncStatus = normalizeSyncStatus(latest);
-      const displayAction = hasCoreSignalData ? action : "WAIT";
-      const displayReason = getDisplayReason(displayAction, errorType, syncStatus, hasCoreSignalData);
+      const btEntries = Array.isArray(btLog?.entries) ? btLog.entries : [];
+      const btLatest = btEntries.length ? btEntries[btEntries.length - 1] : {};
+
+      const displayAction = mapBtcsignalState(btLatest?.state);
+      const displayReason = mapBtReason(btLatest?.reason);
 
       const actionEl = document.getElementById("actionSignal");
       actionEl.textContent = displayAction;
       actionEl.classList.remove("state-wait", "state-defensive", "state-bullish", "state-strong-bullish");
-      actionEl.classList.add(actionStateClassFromLabel(displayAction));
+      actionEl.classList.add(mapActionClassFromBtState(displayAction));
+
       const reasonEl = document.getElementById("actionReason");
       if (reasonEl) reasonEl.textContent = displayReason;
-      const signalUpdated = latest?.updated_at_utc || latest?.timestamp_utc || latest?.price_ts || "-";
+
+      const cycleDate = toDateOnly(btLatest?.date);
+      const signalUpdated = cycleDate ? `${cycleDate}T00:00:00Z` : (latest?.updated_at_utc || latest?.timestamp_utc || latest?.price_ts || "-");
       const basePrice = parseFiniteNumber(latest?.btc_price);
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
       document.getElementById("metaUpdated").textContent = `Signal Updated ${fmtUtc(signalUpdated)}`;
-      const isDataPending = !hasCoreSignalData || syncStatus === "SYNC_PENDING";
-      const staleEl = document.getElementById("dataPending");
-      if (staleEl) staleEl.style.display = "none";
-      console.debug("[SIGNAL_SOURCE]", { source: "log.json.latest", signal_updated_utc: signalUpdated, price_ts_utc: latest?.price_ts || null });
-      console.debug("[REASON_SOURCE]", {
-        source: "log.json.latest.status + error_type (+snapshot_status fallback)",
-        status: latest?.status || null,
-        error_type: errorType || null,
-        sync_status: syncStatus || null,
-        displayed_reason: displayReason,
-      });
 
-      const liveEquity = resolveLiveEquityDetails(log, latest);
-      const equity = parseFiniteNumber(liveEquity.value);
-      document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
-      renderEstimationPriceStatus(latest?.price_ts || latest?.updated_at_utc || latest?.timestamp_utc || null, false);
-      const sinceStart = getSinceTestStart(log);
-      const sinceStartEl = document.getElementById("sinceStart");
-      const liveLabelEl = document.getElementById("liveLabel");
-      const signalCycleDateJst = getSignalCycleDateJst(latest);
-      const dayN = signalCycleDateJst ? calcLiveDayN(TEST_START_DATE_JST, signalCycleDateJst) : null;
-      liveLabelEl.textContent = dayN ? `LIVE TESTING • Day ${dayN}` : "LIVE TESTING";
-      if (sinceStart) {
-        sinceStartEl.textContent = `Since start: ${sinceStart}`;
-        sinceStartEl.style.display = "block";
-      } else {
-        sinceStartEl.textContent = "";
-        sinceStartEl.style.display = "none";
+      const staleEl = document.getElementById("dataPending");
+      if (staleEl) staleEl.style.display = displayAction === "unavailable" ? "block" : "none";
+
+      let snapshot = null;
+      try {
+        snapshot = await fetchLivePortfolioSnapshot();
+      } catch (_) {
+        snapshot = null;
       }
+
+      const usdt = parseFiniteNumber(snapshot?.usdtBalance);
+      const btc = parseFiniteNumber(snapshot?.btcBalance);
+      const px = parseFiniteNumber(snapshot?.priceAtSnapshot ?? latest?.btc_price);
+      const equity = (usdt !== null && btc !== null && px !== null) ? (usdt + btc * px) : null;
+      document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
+
+      const balanceSourceEl = document.getElementById("balanceSource");
+      if (balanceSourceEl) {
+        const src = String(snapshot?.source || latest?.balance_source || "unavailable");
+        balanceSourceEl.textContent = `Source: ${src}`;
+      }
+
+      const sinceStartEl = document.getElementById("sinceStart");
+      sinceStartEl.textContent = `Since start: ${TEST_START_DATE_JST}`;
+      sinceStartEl.style.display = "block";
+
+      const liveLabelEl = document.getElementById("liveLabel");
+      const dayN = cycleDate ? calcLiveDayN(TEST_START_DATE_JST, cycleDate) : null;
+      liveLabelEl.textContent = dayN ? `LIVE TESTING • Day ${dayN}` : "LIVE TESTING";
 
       renderPnl(log, latest, equity);
-
-      const runtime = {
-        log,
-        latest,
-        snapshotEquity: equity,
-        snapshotPrice: basePrice,
-        btcRatio: resolveActualBtcRatio(log, latest),
-        portfolioSnapshot: null,
-        lastPriceTs: latest?.price_ts || latest?.updated_at_utc || latest?.timestamp_utc || null,
-        lastPriceSource: latest?.price_source || "log.json",
-        lastLivePrice: basePrice,
-      };
-
-      async function refreshPriceAndEstimate() {
-        try {
-          const liveFeed = await fetchLiveBtcPrice();
-          const livePrice = parseFiniteNumber(liveFeed?.price);
-          if (livePrice === null) throw new Error("live_price_parse");
-
-          runtime.lastLivePrice = livePrice;
-          runtime.lastPriceTs = liveFeed?.fetchedAtUtc || new Date().toISOString();
-          runtime.lastPriceSource = liveFeed?.source || "realtime";
-
-          document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(livePrice)}`;
-          renderEstimationPriceStatus(runtime.lastPriceTs, false);
-
-          try {
-            const snapshot = await fetchLivePortfolioSnapshot();
-            if (snapshot && (snapshot.usdtBalance !== null || snapshot.btcBalance !== null)) {
-              runtime.portfolioSnapshot = snapshot;
-            }
-          } catch (snapshotErr) {
-            console.debug("[LIVE_PORTFOLIO_SNAPSHOT]", { error: String(snapshotErr) });
-          }
-
-          let estEquity = null;
-          if (
-            runtime.portfolioSnapshot &&
-            runtime.portfolioSnapshot.usdtBalance !== null &&
-            runtime.portfolioSnapshot.btcBalance !== null
-          ) {
-            estEquity = runtime.portfolioSnapshot.usdtBalance + (runtime.portfolioSnapshot.btcBalance * livePrice);
-          } else {
-            estEquity = estimateEquityFromPrice(runtime.snapshotEquity, runtime.snapshotPrice, runtime.btcRatio, livePrice);
-          }
-
-          if (estEquity !== null) {
-            document.getElementById("liveEquity").textContent = fmtUsd(estEquity);
-            renderPnl(runtime.log, runtime.latest, estEquity);
-          }
-
-          console.debug("[LIVE_PRICE_FEED]", {
-            source: runtime.lastPriceSource,
-            fetched_at_utc: runtime.lastPriceTs,
-            btc_price_usd: livePrice,
-            signal_source: "log.json.latest",
-            snapshot_source: runtime.portfolioSnapshot?.source || "fallback_log_snapshot",
-            snapshot_updated_at_utc: runtime.portfolioSnapshot?.updatedAtUtc || null,
-            balances_used: runtime.portfolioSnapshot ? {
-              usdt: runtime.portfolioSnapshot.usdtBalance,
-              btc: runtime.portfolioSnapshot.btcBalance,
-            } : null,
-            estimated_equity_usd: estEquity
-          });
-        } catch (err) {
-          console.debug("[LIVE_PRICE_FEED]", { error: String(err), last_price_ts: runtime.lastPriceTs, source: runtime.lastPriceSource });
-          renderEstimationPriceStatus(runtime.lastPriceTs, true);
-        }
-      }
-
-      setInterval(refreshPriceAndEstimate, 30 * 1000);
-      refreshPriceAndEstimate().catch(() => {});
-
-      renderAudit(log, latest);
+      renderAudit(log, latest, btLog);
     }
 
     runReasonMappingSelfTest();

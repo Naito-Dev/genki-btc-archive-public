@@ -47,6 +47,9 @@ def load_latest(log_path: str) -> dict[str, str]:
         "updated": "unavailable",
     }
 
+    def display_state(raw: str) -> str:
+        return "BTC" if raw == "HOLD" else "CASH" if raw == "CASH" else "unavailable"
+
     for path in btcsignal_paths(log_path):
         data = load_json(path)
         if not isinstance(data, dict):
@@ -57,7 +60,7 @@ def load_latest(log_path: str) -> dict[str, str]:
 
         last = entries[-1] if isinstance(entries[-1], dict) else {}
         raw_state = str(last.get("state") or "").strip().upper()
-        status = raw_state if raw_state in {"HOLD", "CASH"} else "unavailable"
+        status = display_state(raw_state)
         reason = str(last.get("reason") or "").strip() or "unavailable"
         updated = str(last.get("date") or "").strip()[:10] or "unavailable"
 
@@ -80,7 +83,7 @@ def load_latest(log_path: str) -> dict[str, str]:
             if s not in {"HOLD", "CASH"}:
                 tail_states = []
                 break
-            tail_states.append(s)
+            tail_states.append(display_state(s))
         last3 = " -> ".join(tail_states) if len(tail_states) == 3 else "unavailable"
 
         return {
