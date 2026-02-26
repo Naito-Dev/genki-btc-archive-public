@@ -3,7 +3,7 @@
   "btc_balance": null,
   "price_at_snapshot": 68269.05,
   "snapshot_status": "SYNC_PENDING",
-  "source": "BITGET_READONLY",
+  "source": "unavailable",
   "updated_at_utc": "2026-02-26T00:00:00Z",
   "usdt_balance": null
 }
