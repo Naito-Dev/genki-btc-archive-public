@@ -65,7 +65,7 @@ def compute_state(closes: list[float]) -> tuple[str, float, str]:
 
     if len(closes) < 51:
         sma_ref = mean(closes)
-        return ("CASH", float(sma_ref), f"warmup_need_51_closes(now={len(closes)})")
+        return ("CASH", float(sma_ref), f"data_warmup")
 
     sma50_today = mean(closes[-50:])
     sma50_yday = mean(closes[-51:-1])
@@ -78,8 +78,8 @@ def compute_state(closes: list[float]) -> tuple[str, float, str]:
     )
 
     if hold_cond:
-        return ("HOLD", float(sma50_today), "hold_cond(close>SMA50_2days & SMA50_up)")
-    return ("CASH", float(sma50_today), "cash(not_hold_cond)")
+        return ("HOLD", float(sma50_today), "trend_confirmation_2d")
+    return ("CASH", float(sma50_today), "risk_off_not_confirmed")
 
 
 def append_point(entries: list[dict], date: str, close: float) -> None:

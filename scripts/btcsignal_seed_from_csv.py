@@ -57,15 +57,15 @@ def normalize_date(raw: str) -> str | None:
 def compute_state(closes: list[float]) -> tuple[str, float, str]:
     close_today = closes[-1]
     if len(closes) < 51:
-        return ("CASH", float(mean(closes)), f"seed_warmup({len(closes)}/51)")
+        return ("CASH", float(mean(closes)), f"data_warmup_seed")
 
     sma50_today = mean(closes[-50:])
     sma50_yday = mean(closes[-51:-1])
     close_yday = closes[-2]
     hold = (close_today > sma50_today) and (close_yday > sma50_yday) and (sma50_today >= sma50_yday)
     if hold:
-        return ("HOLD", float(sma50_today), "seed_source=csv;hold_cond(close>SMA50_2days & SMA50_up)")
-    return ("CASH", float(sma50_today), "seed_source=csv;cash(not_hold_cond)")
+        return ("HOLD", float(sma50_today), "seed_source=csv;trend_confirmation_2d")
+    return ("CASH", float(sma50_today), "seed_source=csv;risk_off_not_confirmed")
 
 
 def main() -> int:
