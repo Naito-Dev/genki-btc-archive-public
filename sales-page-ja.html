@@ -423,17 +423,17 @@
   <header class="hero">
     <div class="wrap">
       <span class="eyebrow">BTC資産防衛シグナル</span>
-      <h1>BTCを持っている。でも毎日「持ちすぎか、少なすぎか」で迷ってしまう。</h1>
-      <p class="lead">その迷いを、1日1回のルールベース回答に置き換えます。チャート張り付き不要。ノイズなし。明確な配分レベルだけ受け取り、日常に戻れる設計です。</p>
-      <p class="phase-note">ライブ検証中 • ウェイトリスト受付中 • 検証完了後に有料提供開始</p>
+      <h1>Genki BTC Signal</h1>
+      <p class="lead">毎日1回、状態は BTC / CASH のみ。チャート常時監視なしで判断を固定します。</p>
+      <p class="phase-note">毎日21:12 JSTに更新 • ウェイトリスト受付中 • 検証条件達成後に有料提供開始</p>
 
       <div class="hero-grid">
         <article class="card">
           <p class="mini-title">受け取れるもの</p>
-          <p class="sub" style="margin:0">1日1通の短いメール。件名でその日の判断が分かる設計です。</p>
+          <p class="sub" style="margin:0">1日1回の情報更新。必要な日のみ確認すれば十分です。</p>
           <div class="signal-preview" aria-label="無料版と有料版の比較 preview">
-            <div><strong>無料版:</strong> 状態ラベルのみ表示</div>
-            <div><strong>有料メール:</strong> 現行候補（0% / 70% / 100%中心）の配分ガイダンスと実行文脈</div>
+            <div><strong>公開版:</strong> BTC / CASH の日次ステータス</div>
+            <div><strong>配信:</strong> 任意のDiscord通知 + 公開ログ証跡</div>
           </div>
           <div class="cta-row">
             <a class="btn primary" href="#waitlist">ウェイトリストに参加</a>
@@ -456,172 +456,80 @@
   <main>
     <section>
       <div class="wrap card">
-        <h2>有料版で解放される価値</h2>
-        <p class="sub">無料ダッシュボードは証跡レイヤー。有料版は実行レイヤーです。</p>
-        <div class="unlock-grid">
-          <div class="unlock-item"><strong>現在の配分ガイダンス</strong>現行の採用候補は strict70_to0_rule_v1（BTC 0% / 70% / 100%中心）です。30%ルールは現行候補では不採用です。</div>
-          <div class="unlock-item"><strong>なぜそのシグナルか</strong>当日のレベル背景を短く提示。出力だけでなく文脈も把握できます。</div>
-          <div class="unlock-item"><strong>日次配信（定時・1回）</strong>件名を読んで必要時だけ対応。平均判断時間は1分未満を想定。</div>
-          <div class="unlock-item"><strong>完全な履歴アーカイブ</strong>過去のシグナル・配分・理由を一貫して確認できます。</div>
-          <div class="unlock-item"><strong>データ準備状態</strong>市場データが不安定なときは明示し、誤作動を避けます。</div>
-          <div class="unlock-item"><strong>ハッシュ検証済み証跡</strong>結果確定前の判断を公開記録。改ざん検知可能です。</div>
+        <h2>Genki BTC Signal</h2>
+        <p class="sub">毎日1回、状態は <strong>BTC</strong> か <strong>CASH</strong> のみ。<br>チャート常時監視は不要です。</p>
+        <p class="fine">更新は毎日 <strong>21:12 JST</strong>（12:12 UTC）に固定。現在はウェイトリスト受付中。十分な検証履歴を満たした後に有料提供を開始します。</p>
+        <div class="cta-row" style="margin-top:14px;">
+          <a class="btn primary" href="#waitlist">提供開始を通知で受け取る</a>
         </div>
       </div>
     </section>
 
     <section>
       <div class="wrap card">
-        <h2>無料版と有料版の比較</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>項目</th><th>無料ダッシュボード</th><th>有料アクセス</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>ポジション配分</td><td>非表示 / 要約のみ</td><td>現行候補: 0% / 70% / 100%（strict70_to0_rule_v1、30%不採用）</td></tr>
-              <tr><td>ターゲット配分バンド</td><td>非表示</td><td>現行候補（strict70_to0_rule_v1）を評価中</td></tr>
-              <tr><td>本日のシグナル</td><td>状態ラベルのみ</td><td>状態 + 配分ライン</td></tr>
-              <tr><td>直近の判断履歴</td><td>状態テキスト</td><td>状態 + 配分コンテキスト</td></tr>
-              <tr><td>データ同期 / 実行可否</td><td>要約</td><td>実行可否の解釈付き</td></tr>
-              <tr><td>配信方法</td><td>公開ダッシュボード閲覧</td><td>日次メール（定時配信）</td></tr>
-              <tr><td>履歴アーカイブ</td><td>限定的な透明性レイヤー</td><td>実務向け完全アーカイブ</td></tr>
-              <tr><td>改ざん防止の証跡</td><td>Visible</td><td>表示あり（同一の証跡基盤）</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="compare-cards" aria-label="無料版と有料版の比較 mobile comparison">
-          <article class="compare-card"><p class="item">ポジション配分</p><p class="row"><strong>Free:</strong>非表示 / 要約のみ</p><p class="row"><strong>Premium:</strong>現行候補: 0% / 70% / 100%（strict70_to0_rule_v1、30%不採用）</p></article>
-          <article class="compare-card"><p class="item">ターゲット配分バンド</p><p class="row"><strong>Free:</strong>非表示</p><p class="row"><strong>Premium:</strong>現行候補（strict70_to0_rule_v1）を評価中</p></article>
-          <article class="compare-card"><p class="item">本日のシグナル</p><p class="row"><strong>Free:</strong>状態ラベルのみ</p><p class="row"><strong>Premium:</strong>状態 + 配分ライン</p></article>
-          <article class="compare-card"><p class="item">直近の判断履歴</p><p class="row"><strong>Free:</strong>状態テキスト</p><p class="row"><strong>Premium:</strong>状態 + 配分コンテキスト</p></article>
-          <article class="compare-card"><p class="item">データ同期 / 実行可否</p><p class="row"><strong>Free:</strong>要約</p><p class="row"><strong>Premium:</strong>実行可否の解釈付き</p></article>
-          <article class="compare-card"><p class="item">配信方法</p><p class="row"><strong>Free:</strong>公開ダッシュボード閲覧</p><p class="row"><strong>Premium:</strong>日次メール（定時配信）</p></article>
-          <article class="compare-card"><p class="item">履歴アーカイブ</p><p class="row"><strong>Free:</strong>限定的な透明性レイヤー</p><p class="row"><strong>Premium:</strong>実務向け完全アーカイブ</p></article>
-          <article class="compare-card"><p class="item">改ざん防止の証跡</p><p class="row"><strong>Free:</strong>Visible</p><p class="row"><strong>Premium:</strong>表示あり（同一の証跡基盤）</p></article>
-        </div>
+        <h2>受け取れるもの</h2>
+        <p>これはBTC向けの最小構成な情報フィードです。</p>
+        <ul class="list" style="padding-left:16px">
+          <li><strong>日次ステータス</strong> — 1日1回、BTC か CASH を更新</li>
+          <li><strong>任意のDiscord通知</strong> — 自動で配信</li>
+          <li><strong>公開ログ記録</strong> — 毎日の状態を検証可能な形で保存</li>
+        </ul>
+        <p>実行判断は常にあなた自身が行います。提供は情報のみです。</p>
       </div>
     </section>
 
     <section>
       <div class="wrap card">
-        <h2>1日の中での使い方</h2>
-        <p class="sub">チャート監視より、本業に集中したい人向けの設計です。</p>
-        <div class="steps">
-          <article class="step">
-            <span class="n">1</span>
-            <h3>1通のメールが届く</h3>
-            <p>件名にシグナルが入るので、数秒で確認できます。多くの日は変更なしです。</p>
-          </article>
-          <article class="step">
-            <span class="n">2</span>
-            <h3>1つの判断をする</h3>
-            <p>維持・縮小・拡大のどれか。配分バンドが明示されるので迷いを減らせます。</p>
-          </article>
-          <article class="step">
-            <span class="n">3</span>
-            <h3>日常に戻る</h3>
-            <p>常時チャート監視や二重チェックは不要。監視はシステム側で継続します。</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>証跡と実績（参考値）</h2>
-        <p class="sub">透明性のために過去検証値とライブ検証を表示しています。利益保証ではありません。</p>
-        <p class="fine" style="margin-top:-6px">ライブ資金テスト: 進行中（公開証跡あり）。</p>
-        <div class="proof-status" aria-label="Proof status summary">
-          <p class="title">Proof Status</p>
-          <div class="proof-status-grid">
-            <div><strong>Live Forward Test:</strong> <span id="proofDay">UNAVAILABLE</span></div>
-            <div><strong>Chain Integrity:</strong> <span id="proofIntegrity">VALID</span></div>
-            <div><strong>Records Published:</strong> <span id="proofRecords">UNAVAILABLE</span></div>
-            <div><strong>Last Proof Time (UTC):</strong> <span id="proofTimeUtc">YYYY-MM-DD HH:MM</span></div>
-            <div><strong>Last Commit SHA:</strong> <a id="proofCommitLink" href="" target="_blank" rel="noopener noreferrer" style="color:var(--muted)" hidden><span id="proofCommitShaLink">UNAVAILABLE</span></a><span id="proofCommitShaPlain" style="color:var(--muted)">UNAVAILABLE</span></div>
-            <div><strong>ライブ資金テスト:</strong> 進行中（公開証跡あり）</div>
-          </div>
-        </div>
-        <div class="proof-kpis">
-          <div class="kpi"><div class="v">15.17x</div><div class="k">最終資産倍率（参考）</div></div>
-          <div class="kpi"><div class="v">41.02%</div><div class="k">CAGR（参考）</div></div>
-          <div class="kpi"><div class="v">-19.79%</div><div class="k">最大ドローダウン（参考）</div></div>
-          <div class="kpi"><div class="v">11.80%</div><div class="k">平均エクスポージャー（参考）</div></div>
-        </div>
-        <p class="fine">将来収益は保証されません。実運用では手数料・スリッページ・税務・市場環境により結果が変わる可能性があります。投資助言ではありません。最終判断はご自身で行ってください。</p>
-        <p class="fine" style="margin-top:6px">過去の参考値です — 技術検証情報を確認できます。</p>
-        <p class="fine" style="margin-top:8px"><a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.ja.md" style="color:var(--muted)">バックテスト手法（参考）を見る</a> • <a href="https://naito-dev.github.io/genki-btc-archive-public/" style="color:var(--muted)">公開検証ダッシュボードを見る</a> • <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" style="color:var(--muted)">公開証跡（log.json）を見る</a></p>
-        <p class="fine" style="margin-top:6px"><a href="/genki-btc-archive-public/verification/index.html" style="color:var(--muted)">技術検証・再現性センターを見る（上級者向け）</a></p>
-        <p class="fine" style="margin-top:6px">この欄は公開検証の証跡表示であり、取引所のリアルタイム残高表示ではありません。</p>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>よくある質問</h2>
-        <div class="faq">
-          <details>
-            <summary>BTCリスクシグナルとは？</summary>
-            <p>BTC現物保有者向けに、市場構造に基づいて守り優先か保有継続かを示すルールベースの日次レポートです。目的は資産防衛と判断の明確化であり、常時トレードではありません。</p>
-          </details>
-          <details>
-            <summary>どんな人向けですか？</summary>
-            <p>ドローダウン管理を重視し、日次で簡潔に判断したいBTC現物保有者向けです。</p>
-          </details>
-          <details>
-            <summary>具体的に何が届きますか？</summary>
-            <p>現在のシグナル状態、現行候補の配分レベル（strict70_to0_rule_v1、30%不採用）、実行コンテキスト、無料版では見えない履歴情報を含む短い日次メールです。</p>
-          </details>
-          <details>
-            <summary>更新頻度は？</summary>
-            <p>毎日1回、定時で更新。同期と証跡チェックを実施します。</p>
-          </details>
-          <details>
-            <summary>市場データが不安定なときは？</summary>
-            <p>リスクオンを強制せず、安全優先の挙動に切り替え、その状態を明示します。</p>
-          </details>
-          <details>
-            <summary>投資助言ですか？</summary>
-            <p>いいえ。情報提供型のリスク管理シグナルです。実行判断の責任は利用者にあります。</p>
-          </details>
-          <details>
-            <summary>いつでも解約できますか？</summary>
-            <p>有料フェーズでは月次でいつでも解約可能。現在のウェイトリスト期間は課金は発生しません。</p>
-          </details>
-          <details>
-            <summary>有料提供はいつ開始ですか？</summary>
-            <p>60日ライブ検証完了後に開始します。ウェイトリスト登録者へ先行案内します。</p>
-          </details>
-        </div>
+        <h2>透明性と証跡</h2>
+        <p>将来リターン予測やシミュレーション値は掲載しません。<br>代わりに、日次記録そのものを公開し、検証可能な形で残します。</p>
+        <p>
+          <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" target="_blank" rel="noopener">公開ログ（log.json）を見る</a>
+          &nbsp;•&nbsp;
+          <a href="https://github.com/Naito-Dev/genki-btc-archive-public/commits/main" target="_blank" rel="noopener">コミット履歴を見る</a>
+        </p>
       </div>
     </section>
 
     <section>
       <div class="wrap waitlist-card" id="waitlist">
-        <h2>βコホートのウェイトリストに参加</h2>
-        <p class="sub">検証は進行中です。完了後、登録者へ先行案内します。</p>
-        <p class="fine" style="margin-top:6px">このフェーズでは課金は発生しません。提供開始時にご案内します。</p>
-        <p class="fine" style="margin-top:-4px">「Wait / Defensive / Bullish / Strong Bullish」は状態ラベルです。「Safety Hold」はデータ不安定時に防御姿勢を維持する理由説明です。</p>
-        <form class="waitlist-form" action="#" method="post" onsubmit="return false;">
+        <h2>ウェイトリスト参加</h2>
+        <p class="sub">決済はまだ発生しません。検証条件を満たして有料提供を開始する際に通知します。開始日は未定です。</p>
+        <form class="waitlist-form" action="#" method="post" onsubmit="return false;" style="margin:12px 0 18px 0;">
           <label>メールアドレス（必須）
             <input id="waitlistEmail" type="email" required placeholder="you@example.com" />
           </label>
-          <label>ニックネーム（任意・メール内の呼び名）
+          <label>ニックネーム（任意）
             <input id="waitlistName" type="text" placeholder="ニックネーム（例: Taro）" />
           </label>
           <div class="full cta-row" style="margin-top:2px">
-            <button id="waitlistSubmitBtn" class="btn primary" type="button" aria-label="Join waitlist">優先案内を受け取る</button>
-            <span class="btn secondary" aria-disabled="true">有料アクセスは検証フェーズ完了後に開始</span>
+            <button id="waitlistSubmitBtn" class="btn primary" type="button" aria-label="Join waitlist">提供開始を通知で受け取る</button>
           </div>
           <p id="waitlistStatus" class="fine" aria-live="polite"></p>
         </form>
-        <p class="fine">現在のCTAはウェイトリスト受付です。このフェーズでは有料決済リンクは意図的に無効化しています。</p>
+
+        <h3 style="margin:24px 0 12px 0;font-size:15px;">よくある質問</h3>
+        <div class="faq">
+          <details>
+            <summary>これは投資助言ですか？</summary>
+            <p>いいえ。日次の状態（BTC/CASH）を提供する情報フィードです。実行判断と責任は利用者本人にあります。</p>
+          </details>
+          <details>
+            <summary>更新頻度はどのくらいですか？</summary>
+            <p>固定時刻（21:12 JST / 12:12 UTC）で1日1回更新します。任意でDiscord通知も受け取れます。常時監視は不要です。</p>
+          </details>
+          <details>
+            <summary>いつでも停止・解除できますか？</summary>
+            <p>はい。いつでも解除できます。Phase 0期間は課金はありません。</p>
+          </details>
+        </div>
+
+        <p class="fine" style="margin-top:18px;">Genki BTC Signal は情報提供のみを目的とし、投資助言・勧誘・金融アドバイスを構成しません。過去の状態は将来成果を保証しません。</p>
       </div>
     </section>
   </main>
 
   <footer>
-    BTC現物保有者向け資産防衛シグナルサービス。実績値は参考情報であり将来成果を保証しません。
+    Genki BTC Signal は情報提供のみを目的とし、投資助言・勧誘・金融アドバイスを構成しません。
   </footer>
   <script>
     (function () {
