@@ -497,6 +497,21 @@
       return { accepted, status: res.status, body: bodyJson || bodyText };
     }
 
+    async function submitNoCorsForm(endpoint, payload) {
+      const params = new URLSearchParams();
+      Object.keys(payload).forEach(function (k) {
+        const v = payload[k];
+        if (v !== null && v !== undefined) params.append(k, String(v));
+      });
+      await fetch(endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: params.toString()
+      });
+      return { accepted: true, status: 0, body: 'no-cors' };
+    }
+
     submitBtn.addEventListener('click', async function () {
       const email = (emailEl.value || '').trim();
       const name = (nameEl && nameEl.value ? nameEl.value : '').trim();
@@ -521,8 +536,13 @@
 
       try {
         let out = await submitJson(WAITLIST_ENDPOINT, payload);
-        if (!out.accepted && (out.status === 405 || out.status === 415 || out.status === 400)) {
-          out = await submitFormUrlEncoded(WAITLIST_ENDPOINT, payload);
+        if (!out.accepted) {
+          try {
+            out = await submitFormUrlEncoded(WAITLIST_ENDPOINT, payload);
+            if (!out.accepted) throw new Error('submit_not_accepted_form');
+          } catch (_) {
+            out = await submitNoCorsForm(WAITLIST_ENDPOINT, payload);
+          }
         }
         if (!out.accepted) throw new Error('submit_failed_' + out.status);
         setStatus('登録しました。提供開始前に通知します。');
