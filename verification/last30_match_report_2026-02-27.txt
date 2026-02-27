@@ -1,0 +1,6 @@
+compare_dates=30
+matches=30
+mismatches=0
+result=PASS
+
+All compared dates match.
