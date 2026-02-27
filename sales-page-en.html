@@ -233,9 +233,9 @@
 
 <nav class="lang-nav">
   <div class="font-controls" aria-label="Text size">
-    <button type="button" class="font-btn" data-font-scale="0.95" aria-pressed="false">A-</button>
-    <button type="button" class="font-btn" data-font-scale="1" aria-pressed="true">A</button>
-    <button type="button" class="font-btn" data-font-scale="1.1" aria-pressed="false">A+</button>
+    <button type="button" class="font-btn" data-font-scale="1" aria-pressed="false">A</button>
+    <button type="button" class="font-btn" data-font-scale="1.1" aria-pressed="true">A+</button>
+    <button type="button" class="font-btn" data-font-scale="1.2" aria-pressed="false">A++</button>
   </div>
   <a href="./sales-page-en.html" class="active">EN</a>
   <a href="./sales-page-ja.html">JA</a>
@@ -441,10 +441,10 @@
 <script>
   (function () {
     const FONT_SCALE_KEY = 'genki_lp_font_scale';
-    const SCALE_DEFAULT = '1';
+    const SCALE_DEFAULT = '1.1';
 
     function applyFontScale(scale) {
-      const safe = ['0.95', '1', '1.1'].includes(String(scale)) ? String(scale) : SCALE_DEFAULT;
+      const safe = ['1', '1.1', '1.2'].includes(String(scale)) ? String(scale) : SCALE_DEFAULT;
       document.body.style.zoom = safe;
       try { localStorage.setItem(FONT_SCALE_KEY, safe); } catch (_) {}
       document.querySelectorAll('.font-btn[data-font-scale]').forEach(function (btn) {
