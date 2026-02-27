@@ -1,0 +1,63 @@
+{
+  "generated_at_utc": "2026-02-27T12:48:07Z",
+  "model": "Model D (Breaker > MIN_HOLD > COOLDOWN)",
+  "data_source": "log.json source_points (Binance backfill + append), daily close",
+  "execution_assumption": "signal fixed at day close; next day execution proxy by next close",
+  "period": {
+    "from": "2017-08-17",
+    "to": "2026-02-27",
+    "points": 3099
+  },
+  "kpi": {
+    "marketedge_rt_0.24": {
+      "one_way_cost": 0.0021999999999999997,
+      "strategy": {
+        "total_return": 25.622663,
+        "cagr": 0.472042,
+        "max_dd": -0.468505,
+        "sharpe": 1.203657,
+        "mar": 1.007549,
+        "exposure": 0.360555,
+        "switches": 82,
+        "switches_per_year": 9.6611,
+        "days": 3098
+      },
+      "buy_and_hold": {
+        "total_return": 14.643628,
+        "cagr": 0.382657,
+        "max_dd": -0.831871,
+        "sharpe": 0.820365,
+        "mar": 0.459996,
+        "exposure": 1.0,
+        "switches": 0,
+        "switches_per_year": 0.0,
+        "days": 3098
+      }
+    },
+    "marketedge_rt_1.00": {
+      "one_way_cost": 0.006,
+      "strategy": {
+        "total_return": 18.470094,
+        "cagr": 0.418766,
+        "max_dd": -0.492293,
+        "sharpe": 1.107192,
+        "mar": 0.850644,
+        "exposure": 0.360555,
+        "switches": 82,
+        "switches_per_year": 9.6611,
+        "days": 3098
+      },
+      "buy_and_hold": {
+        "total_return": 14.584052,
+        "cagr": 0.382035,
+        "max_dd": -0.831871,
+        "sharpe": 0.819701,
+        "mar": 0.459249,
+        "exposure": 1.0,
+        "switches": 0,
+        "switches_per_year": 0.0,
+        "days": 3098
+      }
+    }
+  }
+}
