@@ -1,731 +1,401 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Genki BTCシグナル | ウェイトリスト</title>
-  <!--
-    Switch-to-paid checklist (after 60-day live verification):
-    1) Replace waitlist CTA href (#waitlist) with checkout URL in BOTH CTA buttons.
-    2) Update access state text from "Waitlist Open" to "Now Open".
-    3) Keep price at US$329/mo (no discounts) and update よくある質問 "When paid access begins" answer.
-    4) Keep proof + live verification sections unchanged for trust continuity.
-  -->
-  <style>
-    :root {
-      --bg: #05090f;
-      --bg-2: #0a1630;
-      --panel: rgba(10, 24, 49, 0.92);
-      --panel-2: rgba(8, 18, 36, 0.9);
-      --line: rgba(122, 159, 225, 0.24);
-      --text: #f2f6ff;
-      --muted: #aebddb;
-      --soft: #7f91b4;
-      --gold: #d8b24a;
-      --gold-hi: #e4c76a;
-      --gold-edge: #b98d2f;
-      --green: #49c884;
-      --red: #e07d7d;
-      --radius: 18px;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      color: var(--text);
-      background:
-        radial-gradient(1200px 700px at 90% -10%, rgba(216,178,74,0.12), transparent 62%),
-        radial-gradient(1000px 600px at -10% 10%, rgba(73,200,132,0.10), transparent 58%),
-        linear-gradient(180deg, var(--bg), var(--bg-2));
-      font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
-      line-height: 1.5;
-    }
-    .wrap { width: min(1080px, 92vw); margin: 0 auto; }
-    .lang-switch {
-      position: sticky;
-      top: 10px;
-      z-index: 20;
-      display: flex;
-      justify-content: flex-end;
-      width: min(1080px, 92vw);
-      margin: 10px auto 0;
-      gap: 6px;
-    }
-    .lang-btn {
-      min-height: 28px;
-      padding: 0 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(8,18,36,.62);
-      color: var(--muted);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-    .lang-btn.active {
-      color: #0b1020;
-      background: linear-gradient(180deg, var(--gold-hi), var(--gold));
-      border-color: var(--gold-edge);
-    }
-    .hero { padding: 56px 0 34px; }
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 14px;
-    }
-    h1 {
-      margin: 0;
-      font-size: clamp(34px, 6vw, 58px);
-      line-height: 1.06;
-      letter-spacing: -0.02em;
-      max-width: 900px;
-    }
-    .lead {
-      margin: 14px 0 0;
-      color: var(--muted);
-      font-size: clamp(16px, 2.2vw, 22px);
-      max-width: 840px;
-    }
-    .phase-note {
-      margin-top: 10px;
-      color: var(--soft);
-      font-size: 13px;
-      letter-spacing: .02em;
-    }
-    .hero-grid {
-      margin-top: 22px;
-      display: grid;
-      gap: 14px;
-      grid-template-columns: 1fr 1fr;
-    }
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 18px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-    }
-    .mini-title {
-      margin: 0 0 8px;
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .signal-preview {
-      display: grid;
-      gap: 8px;
-      margin-top: 8px;
-      font-size: 14px;
-    }
-    .signal-preview div {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: rgba(7, 17, 34, 0.65);
-    }
-    .cta-row {
-      margin-top: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .btn {
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 46px;
-      border-radius: 999px;
-      padding: 0 18px;
-      font-size: 14px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-    .btn[aria-disabled="true"] {
-      pointer-events: none;
-      opacity: .48;
-      cursor: not-allowed;
-      filter: saturate(.7);
-    }
-    .btn.primary {
-      color: #0b1020;
-      background: linear-gradient(180deg, var(--gold-hi), var(--gold));
-      border: 1px solid var(--gold-edge);
-      box-shadow: 0 8px 20px rgba(216, 178, 74, 0.24);
-    }
-    .btn.secondary {
-      color: var(--text);
-      border: 1px solid var(--line);
-      background: rgba(8, 18, 36, 0.5);
-    }
-    section { padding: 14px 0; }
-    h2 {
-      margin: 0 0 10px;
-      font-size: clamp(24px, 4vw, 34px);
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-    }
-    p { margin: 0; }
-    .sub {
-      color: var(--muted);
-      margin-bottom: 14px;
-      font-size: 15px;
-    }
-    .unlock-grid {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .unlock-item {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-    .unlock-item strong {
-      display: block;
-      color: var(--text);
-      margin-bottom: 4px;
-      font-size: 14px;
-    }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 640px; }
-    th, td {
-      border-bottom: 1px solid rgba(122,159,225,.18);
-      padding: 10px 8px;
-      text-align: left;
-      font-size: 14px;
-    }
-    th { color: var(--muted); font-weight: 700; }
-    .compare-cards {
-      display: none;
-      gap: 10px;
-      margin-top: 2px;
-    }
-    .compare-card {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-    }
-    .compare-card .item {
-      margin: 0 0 8px;
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: .01em;
-    }
-    .compare-card .row {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .compare-card .row strong {
-      color: var(--text);
-      font-weight: 700;
-      margin-right: 6px;
-    }
-    .good { color: var(--green); }
-    .warn { color: var(--red); }
-    .steps {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    .step {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-    }
-    .step .n {
-      width: 24px;
-      height: 24px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-    .step h3 { margin: 0 0 6px; font-size: 16px; }
-    .step p { color: var(--muted); font-size: 14px; }
-    .proof-kpis {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      margin-top: 10px;
-    }
-    .proof-status {
-      margin-top: 10px;
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-    }
-    .proof-status .title {
-      margin: 0 0 8px;
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .proof-status-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px 12px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-    .proof-status-grid strong {
-      color: var(--text);
-      font-weight: 700;
-    }
-    .proof-kpis .kpi {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-    }
-    .proof-kpis .v { font-size: 21px; font-weight: 900; line-height: 1; }
-    .proof-kpis .k { margin-top: 5px; color: var(--muted); font-size: 12px; }
-    .price-box {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: 1fr 1fr;
-      align-items: start;
-    }
-    .price {
-      font-size: clamp(34px, 7vw, 48px);
-      font-weight: 900;
-      line-height: 1;
-      letter-spacing: -0.03em;
-    }
-    .list {
-      margin: 0;
-      padding-left: 18px;
-      color: var(--muted);
-      font-size: 14px;
-      display: grid;
-      gap: 5px;
-    }
-    .faq {
-      display: grid;
-      gap: 10px;
-    }
-    details {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 10px 12px;
-    }
-    summary {
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      list-style: none;
-    }
-    details p {
-      margin-top: 8px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-    .waitlist-card {
-      background: linear-gradient(130deg, rgba(216,178,74,.15), rgba(8,18,36,.86));
-      border: 1px solid rgba(216,178,74,.3);
-      border-radius: var(--radius);
-      padding: 18px;
-    }
-    .waitlist-form {
-      margin-top: 12px;
-      display: grid;
-      gap: 10px;
-      grid-template-columns: 1fr 1fr;
-    }
-    .waitlist-form label {
-      display: grid;
-      gap: 5px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .waitlist-form input {
-      width: 100%;
-      min-height: 42px;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      background: rgba(8,18,36,.66);
-      color: var(--text);
-      padding: 0 12px;
-      font-size: 14px;
-    }
-    .waitlist-form .full { grid-column: 1 / -1; }
-    .fine {
-      margin-top: 10px;
-      color: var(--soft);
-      font-size: 12px;
-    }
-    footer {
-      padding: 10px 0 44px;
-      color: var(--soft);
-      font-size: 12px;
-      text-align: center;
-    }
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0,0,0,0);
-      white-space: nowrap;
-      border: 0;
-    }
-    @media (max-width: 900px) {
-      .hero-grid, .price-box { grid-template-columns: 1fr; }
-      .proof-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .steps { grid-template-columns: 1fr; }
-      .unlock-grid { grid-template-columns: 1fr; }
-      .waitlist-form { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 760px) {
-      .table-wrap { display: none; }
-      .compare-cards { display: grid; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genki BTC Signal | ウェイトリスト</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #080d1a;
+    --surface: #0e1628;
+    --border:  #192040;
+    --gold:    #f5c542;
+    --gold2:   #ffd866;
+    --text:    #dde3f0;
+    --muted:   #8a93b0;
+    --dim:     #4a5270;
+    --green:   #3ddc84;
+    --red:     #ff6b6b;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+                 "Noto Sans JP", "Segoe UI", sans-serif;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── layout ── */
+  .wrap { max-width: 660px; margin: 0 auto; padding: 0 22px; }
+
+  section { padding: 52px 0; border-top: 1px solid var(--border); }
+
+  h2 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 18px; }
+  p  { font-size: 15px; color: var(--muted); margin-bottom: 14px; }
+  a  { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── lang nav ── */
+  .lang-nav {
+    display: flex; gap: 16px; justify-content: flex-end;
+    padding: 14px 22px 0;
+    font-size: 13px; color: var(--dim);
+  }
+  .lang-nav a { color: var(--dim); }
+  .lang-nav a.active { color: var(--gold); font-weight: 700; }
+
+  /* ── hero ── */
+  .hero { padding: 72px 0 52px; border-top: none; text-align: center; }
+
+  .hero-label {
+    display: inline-block;
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 22px;
+  }
+
+  .hero h1 {
+    font-size: clamp(26px, 5.5vw, 40px);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.45;
+    margin-bottom: 6px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 500px;
+    margin: 18px auto 0;
+    line-height: 1.9;
+  }
+
+  .hero-cta {
+    margin-top: 36px;
+  }
+
+  /* ── pain ── */
+  .pain-card {
+    background: var(--surface);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    color: #c5cce0;
+  }
+
+  /* ── solution cards ── */
+  .sol-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .sol-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 20px;
+  }
+
+  .sol-num {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    background: var(--gold);
+    color: var(--bg);
+    font-size: 13px; font-weight: 800;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+
+  .sol-card h3 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .sol-card p  { font-size: 13px; margin-bottom: 0; }
+
+  /* ── proof box ── */
+  .proof-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 24px;
+  }
+
+  .proof-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .proof-row:last-child { border-bottom: none; }
+  .proof-label { color: var(--muted); }
+  .proof-val   { color: #fff; font-weight: 600; }
+  .proof-val.ok  { color: var(--green); }
+  .proof-val.link a { color: var(--gold); }
+
+  /* ── CTA section ── */
+  .cta-sec { text-align: center; }
+
+  .cta-sec h2 { margin-bottom: 10px; }
+  .cta-sec > p { max-width: 460px; margin: 0 auto 28px; }
+
+  .form-box { max-width: 400px; margin: 0 auto; }
+
+  .form-box input[type="email"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #fff;
+    margin-bottom: 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-box input[type="email"]:focus { border-color: var(--gold); }
+  .form-box input::placeholder { color: var(--dim); }
+
+  .btn-primary {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    font-size: 16px; font-weight: 800;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover  { background: var(--gold2); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .reassure {
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 12px;
+    line-height: 1.7;
+  }
+
+  /* ── hero CTA inline ── */
+  .hero-cta .btn-outline {
+    display: inline-block;
+    padding: 12px 28px;
+    font-size: 15px; font-weight: 700;
+    border: 1.5px solid var(--gold);
+    border-radius: 8px;
+    color: var(--gold);
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.2s, color 0.2s;
+    text-decoration: none;
+  }
+  .hero-cta .btn-outline:hover {
+    background: var(--gold);
+    color: var(--bg);
+  }
+
+  /* ── FAQ ── */
+  .faq-item { padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .faq-a { font-size: 14px; color: var(--muted); margin-bottom: 0; }
+
+  /* ── footer ── */
+  footer {
+    padding: 36px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  footer p { font-size: 12px; color: var(--dim); margin-bottom: 6px; }
+  footer a  { color: var(--dim); }
+</style>
 </head>
 <body>
-  <nav class="lang-switch" aria-label="Language switch">
-    <a class="lang-btn" href="./sales-page-en.html">EN</a>
-    <a class="lang-btn active" href="./sales-page-ja.html">JA</a>
-  </nav>
-  <p class="fine" style="max-width:980px;margin:6px auto 0;padding:0 16px;"><a href="./index.html">← 公開ダッシュボードに戻る</a></p>
-  <header class="hero">
-    <div class="wrap">
-      <span class="eyebrow">GENKI BTC SIGNAL — PHASE 0</span>
-      <h1>BTCを持っている。<br>でも毎日、持ちすぎか足りないかで迷う。</h1>
-      <p class="lead">その迷いを、1日1回の状態更新に変える。予測ではなく、ルールに基づく通知で判断を固定します。</p>
-      <p class="phase-note">更新は毎日21:12 JST（12:12 UTC）固定。チャート常時監視は不要です。</p>
+
+<!-- lang nav -->
+<nav class="lang-nav">
+  <a href="sales-page-en.html">EN</a>
+  <a href="sales-page-ja.html" class="active">JA</a>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<div class="wrap">
+  <section class="hero">
+    <span class="hero-label">Genki BTC Signal</span>
+    <h1>BTCを持っている。<br>でも毎日、<em>このままでいいのか</em>で迷う。</h1>
+    <p class="hero-sub">
+      その迷いを、1日1回の状態通知に変えます。<br>
+      予測ではなくルール。チャート常時監視は不要。
+    </p>
+    <div class="hero-cta">
+      <a href="#waitlist" class="btn-outline">提供開始の通知を受け取る（無料）</a>
     </div>
-  </header>
+  </section>
+</div>
 
-  <main>
-    <section>
-      <div class="wrap card">
-        <h2>こんな朝を繰り返していませんか</h2>
-        <p>朝起きてBTCを確認する。下がっている。「少し減らすべきか」と思うが、前回減らした後に反発して後悔した。結局何もしない。でも、その判断が正しかったかは分からない。</p>
-        <p>SNSを開けば、誰かは「まだ上がる」と言い、別の誰かは「天井だ」と言う。どちらも自信満々で、自分だけ判断基準がないように感じる。</p>
-        <p>チャート分析を学ぼうとしても、仕事や生活で続かない。知識以前に、日々の判断を固定する枠組みがない。</p>
-        <p class="sub"><strong>問題は知識不足ではなく、判断の枠組み不足です。</strong></p>
+<!-- ═══ PAIN ═══ -->
+<div class="wrap">
+  <section>
+    <h2>こんな朝を繰り返していませんか</h2>
+
+    <div class="pain-card">
+      起きてすぐBTCを確認する。下がっている。「少し売るべきか」と思うが、前回売った後に反発して後悔した。結局何もしない。でもその判断が正しかったか分からない。
+    </div>
+
+    <div class="pain-card">
+      SNSを開くと「まだ上がる」と「もう天井だ」が同時に流れてくる。どちらも自信満々で、自分だけ判断基準がないように感じる。
+    </div>
+
+    <div class="pain-card">
+      チャートの勉強を始めようとした。でも仕事で続かない。そもそも勉強したところで、毎日迷うことは変わらなかった。
+    </div>
+
+    <p style="margin-top:20px; color:#c0c8e0;">
+      問題は知識不足ではありません。<strong style="color:#fff;">判断の枠組みがないこと</strong>です。
+    </p>
+  </section>
+</div>
+
+<!-- ═══ SOLUTION ═══ -->
+<div class="wrap">
+  <section>
+    <h2>Genki BTC Signal がやること</h2>
+    <p>毎日21:12 JSTにルールが動き、状態（BTC / CASH）を判定して通知します。あなたがやることは確認して、必要なら動くだけです。</p>
+
+    <div class="sol-grid">
+      <div class="sol-card">
+        <div class="sol-num">1</div>
+        <h3>メールが届く</h3>
+        <p>固定時刻に1日1回だけ。件名を見れば今日の状態が分かります。</p>
       </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>Genki BTC Signalがやること</h2>
-        <p>毎日1回、状態を判定して通知します。あなたがやることは、通知を見て必要なら動く。それだけです。</p>
-        <ul class="list" style="padding-left:16px">
-          <li><strong>メールが届く</strong> — 固定時刻に届くので、確認は1日1回で十分</li>
-          <li><strong>判断する</strong> — 状態は明確。曖昧な中間判断を減らす</li>
-          <li><strong>日常に戻る</strong> — チャートを見続ける必要がない</li>
-        </ul>
+      <div class="sol-card">
+        <div class="sol-num">2</div>
+        <h3>判断する</h3>
+        <p>BTC か CASH の2択のみ。曖昧な中間判断はありません。</p>
       </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>後出しではない証拠</h2>
-        <p>将来の数値予測や実績倍率は掲載しません。判断は公開ログとコミット履歴で、結果が出る前に検証できます。</p>
-        <p>
-          <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" target="_blank" rel="noopener">公開ログ（log.json）を見る</a>
-          &nbsp;•&nbsp;
-          <a href="https://github.com/Naito-Dev/genki-btc-archive-public/commits/main" target="_blank" rel="noopener">コミット履歴を見る</a>
-        </p>
-        <p class="fine">検証期間中の記録であり、将来の結果を保証するものではありません。</p>
-        <p class="fine">監査証跡（30/30一致）：<a href="https://btcsignal.org/verification/last30_match_report_2026-02-27.txt" target="_blank" rel="noopener">btcsignal.org/verification/last30_match_report_2026-02-27.txt</a></p>
+      <div class="sol-card">
+        <div class="sol-num">3</div>
+        <h3>日常に戻る</h3>
+        <p>次の通知まで、BTCのことを考えなくていい。それが目的です。</p>
       </div>
-    </section>
+    </div>
+  </section>
+</div>
 
-    <section>
-      <div class="wrap waitlist-card" id="waitlist">
-        <h2>ウェイトリスト参加</h2>
-        <p class="sub">有料提供の開始時に通知を受け取りたい方のみ登録してください。開始日は未定です。</p>
-        <p class="fine">スパム配信しません。無料登録です。目的外利用はしません。</p>
-        <form class="waitlist-form" action="#" method="post" onsubmit="return false;" style="margin:12px 0 18px 0;">
-          <label>メールアドレス（必須）
-            <input id="waitlistEmail" type="email" required placeholder="you@example.com" />
-          </label>
-          <label>ニックネーム（任意）
-            <input id="waitlistName" type="text" placeholder="ニックネーム（例: Taro）" />
-          </label>
-          <div class="full cta-row" style="margin-top:2px">
-            <button id="waitlistSubmitBtn" class="btn primary" type="button" aria-label="Join waitlist">提供開始を通知で受け取る</button>
-          </div>
-          <p id="waitlistStatus" class="fine" aria-live="polite"></p>
-        </form>
+<!-- ═══ PROOF ═══ -->
+<div class="wrap">
+  <section>
+    <h2>後出しではない証拠</h2>
+    <p>パフォーマンス数値は一切掲載しません。代わりに、すべての判定ログをリアルタイムで公開しています。結果が出る前に記録されているため、後から書き換えることは構造的に不可能です。</p>
 
-        <h3 style="margin:24px 0 12px 0;font-size:15px;">よくある質問</h3>
-        <div class="faq">
-          <details>
-            <summary>これは投資助言ですか？</summary>
-            <p>いいえ。ルールに基づく状態通知です。売買の実行判断と責任は利用者本人にあります。</p>
-          </details>
-          <details>
-            <summary>何が届きますか？</summary>
-            <p>現在はウェイトリスト段階のため、提供開始時の通知のみです。提供開始後は、毎日1回の状態通知が届きます。</p>
-          </details>
-          <details>
-            <summary>チャートを読む必要がありますか？</summary>
-            <p>ありません。毎日の更新通知を確認する運用を前提にしています。</p>
-          </details>
-          <details>
-            <summary>なぜ検証期間中でも公開しているのですか？</summary>
-            <p>後から「こうだった」と言うのではなく、リアルタイムで記録を残すためです。公開記録そのものが信用の根拠です。</p>
-          </details>
-          <details>
-            <summary>暴落時の挙動はどうなりますか？</summary>
-            <p>Breaker発火時は14日ルールより優先して即CASHに退避します（暴落回避最優先）。そのため、V字反発は一部取り逃がすことがあります（仕様）。</p>
-          </details>
-          <details>
-            <summary>いつでも解除できますか？</summary>
-            <p>はい。いつでも解除できます。</p>
-          </details>
-        </div>
+    <div class="proof-box">
+      <div class="proof-row">
+        <span class="proof-label">フェーズ</span>
+        <span class="proof-val">Phase 0（トラックレコード構築中）</span>
       </div>
-    </section>
-  </main>
+      <div class="proof-row">
+        <span class="proof-label">監査レポート（30/30）</span>
+        <span class="proof-val ok">PASS ✓</span>
+      </div>
+      <div class="proof-row">
+        <span class="proof-label">公開ログ</span>
+        <span class="proof-val link">
+          <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" target="_blank" rel="noopener">log.json を見る →</a>
+        </span>
+      </div>
+      <div class="proof-row">
+        <span class="proof-label">コミット履歴</span>
+        <span class="proof-val link">
+          <a href="https://github.com/Naito-Dev/genki-btc-archive-public/commits/main" target="_blank" rel="noopener">GitHub で確認 →</a>
+        </span>
+      </div>
+    </div>
 
-  <footer>
-    Genki BTC Signal は情報提供のみを目的とし、投資助言・勧誘・金融アドバイスを構成しません。
-  </footer>
-  <script>
-    (function () {
-      const form = document.querySelector('.waitlist-form');
-      const emailEl = document.getElementById('waitlistEmail');
-      const nameEl = document.getElementById('waitlistName');
-      const submitBtn = document.getElementById('waitlistSubmitBtn');
-      const statusEl = document.getElementById('waitlistStatus');
-      const WAITLIST_ENDPOINT = (
-        window.WAITLIST_ENDPOINT ||
-        'https://script.google.com/macros/s/AKfycbxzFt641ISSZJWtPXMSEVgQiDsITZ4J3jMrXoPw7Up_8QKtP1orayXnBsSMJETAnVC7/exec'
-      ).trim();
-      if (!form || !emailEl || !submitBtn || !statusEl) return;
+    <p style="margin-top:16px; font-size:13px; color:var(--dim);">
+      検証期間中の記録です。将来の結果を保証するものではありません。
+    </p>
+  </section>
+</div>
 
-      function isValidEmail(v) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
-      }
+<!-- ═══ WAITLIST CTA ═══ -->
+<div class="wrap">
+  <section class="cta-sec" id="waitlist">
+    <h2>提供開始のとき、最初に知る</h2>
+    <p>
+      有料提供を開始する条件は「十分な検証期間を終えること」のみです。日付も価格も未定。登録しておけば、条件が揃ったときに最初に通知が届きます。
+    </p>
 
-      function setStatus(msg, type) {
-        statusEl.textContent = msg || '';
-        statusEl.style.color =
-          type === 'success' ? '#2bb673' :
-          type === 'error' ? '#d95b5b' :
-          '';
-      }
+    <div class="form-box">
+      <!-- TODO: replace action with your actual form endpoint (Mailchimp / ConvertKit / etc.) -->
+      <form action="#" method="post">
+        <input type="email" name="email" placeholder="メールアドレス" required>
+        <button type="submit" class="btn-primary">提供開始を通知で受け取る（無料）</button>
+      </form>
+      <p class="reassure">
+        スパム配信はしません。&ensp;解除はいつでも1クリックで。&ensp;目的外利用はしません。
+      </p>
+    </div>
+  </section>
+</div>
 
-      async function submitJson(endpoint, payload) {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          // text/plain keeps this as a simple request (no preflight),
-          // while Apps Script can still parse postData.contents as JSON.
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        const bodyText = await res.text();
-        let bodyJson = null;
-        try { bodyJson = JSON.parse(bodyText); } catch (_) {}
-        const appOk = !!(
-          (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
-          /\"ok\"\\s*:\\s*true/i.test(bodyText) ||
-          /\bok\b/i.test(bodyText)
-        );
-        const accepted = res.ok && (appOk || !bodyJson);
-        return { accepted, status: res.status, body: bodyJson || bodyText };
-      }
+<!-- ═══ FAQ ═══ -->
+<div class="wrap">
+  <section>
+    <h2>よくある質問</h2>
 
-      async function submitFormUrlEncoded(endpoint, payload) {
-        const params = new URLSearchParams();
-        Object.keys(payload).forEach(function (k) {
-          const v = payload[k];
-          if (v !== null && v !== undefined) params.append(k, String(v));
-        });
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-          body: params.toString()
-        });
-        const bodyText = await res.text();
-        let bodyJson = null;
-        try { bodyJson = JSON.parse(bodyText); } catch (_) {}
-        const appOk = !!(
-          (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
-          /\"ok\"\\s*:\\s*true/i.test(bodyText) ||
-          /\bok\b/i.test(bodyText)
-        );
-        const accepted = res.ok && (appOk || !bodyJson);
-        return { accepted, status: res.status, body: bodyJson || bodyText };
-      }
+    <div class="faq-item">
+      <p class="faq-q">これは投資助言ですか？</p>
+      <p class="faq-a">いいえ。ルールに基づく状態通知です。売買の実行判断と結果の責任は、利用者ご本人にあります。</p>
+    </div>
 
-      function formatUtc(ts) {
-        if (!ts) return 'UNAVAILABLE';
-        const d = new Date(ts);
-        if (!Number.isFinite(d.getTime())) return String(ts);
-        const y = d.getUTCFullYear();
-        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        const hh = String(d.getUTCHours()).padStart(2, '0');
-        const mm = String(d.getUTCMinutes()).padStart(2, '0');
-        return `${y}-${m}-${day} ${hh}:${mm}`;
-      }
+    <div class="faq-item">
+      <p class="faq-q">登録後、何が届きますか？</p>
+      <p class="faq-a">現在はウェイトリスト段階のため、有料提供開始時の通知のみです。提供開始後は毎日21:12 JSTに状態通知が届きます。</p>
+    </div>
 
-      async function hydrateProofStatus() {
-        const dayEl = document.getElementById('proofDay');
-        const integrityEl = document.getElementById('proofIntegrity');
-        const recordsEl = document.getElementById('proofRecords');
-        const timeEl = document.getElementById('proofTimeUtc');
-        const commitLinkTextEl = document.getElementById('proofCommitShaLink');
-        const commitPlainEl = document.getElementById('proofCommitShaPlain');
-        const commitLinkEl = document.getElementById('proofCommitLink');
-        if (!dayEl || !integrityEl || !recordsEl || !timeEl || !commitLinkEl || !commitLinkTextEl || !commitPlainEl) return;
+    <div class="faq-item">
+      <p class="faq-q">チャートを読む必要がありますか？</p>
+      <p class="faq-a">ありません。通知を確認するだけで判断できる設計です。常時監視は不要です。</p>
+    </div>
 
-        try {
-          const res = await fetch(`log.json?ts=${Date.now()}`, { cache: 'no-store' });
-          if (!res.ok) throw new Error(`log_fetch_${res.status}`);
-          const log = await res.json();
-          const entries = Array.isArray(log?.entries) ? log.entries : [];
-          const latest = (log && typeof log === 'object' ? log.latest : null) || entries[entries.length - 1] || {};
+    <div class="faq-item">
+      <p class="faq-q">なぜ今の段階で公開しているのですか？</p>
+      <p class="faq-a">「後から良かった」と言うのではなく、リアルタイムで記録を残すためです。公開記録そのものが、信頼の根拠です。</p>
+    </div>
 
-          const dayCount = entries.length;
-          const integrity = latest?.chain_integrity || 'UNAVAILABLE';
-          const proofTime = latest?.updated_at_utc || latest?.timestamp_utc || log?.last_updated_utc || latest?.date || '';
+    <div class="faq-item">
+      <p class="faq-q">解除できますか？</p>
+      <p class="faq-a">はい。いつでもメール内のリンクから1クリックで解除できます。</p>
+    </div>
+  </section>
+</div>
 
-          dayEl.textContent = `Day ${dayCount || 0}`;
-          integrityEl.textContent = String(integrity);
-          recordsEl.textContent = String(dayCount || 0);
-          timeEl.textContent = formatUtc(proofTime);
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="wrap">
+    <p>
+      <a href="index.html">← 公開ダッシュボードに戻る</a>
+    </p>
+    <p style="margin-top:10px;">
+      Genki BTC Signal は情報提供サービスです。投資助言・勧誘を目的とするものではありません。<br>
+      過去の記録は将来の結果を保証するものではありません。実行判断は利用者ご自身の責任において行ってください。
+    </p>
+  </div>
+</footer>
 
-          const fullSha = String(log?.commit_sha || latest?.commit_sha || '').trim();
-          const commitSha = fullSha ? fullSha.slice(0, 7) : 'UNAVAILABLE';
-          const commitUrl = String(log?.commit_url || latest?.commit_url || '').trim() ||
-            (fullSha ? `https://github.com/Naito-Dev/genki-btc-archive-public/commit/${fullSha}` : '');
-          if (commitUrl && commitSha !== 'UNAVAILABLE') {
-            commitLinkTextEl.textContent = commitSha;
-            commitLinkEl.href = commitUrl;
-            commitLinkEl.hidden = false;
-            commitPlainEl.hidden = true;
-          } else {
-            commitPlainEl.textContent = 'UNAVAILABLE';
-            commitPlainEl.hidden = false;
-            commitLinkEl.hidden = true;
-            commitLinkEl.removeAttribute('href');
-          }
-
-          console.debug('[PROOF_STATUS]', {
-            day: dayCount || 0,
-            chain_integrity: integrity,
-            last_proof_time_utc: proofTime,
-            commit_sha: commitSha
-          });
-        } catch (err) {
-          dayEl.textContent = 'UNAVAILABLE';
-          integrityEl.textContent = 'UNAVAILABLE';
-          recordsEl.textContent = 'UNAVAILABLE';
-          timeEl.textContent = 'UNAVAILABLE';
-          commitPlainEl.textContent = 'UNAVAILABLE';
-          commitPlainEl.hidden = false;
-          commitLinkEl.hidden = true;
-          commitLinkEl.removeAttribute('href');
-          console.debug('[PROOF_STATUS]', { error: String(err) });
-        }
-      }
-
-      hydrateProofStatus();
-
-      submitBtn.addEventListener('click', async function () {
-        const defaultLabel = 'βコホートのウェイトリストに参加';
-        const submittingLabel = '送信中...';
-        const email = String(emailEl.value || '').trim();
-        const name = String((nameEl && nameEl.value) || '').trim();
-        if (!isValidEmail(email)) {
-          setStatus('有効なメールアドレスを入力してください。', 'error');
-          return;
-        }
-
-        submitBtn.disabled = true;
-        setStatus('送信中...');
-        submitBtn.textContent = submittingLabel;
-
-        const payload = {
-          timestamp_utc: new Date().toISOString(),
-          email: email,
-          name: name || '',
-          use_case: 'Waitlist',
-          page_lang: 'ja',
-          source: 'sales-page-ja'
-        };
-
-        try {
-          if (!WAITLIST_ENDPOINT) {
-            throw new Error('endpoint_missing');
-          }
-
-          let result;
-          let mode = 'json';
-          try {
-            result = await submitJson(WAITLIST_ENDPOINT, payload);
-            if (!result.accepted) throw new Error('submit_not_accepted_json');
-          } catch (primaryErr) {
-            mode = 'form-urlencoded';
-            result = await submitFormUrlEncoded(WAITLIST_ENDPOINT, payload);
-            if (!result.accepted) throw new Error('submit_not_accepted_form');
-          }
-
-          console.debug('[WAITLIST_SUBMIT]', {
-            endpoint: WAITLIST_ENDPOINT,
-            mode,
-            status: result.status,
-            ok: result.accepted,
-            payload,
-            body: result.body
-          });
-
-          setStatus('登録ありがとうございます。先行案内の対象として受け付けました。', 'success');
-        } catch (err) {
-          console.error('[WAITLIST_SUBMIT]', { ok: false, error: String(err), payload });
-          try {
-            const key = 'genki_waitlist_leads_failed';
-            const failed = JSON.parse(localStorage.getItem(key) || '[]');
-            failed.push(payload);
-            localStorage.setItem(key, JSON.stringify(failed));
-          } catch (__){}
-          setStatus('送信に失敗しました。再度お試しください。', 'error');
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.textContent = defaultLabel;
-        }
-      });
-    })();
-  </script>
 </body>
 </html>
