@@ -28,9 +28,11 @@ atr20_ratio = close > 0 ? atr20 / close : 0.0
 
 ret3 = (close / close[3]) - 1.0
 
-// Previous completed week only, no repaint
-wk_close = request.security(syminfo.tickerid, "W", close[1], lookahead=barmerge.lookahead_off)
-wk_sma10 = request.security(syminfo.tickerid, "W", ta.sma(close, 10)[1], lookahead=barmerge.lookahead_off)
+// Previous completed week only, no repaint.
+// With lookahead_off on a daily chart, weekly "close" already means
+// the last completed weekly bar (no extra [1] shift).
+wk_close = request.security(syminfo.tickerid, "W", close, lookahead=barmerge.lookahead_off)
+wk_sma10 = request.security(syminfo.tickerid, "W", ta.sma(close, 10), lookahead=barmerge.lookahead_off)
 weekly_bull = na(wk_sma10) ? true : (wk_close > wk_sma10)
 
 v1_hold = close > sma50_today and close[1] > sma50_yday and sma50_today >= sma50_yday
