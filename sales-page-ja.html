@@ -422,66 +422,32 @@
   </nav>
   <header class="hero">
     <div class="wrap">
-      <span class="eyebrow">BTC資産防衛シグナル</span>
-      <h1>Genki BTC Signal</h1>
-      <p class="lead">毎日1回、状態は BTC / CASH のみ。チャート常時監視なしで判断を固定します。</p>
-      <p class="phase-note">毎日21:12 JSTに更新 • ウェイトリスト受付中 • 検証条件達成後に有料提供開始</p>
-
-      <div class="hero-grid">
-        <article class="card">
-          <p class="mini-title">受け取れるもの</p>
-          <p class="sub" style="margin:0">1日1回の情報更新。必要な日のみ確認すれば十分です。</p>
-          <div class="signal-preview" aria-label="無料版と有料版の比較 preview">
-            <div><strong>公開版:</strong> BTC / CASH の日次ステータス</div>
-            <div><strong>配信:</strong> 任意のDiscord通知 + 公開ログ証跡</div>
-          </div>
-          <div class="cta-row">
-            <a class="btn primary" href="#waitlist">ウェイトリストに参加</a>
-            <a class="btn secondary" href="https://naito-dev.github.io/genki-btc-archive-public/">← 公開ダッシュボードに戻る</a>
-          </div>
-        </article>
-        <article class="card">
-          <p class="mini-title">このような方に向いています</p>
-          <ul class="list" style="padding-left:16px">
-            <li>BTCを長期保有しているが、毎日のポジション量に迷う方。</li>
-            <li>一日中チャートを見られない（見るべきでもない）忙しい方。</li>
-            <li>インフルエンサー予想ではなく、ルールと証跡を重視する方。</li>
-            <li>判断の負荷を下げたいが、責任は自分で持ちたい方。</li>
-          </ul>
-        </article>
-      </div>
+      <span class="eyebrow">GENKI BTC SIGNAL — PHASE 0</span>
+      <h1>BTCを持っているのに、毎日「このままでいいのか」と迷うのをやめたい。</h1>
+      <p class="lead">Genki BTC Signalは、その迷いを毎日1回の状態更新（BTC / CASH）に置き換えるための情報提供サービスです。</p>
+      <p class="phase-note">更新は毎日21:12 JST（12:12 UTC）固定。現在はウェイトリスト受付中です。</p>
+      <p class="fine"><a href="#waitlist">提供開始を通知で受け取る</a></p>
     </div>
   </header>
 
   <main>
     <section>
       <div class="wrap card">
-        <h2>Genki BTC Signal</h2>
-        <p class="sub">毎日1回、状態は <strong>BTC</strong> か <strong>CASH</strong> のみ。<br>チャート常時監視は不要です。</p>
-        <p class="fine">更新は毎日 <strong>21:12 JST</strong>（12:12 UTC）に固定。現在はウェイトリスト受付中。十分な検証履歴を満たした後に有料提供を開始します。</p>
-        <div class="cta-row" style="margin-top:14px;">
-          <a class="btn primary" href="#waitlist">提供開始を通知で受け取る</a>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>受け取れるもの</h2>
-        <p>これはBTC向けの最小構成な情報フィードです。</p>
+        <h2>登録する理由</h2>
         <ul class="list" style="padding-left:16px">
-          <li><strong>日次ステータス</strong> — 1日1回、BTC か CASH を更新</li>
-          <li><strong>任意のDiscord通知</strong> — 自動で配信</li>
-          <li><strong>公開ログ記録</strong> — 毎日の状態を検証可能な形で保存</li>
+          <li>毎日の判断を「BTC / CASH」の2択に絞れる</li>
+          <li>確認は1日1回だけで済む</li>
+          <li>公開ログで更新履歴を自分で検証できる</li>
+          <li>裁量判断の迷いを減らし、行動を固定できる</li>
+          <li>開始通知を受け取って、提供開始を見逃さない</li>
         </ul>
-        <p>実行判断は常にあなた自身が行います。提供は情報のみです。</p>
       </div>
     </section>
 
     <section>
       <div class="wrap card">
-        <h2>透明性と証跡</h2>
-        <p>将来リターン予測やシミュレーション値は掲載しません。<br>代わりに、日次記録そのものを公開し、検証可能な形で残します。</p>
+        <h2>公開記録で検証できる運用</h2>
+        <p>将来の数値予測や実績倍率は掲載しません。公開ログとコミット履歴で、毎日の状態更新そのものを確認できます。</p>
         <p>
           <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" target="_blank" rel="noopener">公開ログ（log.json）を見る</a>
           &nbsp;•&nbsp;
@@ -493,7 +459,8 @@
     <section>
       <div class="wrap waitlist-card" id="waitlist">
         <h2>ウェイトリスト参加</h2>
-        <p class="sub">決済はまだ発生しません。検証条件を満たして有料提供を開始する際に通知します。開始日は未定です。</p>
+        <p class="sub">有料提供の開始時に通知を受け取りたい方のみ登録してください。開始日は未定です。</p>
+        <p class="fine">スパム配信しません。無料登録です。目的外利用はしません。</p>
         <form class="waitlist-form" action="#" method="post" onsubmit="return false;" style="margin:12px 0 18px 0;">
           <label>メールアドレス（必須）
             <input id="waitlistEmail" type="email" required placeholder="you@example.com" />
@@ -511,19 +478,25 @@
         <div class="faq">
           <details>
             <summary>これは投資助言ですか？</summary>
-            <p>いいえ。日次の状態（BTC/CASH）を提供する情報フィードです。実行判断と責任は利用者本人にあります。</p>
+            <p>いいえ。情報提供のみを目的とした日次ステータス配信です。実行判断と責任は利用者本人にあります。</p>
           </details>
           <details>
             <summary>更新頻度はどのくらいですか？</summary>
-            <p>固定時刻（21:12 JST / 12:12 UTC）で1日1回更新します。任意でDiscord通知も受け取れます。常時監視は不要です。</p>
+            <p>毎日1回、固定時刻（21:12 JST / 12:12 UTC）で更新します。</p>
           </details>
           <details>
-            <summary>いつでも停止・解除できますか？</summary>
-            <p>はい。いつでも解除できます。Phase 0期間は課金はありません。</p>
+            <summary>登録すると何が届きますか？</summary>
+            <p>提供開始時の通知と、必要な案内のみを送ります。</p>
+          </details>
+          <details>
+            <summary>いつでも解除できますか？</summary>
+            <p>はい。いつでも解除できます。</p>
+          </details>
+          <details>
+            <summary>検証状況はどう確認できますか？</summary>
+            <p>公開ログ（log.json）とコミット履歴で、更新の記録を確認できます。</p>
           </details>
         </div>
-
-        <p class="fine" style="margin-top:18px;">Genki BTC Signal は情報提供のみを目的とし、投資助言・勧誘・金融アドバイスを構成しません。過去の状態は将来成果を保証しません。</p>
       </div>
     </section>
   </main>
