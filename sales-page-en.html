@@ -43,9 +43,28 @@
     display: flex; gap: 16px; justify-content: flex-end;
     padding: 14px 22px 0;
     font-size: 13px; color: var(--dim);
+    align-items: center;
+    flex-wrap: wrap;
   }
   .lang-nav a { color: var(--dim); }
   .lang-nav a.active { color: var(--gold); font-weight: 700; }
+  .font-controls { display: inline-flex; gap: 6px; margin-right: 10px; }
+  .font-btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    border-radius: 999px;
+    min-width: 34px;
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .font-btn[aria-pressed="true"] {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
 
   .hero { padding: 72px 0 52px; border-top: none; text-align: center; }
   .hero-label {
@@ -213,6 +232,11 @@
 <body>
 
 <nav class="lang-nav">
+  <div class="font-controls" aria-label="Text size">
+    <button type="button" class="font-btn" data-font-scale="0.95" aria-pressed="false">A-</button>
+    <button type="button" class="font-btn" data-font-scale="1" aria-pressed="true">A</button>
+    <button type="button" class="font-btn" data-font-scale="1.1" aria-pressed="false">A+</button>
+  </div>
   <a href="./sales-page-en.html" class="active">EN</a>
   <a href="./sales-page-ja.html">JA</a>
 </nav>
@@ -416,6 +440,30 @@
 
 <script>
   (function () {
+    const FONT_SCALE_KEY = 'genki_lp_font_scale';
+    const SCALE_DEFAULT = '1';
+
+    function applyFontScale(scale) {
+      const safe = ['0.95', '1', '1.1'].includes(String(scale)) ? String(scale) : SCALE_DEFAULT;
+      document.body.style.zoom = safe;
+      try { localStorage.setItem(FONT_SCALE_KEY, safe); } catch (_) {}
+      document.querySelectorAll('.font-btn[data-font-scale]').forEach(function (btn) {
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-font-scale') === safe ? 'true' : 'false');
+      });
+    }
+
+    (function initFontControls() {
+      const saved = (function () {
+        try { return localStorage.getItem(FONT_SCALE_KEY) || SCALE_DEFAULT; } catch (_) { return SCALE_DEFAULT; }
+      })();
+      applyFontScale(saved);
+      document.querySelectorAll('.font-btn[data-font-scale]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          applyFontScale(btn.getAttribute('data-font-scale') || SCALE_DEFAULT);
+        });
+      });
+    })();
+
     const emailEl = document.getElementById('waitlistEmail');
     const nameEl = document.getElementById('waitlistName');
     const submitBtn = document.getElementById('waitlistSubmitBtn');
