@@ -578,7 +578,7 @@
     // Display source map (single-source integrity rules):
     // - Status label: btcsignal_log.json.entries[-1].state -> BTC/CASH
     // - Reason text: btcsignal_log.json.entries[-1].reason
-    // - Signal Updated timestamp: log.json.latest.updated_at_utc
+    // - Signal Updated timestamp: log.json.latest.published_at_utc (fallback: updated_at_utc)
     // - LIVE TESTING Day N: TEST_START_DATE_JST + log.json.latest.date
     // - LIVE TESTING equity/P&L: data/live_portfolio_snapshot.json + data/live_test_baseline.json
     const TEST_START_DATE_JST = "2026-02-26";
@@ -1141,7 +1141,7 @@
       if (reasonEl) reasonEl.textContent = displayReason;
 
       const cycleDate = toDateOnly(latest?.date);
-      const signalUpdated = latest?.updated_at_utc || "unavailable";
+      const signalUpdated = latest?.published_at_utc || latest?.updated_at_utc || "unavailable";
       const basePrice = parseFiniteNumber(latest?.btc_price);
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
       document.getElementById("metaUpdated").textContent = `Signal Updated ${fmtUtc(signalUpdated)}`;
