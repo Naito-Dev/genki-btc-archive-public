@@ -248,8 +248,8 @@
 
 <!-- lang nav -->
 <nav class="lang-nav">
-  <a href="sales-page-en.html">EN</a>
-  <a href="sales-page-ja.html" class="active">JA</a>
+  <a href="./sales-page-en.html">EN</a>
+  <a href="./sales-page-ja.html" class="active">JA</a>
 </nav>
 
 <!-- ═══ HERO ═══ -->
@@ -359,7 +359,8 @@
       <p>
         この通知は、短期の値動きを予測するものではありません。<br>
         大きな下落局面で早めにCASHに移行し、安定したトレンド中はBTCを保有する。<br>
-        長期保有者が「撤退の判断」を毎日自分でしなくて済むように設計されています。
+        長期保有者が「撤退の判断」を毎日自分でしなくて済むように設計されています。<br>
+        この通知は「売買回数を増やす」ためのものではありません。公開記録ベース（2023〜2025年）では、年間の状態切り替えは7〜11回（年平均約8.7回）でした。※将来の回数を保証するものではありません。
       </p>
     </div>
   </section>
@@ -374,10 +375,11 @@
     </p>
 
     <div class="form-box">
-      <!-- TODO: replace action with your actual form endpoint (Mailchimp / ConvertKit / etc.) -->
-      <form action="#" method="post">
-        <input type="email" name="email" placeholder="メールアドレス" required>
-        <button type="submit" class="btn-primary">提供開始を通知で受け取る（無料）</button>
+      <form action="#" method="post" onsubmit="return false;">
+        <input id="waitlistEmail" type="email" name="email" placeholder="メールアドレス" required>
+        <input id="waitlistName" type="text" name="name" placeholder="ニックネーム（任意）">
+        <button id="waitlistSubmitBtn" type="button" class="btn-primary">提供開始を通知で受け取る（無料）</button>
+        <p id="waitlistStatus" class="reassure" aria-live="polite"></p>
       </form>
       <p class="reassure">
         スパム配信はしません。&ensp;解除はいつでも1クリックで。&ensp;目的外利用はしません。
@@ -430,6 +432,107 @@
     </p>
   </div>
 </footer>
+
+<script>
+  (function () {
+    const emailEl = document.getElementById('waitlistEmail');
+    const nameEl = document.getElementById('waitlistName');
+    const submitBtn = document.getElementById('waitlistSubmitBtn');
+    const statusEl = document.getElementById('waitlistStatus');
+    const WAITLIST_ENDPOINT = (
+      window.WAITLIST_ENDPOINT ||
+      'https://script.google.com/macros/s/AKfycbxzFt641ISSZJWtPXMSEVgQiDsITZ4J3jMrXoPw7Up_8QKtP1orayXnBsSMJETAnVC7/exec'
+    ).trim();
+    if (!emailEl || !submitBtn || !statusEl) return;
+
+    function isValidEmail(v) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
+    }
+
+    function setStatus(msg) {
+      statusEl.textContent = msg || '';
+    }
+
+    async function submitJson(endpoint, payload) {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const bodyText = await res.text();
+      let bodyJson = null;
+      try { bodyJson = JSON.parse(bodyText); } catch (_) {}
+      const appOk = !!(
+        (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
+        /\"ok\"\\s*:\\s*true/i.test(bodyText) ||
+        /\bok\b/i.test(bodyText)
+      );
+      const accepted = res.ok && (appOk || !bodyJson);
+      return { accepted, status: res.status, body: bodyJson || bodyText };
+    }
+
+    async function submitFormUrlEncoded(endpoint, payload) {
+      const params = new URLSearchParams();
+      Object.keys(payload).forEach(function (k) {
+        const v = payload[k];
+        if (v !== null && v !== undefined) params.append(k, String(v));
+      });
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: params.toString()
+      });
+      const bodyText = await res.text();
+      let bodyJson = null;
+      try { bodyJson = JSON.parse(bodyText); } catch (_) {}
+      const appOk = !!(
+        (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
+        /\"ok\"\\s*:\\s*true/i.test(bodyText) ||
+        /\bok\b/i.test(bodyText)
+      );
+      const accepted = res.ok && (appOk || !bodyJson);
+      return { accepted, status: res.status, body: bodyJson || bodyText };
+    }
+
+    submitBtn.addEventListener('click', async function () {
+      const email = (emailEl.value || '').trim();
+      const name = (nameEl && nameEl.value ? nameEl.value : '').trim();
+      if (!isValidEmail(email)) {
+        setStatus('メールアドレスの形式を確認してください。');
+        return;
+      }
+      if (!WAITLIST_ENDPOINT) {
+        setStatus('送信先が未設定です。');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      setStatus('送信中...');
+      const payload = {
+        email,
+        name,
+        locale: 'ja',
+        source: 'sales-page-ja',
+        ts_utc: new Date().toISOString()
+      };
+
+      try {
+        let out = await submitJson(WAITLIST_ENDPOINT, payload);
+        if (!out.accepted && (out.status === 405 || out.status === 415 || out.status === 400)) {
+          out = await submitFormUrlEncoded(WAITLIST_ENDPOINT, payload);
+        }
+        if (!out.accepted) throw new Error('submit_failed_' + out.status);
+        setStatus('登録しました。提供開始前に通知します。');
+        emailEl.value = '';
+        if (nameEl) nameEl.value = '';
+      } catch (e) {
+        setStatus('送信に失敗しました。時間をおいて再度お試しください。');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  })();
+</script>
 
 </body>
 </html>
