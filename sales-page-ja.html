@@ -527,11 +527,12 @@
       submitBtn.disabled = true;
       setStatus('送信中...');
       const payload = {
-        email,
-        name,
-        locale: 'ja',
-        source: 'sales-page-ja',
-        ts_utc: new Date().toISOString()
+        timestamp_utc: new Date().toISOString(),
+        email: email,
+        name: name || '',
+        use_case: 'Waitlist',
+        page_lang: 'ja',
+        source: 'sales-page-ja'
       };
 
       try {
