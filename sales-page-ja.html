@@ -332,7 +332,13 @@
         <span class="proof-val ok">PASS ✓</span>
       </div>
       <div class="proof-row">
-        <span class="proof-label">公開ログ</span>
+        <span class="proof-label">判定ログ（BTC/CASH, 実運用フェーズ）</span>
+        <span class="proof-val link">
+          <a href="https://btcsignal.org/btcsignal_log_live.json" target="_blank" rel="noopener">btcsignal_log_live.json を見る →</a>
+        </span>
+      </div>
+      <div class="proof-row">
+        <span class="proof-label">価格履歴＋チェーン（ウォームアップ含む）</span>
         <span class="proof-val link">
           <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" target="_blank" rel="noopener">log.json を見る →</a>
         </span>
@@ -347,6 +353,12 @@
 
     <p style="margin-top:16px; font-size:13px; color:var(--dim);">
       検証期間中の記録です。将来の結果を保証するものではありません。
+    </p>
+    <p style="margin-top:4px; font-size:13px; color:var(--dim);">
+      監査証跡（30/30一致）：<a href="https://btcsignal.org/verification/last30_match_report_2026-02-27.txt" target="_blank" rel="noopener">https://btcsignal.org/verification/last30_match_report_2026-02-27.txt</a>
+    </p>
+    <p style="margin-top:4px; font-size:13px; color:var(--dim);">
+      週次最新：<a href="https://btcsignal.org/verification/weekly/latest.txt" target="_blank" rel="noopener">https://btcsignal.org/verification/weekly/latest.txt</a>
     </p>
   </section>
 </div>
@@ -364,6 +376,7 @@
     <div class="pain-card">
       売買頻度を増やすツールではありません。<br>
       公開記録（2023〜2025年）では年間7〜11回、平均約8.7回の切り替えでした。<br>
+      根拠：<a href="https://btcsignal.org/verification/annual_switches_2017_to_present.csv" target="_blank" rel="noopener">annual_switches_2017_to_present.csv</a><br>
       ※将来の回数・結果を保証するものではありません。
     </div>
   </section>
@@ -419,6 +432,10 @@
     <div class="faq-item">
       <p class="faq-q">解除できますか？</p>
       <p class="faq-a">はい。いつでもメール内のリンクから1クリックで解除できます。</p>
+    </div>
+    <div class="faq-item">
+      <p class="faq-q">TradingViewと時刻がずれて見えるのはなぜですか？</p>
+      <p class="faq-a">TradingViewは日足確定後に表示更新されることがあります。21:12 JST時点のDiscord/メール通知を正としてください。</p>
     </div>
   </section>
 </div>

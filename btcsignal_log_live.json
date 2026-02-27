@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "generated_at_utc": "2026-02-27T16:50:45.852758+00:00",
+    "source": "btcsignal_log.json",
+    "note": "warmup seed rows are excluded from this live decision log",
+    "excluded_reason_patterns": [
+      "data_warmup_seed",
+      "seed_source=csv"
+    ]
+  },
+  "entries": [
+    {
+      "date": "2026-02-18",
+      "state": "CASH",
+      "reason": "risk_off_not_confirmed"
+    },
+    {
+      "date": "2026-02-20",
+      "state": "CASH",
+      "reason": "risk_off_not_confirmed"
+    },
+    {
+      "date": "2026-02-21",
+      "state": "CASH",
+      "reason": "risk_off_not_confirmed"
+    },
+    {
+      "date": "2026-02-22",
+      "state": "CASH",
+      "reason": "risk_off_not_confirmed"
+    },
+    {
+      "date": "2026-02-23",
+      "state": "CASH",
+      "reason": "risk_off_not_confirmed"
+    },
+    {
+      "date": "2026-02-24",
+      "state": "CASH",
+      "reason": "risk_off_not_confirmed"
+    },
+    {
+      "date": "2026-02-25",
+      "state": "CASH",
+      "reason": "risk_off_not_confirmed"
+    },
+    {
+      "date": "2026-02-26",
+      "state": "CASH",
+      "reason": "risk_off_not_confirmed"
+    },
+    {
+      "date": "2026-02-27",
+      "state": "CASH",
+      "reason": "risk_off_not_confirmed"
+    }
+  ]
+}

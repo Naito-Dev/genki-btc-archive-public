@@ -49,6 +49,10 @@ jobs:
         run: |
           python scripts/btcsignal_daily.py
 
+      - name: Export BTCSIGNAL live decision log (seed excluded)
+        run: |
+          python scripts/export_btcsignal_live_log.py
+
       - name: Ensure Live Testing baseline (2026-02-26)
         run: |
           python scripts/ensure_live_test_baseline.py --start-date-jst 2026-02-26
@@ -91,7 +95,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json btcsignal_log.json
+          git add log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json btcsignal_log.json btcsignal_log_live.json
           [ -f data/live_test_baseline.json ] && git add data/live_test_baseline.json || true
           [ -f data/btcsignal_execution_log.csv ] && git add data/btcsignal_execution_log.csv || true
           [ -f data/btcsignal_execute_state.json ] && git add data/btcsignal_execute_state.json || true
