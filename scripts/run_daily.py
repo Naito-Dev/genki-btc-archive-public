@@ -720,11 +720,42 @@ def save_live_portfolio_snapshot_from_latest(latest: dict) -> None:
     env_source = os.getenv("BALANCE_SOURCE", "").strip()
     use_env = input_fresh and env_status == "SYNCED" and env_source == "BITGET_READONLY"
 
+    latest_ps = latest.get("portfolio_snapshot") if isinstance(latest.get("portfolio_snapshot"), dict) else {}
+    prior = {}
+    if LIVE_SNAPSHOT_JSON.exists():
+        try:
+            prior = json.loads(LIVE_SNAPSHOT_JSON.read_text(encoding="utf-8"))
+        except Exception:
+            prior = {}
+
     usdt_bal = _round_or_none(_env_float("USDT_UNITS"), 8) if use_env else None
     btc_bal = _round_or_none(_env_float("BTC_UNITS"), 8) if use_env else None
     src = "BITGET_READONLY" if use_env and usdt_bal is not None and btc_bal is not None else "unavailable"
     bal_ts = os.getenv("BALANCE_TS_UTC", "").strip() if use_env else latest.get("balance_ts_utc")
+
+    # fallback from prior snapshot (last-known-good) to avoid null balances when env sync is unavailable
+    if not use_env:
+        p_usdt = _round_or_none(prior.get("usdt_balance"), 8) if isinstance(prior, dict) else None
+        p_btc = _round_or_none(prior.get("btc_balance"), 8) if isinstance(prior, dict) else None
+        p_src = str(prior.get("source") or "").strip() if isinstance(prior, dict) else ""
+        p_ts = (prior.get("balance_ts_utc") if isinstance(prior, dict) else None) or latest_ps.get("ts_utc")
+        if p_usdt is not None and p_btc is not None and p_src and p_src != "unavailable":
+            usdt_bal = p_usdt
+            btc_bal = p_btc
+            src = p_src
+            bal_ts = p_ts or bal_ts
+
     snapshot_status = "SYNCED" if src == "BITGET_READONLY" else (latest.get("snapshot_status") or "SYNC_PENDING")
+
+    # Fail-closed invariant: SYNCED must not carry unavailable/null critical fields
+    eq_ref = _round_or_none(latest_ps.get("equity_usd"), 2)
+    if eq_ref is None:
+        eq_ref = _round_or_none(latest.get("equity_usd"), 2)
+    if snapshot_status == "SYNCED":
+        if src == "unavailable" or btc_bal is None or usdt_bal is None or eq_ref is None:
+            snapshot_status = "SYNC_PENDING"
+            src = "unavailable"
+
     payload = {
         "updated_at_utc": latest.get("updated_at_utc"),
         "balance_ts_utc": bal_ts or None,
