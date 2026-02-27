@@ -266,6 +266,8 @@ def compute_all_states(
             if force_exit:
                 # Breaker/probation exits are never blocked by cooldown/min_hold.
                 last_sw = i
+                if sig == "CASH":
+                    hold_start = -1
             else:
                 if (i - last_sw) < COOLDOWN:
                     sig = prev  # cooldown reject
@@ -275,6 +277,8 @@ def compute_all_states(
                     last_sw = i
                     if sig == "HOLD":
                         hold_start = i
+                    elif sig == "CASH":
+                        hold_start = -1
         elif sig == "HOLD" and hold_start < 0:
             hold_start = i
 

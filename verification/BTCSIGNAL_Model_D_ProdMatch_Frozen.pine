@@ -72,6 +72,8 @@ if barstate.isconfirmed
     if candidate != prev_state
         if force_exit
             last_switch := bar_index
+            if candidate == STATE_CASH
+                hold_start := -1
         else
             if (bar_index - last_switch) < COOLDOWN
                 candidate := prev_state
@@ -81,6 +83,8 @@ if barstate.isconfirmed
                 last_switch := bar_index
                 if candidate == STATE_HOLD
                     hold_start := bar_index
+                else if candidate == STATE_CASH
+                    hold_start := -1
     else if candidate == STATE_HOLD and hold_start < 0
         hold_start := bar_index
 
