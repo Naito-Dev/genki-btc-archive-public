@@ -1,748 +1,517 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Genki BTC Signal | Waitlist</title>
-  <!--
-    Switch-to-paid checklist (after live verification):
-    1) Replace waitlist CTA href (#waitlist) with checkout URL in BOTH CTA buttons.
-    2) Update access state text from "Waitlist Open" to "Now Open".
-    3) Keep price at US$329/mo (no discounts) and update FAQ "When paid access begins" answer.
-    4) Keep proof + live verification sections unchanged for trust continuity.
-  -->
-  <style>
-    :root {
-      --bg: #05090f;
-      --bg-2: #0a1630;
-      --panel: rgba(10, 24, 49, 0.92);
-      --panel-2: rgba(8, 18, 36, 0.9);
-      --line: rgba(122, 159, 225, 0.24);
-      --text: #f2f6ff;
-      --muted: #aebddb;
-      --soft: #7f91b4;
-      --gold: #d8b24a;
-      --gold-hi: #e4c76a;
-      --gold-edge: #b98d2f;
-      --green: #49c884;
-      --red: #e07d7d;
-      --radius: 18px;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      color: var(--text);
-      background:
-        radial-gradient(1200px 700px at 90% -10%, rgba(216,178,74,0.12), transparent 62%),
-        radial-gradient(1000px 600px at -10% 10%, rgba(73,200,132,0.10), transparent 58%),
-        linear-gradient(180deg, var(--bg), var(--bg-2));
-      font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
-      line-height: 1.5;
-    }
-    .wrap { width: min(1080px, 92vw); margin: 0 auto; }
-    .lang-switch {
-      position: sticky;
-      top: 10px;
-      z-index: 20;
-      display: flex;
-      justify-content: flex-end;
-      width: min(1080px, 92vw);
-      margin: 10px auto 0;
-      gap: 6px;
-    }
-    .lang-btn {
-      min-height: 28px;
-      padding: 0 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(8,18,36,.62);
-      color: var(--muted);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-    .lang-btn.active {
-      color: #0b1020;
-      background: linear-gradient(180deg, var(--gold-hi), var(--gold));
-      border-color: var(--gold-edge);
-    }
-    .hero { padding: 56px 0 34px; }
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 14px;
-    }
-    h1 {
-      margin: 0;
-      font-size: clamp(34px, 6vw, 58px);
-      line-height: 1.06;
-      letter-spacing: -0.02em;
-      max-width: 900px;
-    }
-    .lead {
-      margin: 14px 0 0;
-      color: var(--muted);
-      font-size: clamp(16px, 2.2vw, 22px);
-      max-width: 840px;
-    }
-    .phase-note {
-      margin-top: 10px;
-      color: var(--soft);
-      font-size: 13px;
-      letter-spacing: .02em;
-    }
-    .hero-grid {
-      margin-top: 22px;
-      display: grid;
-      gap: 14px;
-      grid-template-columns: 1fr 1fr;
-    }
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 18px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-    }
-    .mini-title {
-      margin: 0 0 8px;
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .signal-preview {
-      display: grid;
-      gap: 8px;
-      margin-top: 8px;
-      font-size: 14px;
-    }
-    .signal-preview div {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: rgba(7, 17, 34, 0.65);
-    }
-    .cta-row {
-      margin-top: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .btn {
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 46px;
-      border-radius: 999px;
-      padding: 0 18px;
-      font-size: 14px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-    .btn[aria-disabled="true"] {
-      pointer-events: none;
-      opacity: .48;
-      cursor: not-allowed;
-      filter: saturate(.7);
-    }
-    .btn.primary {
-      color: #0b1020;
-      background: linear-gradient(180deg, var(--gold-hi), var(--gold));
-      border: 1px solid var(--gold-edge);
-      box-shadow: 0 8px 20px rgba(216, 178, 74, 0.24);
-    }
-    .btn.secondary {
-      color: var(--text);
-      border: 1px solid var(--line);
-      background: rgba(8, 18, 36, 0.5);
-    }
-    section { padding: 14px 0; }
-    h2 {
-      margin: 0 0 10px;
-      font-size: clamp(24px, 4vw, 34px);
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-    }
-    p { margin: 0; }
-    .sub {
-      color: var(--muted);
-      margin-bottom: 14px;
-      font-size: 15px;
-    }
-    .unlock-grid {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .unlock-item {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-    .unlock-item strong {
-      display: block;
-      color: var(--text);
-      margin-bottom: 4px;
-      font-size: 14px;
-    }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 640px; }
-    th, td {
-      border-bottom: 1px solid rgba(122,159,225,.18);
-      padding: 10px 8px;
-      text-align: left;
-      font-size: 14px;
-    }
-    th { color: var(--muted); font-weight: 700; }
-    .compare-cards {
-      display: none;
-      gap: 10px;
-      margin-top: 2px;
-    }
-    .compare-card {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-    }
-    .compare-card .item {
-      margin: 0 0 8px;
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: .01em;
-    }
-    .compare-card .row {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .compare-card .row strong {
-      color: var(--text);
-      font-weight: 700;
-      margin-right: 6px;
-    }
-    .good { color: var(--green); }
-    .warn { color: var(--red); }
-    .steps {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    .step {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-    }
-    .step .n {
-      width: 24px;
-      height: 24px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-    .step h3 { margin: 0 0 6px; font-size: 16px; }
-    .step p { color: var(--muted); font-size: 14px; }
-    .proof-kpis {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      margin-top: 10px;
-    }
-    .proof-status {
-      margin-top: 10px;
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-    }
-    .proof-status .title {
-      margin: 0 0 8px;
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .proof-status-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px 12px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-    .proof-status-grid strong {
-      color: var(--text);
-      font-weight: 700;
-    }
-    .proof-kpis .kpi {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 12px;
-    }
-    .proof-kpis .v { font-size: 21px; font-weight: 900; line-height: 1; }
-    .proof-kpis .k { margin-top: 5px; color: var(--muted); font-size: 12px; }
-    .price-box {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: 1fr 1fr;
-      align-items: start;
-    }
-    .price {
-      font-size: clamp(34px, 7vw, 48px);
-      font-weight: 900;
-      line-height: 1;
-      letter-spacing: -0.03em;
-    }
-    .list {
-      margin: 0;
-      padding-left: 18px;
-      color: var(--muted);
-      font-size: 14px;
-      display: grid;
-      gap: 5px;
-    }
-    .faq {
-      display: grid;
-      gap: 10px;
-    }
-    details {
-      border: 1px solid rgba(122,159,225,.2);
-      border-radius: 12px;
-      background: rgba(8, 18, 36, 0.58);
-      padding: 10px 12px;
-    }
-    summary {
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      list-style: none;
-    }
-    details p {
-      margin-top: 8px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-    .waitlist-card {
-      background: linear-gradient(130deg, rgba(216,178,74,.15), rgba(8,18,36,.86));
-      border: 1px solid rgba(216,178,74,.3);
-      border-radius: var(--radius);
-      padding: 18px;
-    }
-    .waitlist-form {
-      margin-top: 12px;
-      display: grid;
-      gap: 10px;
-      grid-template-columns: 1fr 1fr;
-    }
-    .waitlist-form label {
-      display: grid;
-      gap: 5px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .waitlist-form input {
-      width: 100%;
-      min-height: 42px;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      background: rgba(8,18,36,.66);
-      color: var(--text);
-      padding: 0 12px;
-      font-size: 14px;
-    }
-    .waitlist-form .full { grid-column: 1 / -1; }
-    .fine {
-      margin-top: 10px;
-      color: var(--soft);
-      font-size: 12px;
-    }
-    footer {
-      padding: 10px 0 44px;
-      color: var(--soft);
-      font-size: 12px;
-      text-align: center;
-    }
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0,0,0,0);
-      white-space: nowrap;
-      border: 0;
-    }
-    @media (max-width: 900px) {
-      .hero-grid, .price-box { grid-template-columns: 1fr; }
-      .proof-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .steps { grid-template-columns: 1fr; }
-      .unlock-grid { grid-template-columns: 1fr; }
-      .waitlist-form { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 760px) {
-      .table-wrap { display: none; }
-      .compare-cards { display: grid; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genki BTC Signal | Waitlist</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #080d1a;
+    --surface: #0e1628;
+    --border:  #192040;
+    --gold:    #f5c542;
+    --gold2:   #ffd866;
+    --text:    #dde3f0;
+    --muted:   #8a93b0;
+    --dim:     #4a5270;
+    --green:   #3ddc84;
+    --red:     #ff6b6b;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Noto Sans", sans-serif;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 660px; margin: 0 auto; padding: 0 22px; }
+  section { padding: 52px 0; border-top: 1px solid var(--border); }
+
+  h2 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 18px; }
+  p  { font-size: 15px; color: var(--muted); margin-bottom: 14px; }
+  a  { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .lang-nav {
+    display: flex; gap: 16px; justify-content: flex-end;
+    padding: 14px 22px 0;
+    font-size: 13px; color: var(--dim);
+  }
+  .lang-nav a { color: var(--dim); }
+  .lang-nav a.active { color: var(--gold); font-weight: 700; }
+
+  .hero { padding: 72px 0 52px; border-top: none; text-align: center; }
+  .hero-label {
+    display: inline-block;
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 22px;
+  }
+
+  .hero h1 {
+    font-size: clamp(26px, 5.5vw, 40px);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.45;
+    margin-bottom: 6px;
+  }
+
+  .hero h1 em { font-style: normal; color: var(--gold); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 540px;
+    margin: 18px auto 0;
+    line-height: 1.9;
+  }
+
+  .hero-cta { margin-top: 36px; }
+
+  .pain-card {
+    background: var(--surface);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    color: #c5cce0;
+  }
+
+  .sol-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .sol-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 20px;
+  }
+
+  .sol-num {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    background: var(--gold);
+    color: var(--bg);
+    font-size: 13px; font-weight: 800;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+
+  .sol-card h3 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .sol-card p  { font-size: 13px; margin-bottom: 0; }
+
+  .proof-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 24px;
+  }
+
+  .proof-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .proof-row:last-child { border-bottom: none; }
+  .proof-label { color: var(--muted); }
+  .proof-val   { color: #fff; font-weight: 600; }
+  .proof-val.ok  { color: var(--green); }
+  .proof-val.link a { color: var(--gold); }
+
+  .cta-sec { text-align: center; }
+  .cta-sec h2 { margin-bottom: 10px; }
+  .cta-sec > p { max-width: 460px; margin: 0 auto 28px; }
+
+  .form-box { max-width: 400px; margin: 0 auto; }
+
+  .form-box input[type="email"],
+  .form-box input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #fff;
+    margin-bottom: 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-box input[type="email"]:focus,
+  .form-box input[type="text"]:focus { border-color: var(--gold); }
+  .form-box input::placeholder { color: var(--dim); }
+
+  .btn-primary {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    font-size: 16px; font-weight: 800;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover  { background: var(--gold2); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .reassure {
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 12px;
+    line-height: 1.7;
+  }
+
+  .hero-cta .btn-outline {
+    display: inline-block;
+    padding: 12px 28px;
+    font-size: 15px; font-weight: 700;
+    border: 1.5px solid var(--gold);
+    border-radius: 8px;
+    color: var(--gold);
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.2s, color 0.2s;
+    text-decoration: none;
+  }
+  .hero-cta .btn-outline:hover {
+    background: var(--gold);
+    color: var(--bg);
+  }
+
+  .faq-item { padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .faq-a { font-size: 14px; color: var(--muted); margin-bottom: 0; }
+
+  footer {
+    padding: 36px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  footer p { font-size: 12px; color: var(--dim); margin-bottom: 6px; }
+  footer a  { color: var(--dim); }
+</style>
 </head>
 <body>
-  <nav class="lang-switch" aria-label="Language switch">
-    <a class="lang-btn active" href="./sales-page-en.html">EN</a>
-    <a class="lang-btn" href="./sales-page-ja.html">JA</a>
-  </nav>
-  <p class="fine" style="max-width:980px;margin:6px auto 0;padding:0 16px;"><a href="./index.html">← Back to Dashboard</a></p>
-  <header class="hero">
-    <div class="wrap">
-      <span class="eyebrow">GENKI BTC SIGNAL — PHASE 0</span>
-      <h1>You hold BTC.<br>But every day, you wonder if you are holding too much or too little.</h1>
-      <p class="lead">Replace that uncertainty with one daily state update. No prediction narrative, just a rules-based signal you can act on.</p>
-      <p class="phase-note">Updated daily at 21:12 JST (12:12 UTC). No chart-watching loop required.</p>
+
+<nav class="lang-nav">
+  <a href="./sales-page-en.html" class="active">EN</a>
+  <a href="./sales-page-ja.html">JA</a>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <span class="hero-label">Genki BTC Signal</span>
+    <h1>You hold BTC.<br>But every day, you wonder if <em>this is still right</em>.</h1>
+    <p class="hero-sub">
+      Replace uncertainty with one daily state update.<br>
+      Rule-based, not predictive. No constant chart monitoring.
+    </p>
+    <div class="hero-cta">
+      <a href="#waitlist" class="btn-outline">Get notified when access opens (Free)</a>
     </div>
-  </header>
+  </section>
+</div>
 
-  <main>
-    <section>
-      <div class="wrap card">
-        <h2>Do these mornings sound familiar?</h2>
-        <p>You check BTC first thing. Price is down. You think about reducing exposure, but remember the last time you sold and it bounced right after. You do nothing, but still feel uncertain.</p>
-        <p>On social feeds, one account says “still bullish” and another says “local top.” Both sound confident. You realize your decision framework depends on whoever posted last.</p>
-        <p>You tried learning technical analysis, but consistency failed. The issue is not information. The issue is the absence of a repeatable decision framework.</p>
-        <p class="sub"><strong>The real problem is not knowledge. It is decision structure.</strong></p>
+<div class="wrap">
+  <section>
+    <h2>Do these mornings sound familiar?</h2>
+
+    <div class="pain-card">
+      You check BTC right after waking up. It is down. You think, “Maybe I should reduce exposure,” but remember the last time you sold and it bounced right after. You do nothing, but still cannot tell if that was the right decision.
+    </div>
+
+    <div class="pain-card">
+      You open social feeds and see “still bullish” and “local top” at the same time. Both sound confident. You feel like you are the only one without a decision framework.
+    </div>
+
+    <div class="pain-card">
+      You tried learning technical analysis. It did not stick with your schedule. Even after learning, daily decision stress did not disappear.
+    </div>
+
+    <p style="margin-top:20px; color:#c0c8e0;">
+      The issue is not a lack of information. <strong style="color:#fff;">The issue is decision structure.</strong>
+    </p>
+  </section>
+</div>
+
+<div class="wrap">
+  <section>
+    <h2>What Genki BTC Signal does</h2>
+    <p>The model runs daily at 21:12 JST and outputs one state (BTC / CASH). You check once and act only if needed.</p>
+
+    <div class="sol-grid">
+      <div class="sol-card">
+        <div class="sol-num">1</div>
+        <h3>One message per day</h3>
+        <p>Delivered at a fixed time. You know today’s state in seconds.</p>
       </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>What Genki BTC Signal does</h2>
-        <p>It outputs one daily state. You read it once, decide, and move on.</p>
-        <ul class="list" style="padding-left:16px">
-          <li><strong>Message arrives</strong> — fixed time, once per day</li>
-          <li><strong>You decide</strong> — clear state, no ambiguous interpretation</li>
-          <li><strong>You return to your day</strong> — no endless monitoring loop</li>
-        </ul>
+      <div class="sol-card">
+        <div class="sol-num">2</div>
+        <h3>Clear decision</h3>
+        <p>Only two states: BTC or CASH. No ambiguous midpoint.</p>
       </div>
-    </section>
-
-    <section>
-      <div class="wrap card">
-        <h2>Proof before outcomes</h2>
-        <p>No projected returns and no performance promises. Decisions are recorded in public logs before outcomes are known.</p>
-        <p>
-          <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" target="_blank" rel="noopener">View public log (log.json)</a>
-          &nbsp;•&nbsp;
-          <a href="https://github.com/Naito-Dev/genki-btc-archive-public/commits/main" target="_blank" rel="noopener">View commit history</a>
-        </p>
-        <p class="fine">Verification-phase records only. Past outcomes do not guarantee future results.</p>
-        <p class="fine">Audit proof (30/30 match): <a href="https://btcsignal.org/verification/last30_match_report_2026-02-27.txt" target="_blank" rel="noopener">btcsignal.org/verification/last30_match_report_2026-02-27.txt</a></p>
+      <div class="sol-card">
+        <div class="sol-num">3</div>
+        <h3>Back to your day</h3>
+        <p>No need to watch charts all day. That is the point.</p>
       </div>
-    </section>
+    </div>
+  </section>
+</div>
 
-    <section>
-      <div class="wrap">
-        <h2>What this notification is for</h2>
+<div class="wrap">
+  <section>
+    <h2>Proof before outcomes</h2>
+    <p>We do not publish performance promises. We publish decision logs in real time. Entries are recorded before outcomes, so they cannot be rewritten later.</p>
+
+    <div class="proof-box">
+      <div class="proof-row">
+        <span class="proof-label">Phase</span>
+        <span class="proof-val">Phase 0 (Track record building)</span>
       </div>
-      <div class="wrap card">
-        <p style="margin:0">This notification is a state decision feed, not a prediction.</p>
+      <div class="proof-row">
+        <span class="proof-label">Audit report (30/30)</span>
+        <span class="proof-val ok">PASS ✓</span>
       </div>
-      <div class="wrap card">
-        <p style="margin:0">
-          It moves to CASH in major drawdown phases,<br>
-          and holds BTC during stable trends.<br>
-          It is designed so long-term holders do not need to make daily exit decisions by themselves.
-        </p>
+      <div class="proof-row">
+        <span class="proof-label">Public log</span>
+        <span class="proof-val link">
+          <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json" target="_blank" rel="noopener">View log.json →</a>
+        </span>
       </div>
-      <div class="wrap card">
-        <p style="margin:0">
-          This is not a tool to increase trading frequency.<br>
-          In public records (2023–2025), annual state switches were 7–11 times, averaging about 8.7 per year.<br>
-          Future frequency and outcomes are not guaranteed.
-        </p>
+      <div class="proof-row">
+        <span class="proof-label">Commit history</span>
+        <span class="proof-val link">
+          <a href="https://github.com/Naito-Dev/genki-btc-archive-public/commits/main" target="_blank" rel="noopener">Verify on GitHub →</a>
+        </span>
       </div>
-    </section>
+    </div>
 
-    <section>
-      <div class="wrap waitlist-card" id="waitlist">
-        <h2>Join the waitlist</h2>
-        <p class="sub">Join to be notified when access opens. Launch date is not announced yet.</p>
-        <p class="fine">No spam. Free to join. We do not use your data for unrelated purposes.</p>
-        <form class="waitlist-form" action="#" method="post" onsubmit="return false;">
-          <label>Email (required)
-            <input id="waitlistEmail" type="email" required placeholder="you@example.com" />
-          </label>
-          <label>Name (optional)
-            <input id="waitlistName" type="text" placeholder="Your name" />
-          </label>
-          <div class="full cta-row" style="margin-top:2px">
-            <button id="waitlistSubmitBtn" class="btn primary" type="button" aria-label="Join waitlist">Get notified when access opens</button>
-          </div>
-          <p id="waitlistStatus" class="fine" aria-live="polite"></p>
-        </form>
+    <p style="margin-top:16px; font-size:13px; color:var(--dim);">
+      Verification-phase records only. Past outcomes do not guarantee future results.
+    </p>
+  </section>
+</div>
 
-        <h3 style="margin:24px 0 12px 0;font-size:15px;">FAQ</h3>
-        <div class="faq">
-          <details>
-            <summary>Is this financial advice?</summary>
-            <p>No. This is a rules-based status feed. Execution decisions and responsibility remain yours.</p>
-          </details>
-          <details>
-            <summary>What do I receive?</summary>
-            <p>During Phase 0, you only receive launch notifications. After launch, you receive one daily state update.</p>
-          </details>
-          <details>
-            <summary>Do I need to read charts?</summary>
-            <p>No. The workflow is designed around a once-daily update and a clear state.</p>
-          </details>
-          <details>
-            <summary>Why publish during verification?</summary>
-            <p>To prevent hindsight claims. Real-time records are the credibility layer.</p>
-          </details>
-          <details>
-            <summary>How does crash handling work in this model?</summary>
-            <p>If the Breaker fires, the model exits to CASH immediately even within the 14-day hold rule (crash avoidance has priority). In V-shaped rebounds, this can miss part of the recovery by design.</p>
-          </details>
-          <details>
-            <summary>Can I unsubscribe anytime?</summary>
-            <p>Yes. You can unsubscribe at any time.</p>
-          </details>
-        </div>
-      </div>
-    </section>
-  </main>
+<div class="wrap">
+  <section>
+    <h2>What this notification is for</h2>
+    <div class="pain-card">This notification is a state decision feed, not a prediction.</div>
+    <div class="pain-card">
+      It moves to CASH in major drawdown phases,<br>
+      and holds BTC during stable trends.<br>
+      It is designed so long-term holders do not need to make daily exit decisions themselves.
+    </div>
+    <div class="pain-card">
+      This is not a tool to increase trading frequency.<br>
+      In public records (2023–2025), annual state switches were 7–11 times, averaging about 8.7 per year.<br>
+      Future frequency and outcomes are not guaranteed.
+    </div>
+  </section>
+</div>
 
-  <footer>
-    Genki BTC Signal is for informational use only and does not constitute investment advice.
-  </footer>
-  <script>
-    (function () {
-      const form = document.querySelector('.waitlist-form');
-      const emailEl = document.getElementById('waitlistEmail');
-      const nameEl = document.getElementById('waitlistName');
-      const submitBtn = document.getElementById('waitlistSubmitBtn');
-      const statusEl = document.getElementById('waitlistStatus');
-      const WAITLIST_ENDPOINT = (
-        window.WAITLIST_ENDPOINT ||
-        'https://script.google.com/macros/s/AKfycbxzFt641ISSZJWtPXMSEVgQiDsITZ4J3jMrXoPw7Up_8QKtP1orayXnBsSMJETAnVC7/exec'
-      ).trim();
-      if (!form || !emailEl || !submitBtn || !statusEl) return;
+<div class="wrap">
+  <section class="cta-sec" id="waitlist">
+    <h2>Be first to know when access opens</h2>
+    <p>
+      Paid access opens only after enough verification history is accumulated. Date and pricing are not announced yet.
+      Join the waitlist to receive the first notification.
+    </p>
 
-      function isValidEmail(v) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
-      }
+    <div class="form-box">
+      <form action="#" method="post" onsubmit="return false;">
+        <input id="waitlistEmail" type="email" name="email" placeholder="Email address" required>
+        <input id="waitlistName" type="text" name="name" placeholder="Name (optional)">
+        <button id="waitlistSubmitBtn" type="button" class="btn-primary">Get notified when access opens (Free)</button>
+        <p id="waitlistStatus" class="reassure" aria-live="polite"></p>
+      </form>
+      <p class="reassure">
+        No spam. &ensp;Unsubscribe anytime in one click. &ensp;No unrelated data use.
+      </p>
+    </div>
+  </section>
+</div>
 
-      function setStatus(msg) {
-        statusEl.textContent = msg || '';
-      }
+<div class="wrap">
+  <section>
+    <h2>FAQ</h2>
 
-      async function submitJson(endpoint, payload) {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        const bodyText = await res.text();
-        let bodyJson = null;
-        try { bodyJson = JSON.parse(bodyText); } catch (_) {}
-        const appOk = !!(
-          (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
-          /\"ok\"\\s*:\\s*true/i.test(bodyText) ||
-          /\bok\b/i.test(bodyText)
-        );
-        const accepted = res.ok && (appOk || !bodyJson);
-        return { accepted, status: res.status, body: bodyJson || bodyText };
-      }
+    <div class="faq-item">
+      <p class="faq-q">Is this financial advice?</p>
+      <p class="faq-a">No. This is a rules-based state feed. Execution decisions and outcomes are your responsibility.</p>
+    </div>
 
-      async function submitFormUrlEncoded(endpoint, payload) {
-        const params = new URLSearchParams();
-        Object.keys(payload).forEach(function (k) {
-          const v = payload[k];
-          if (v !== null && v !== undefined) params.append(k, String(v));
-        });
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-          body: params.toString()
-        });
-        const bodyText = await res.text();
-        let bodyJson = null;
-        try { bodyJson = JSON.parse(bodyText); } catch (_) {}
-        const appOk = !!(
-          (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
-          /\"ok\"\\s*:\\s*true/i.test(bodyText) ||
-          /\bok\b/i.test(bodyText)
-        );
-        const accepted = res.ok && (appOk || !bodyJson);
-        return { accepted, status: res.status, body: bodyJson || bodyText };
-      }
+    <div class="faq-item">
+      <p class="faq-q">What do I receive after signup?</p>
+      <p class="faq-a">During waitlist phase, launch notification only. After launch, one daily state update at 21:12 JST.</p>
+    </div>
 
-      async function submitNoCorsForm(endpoint, payload) {
-        const params = new URLSearchParams();
-        Object.keys(payload).forEach(function (k) {
-          const v = payload[k];
-          if (v !== null && v !== undefined) params.append(k, String(v));
-        });
-        await fetch(endpoint, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-          body: params.toString()
-        });
-        return { accepted: true, status: 0, body: 'no-cors' };
-      }
+    <div class="faq-item">
+      <p class="faq-q">Do I need to read charts?</p>
+      <p class="faq-a">No. The workflow is designed so you can decide from one daily state update.</p>
+    </div>
 
-      function formatUtc(ts) {
-        if (!ts) return 'UNAVAILABLE';
-        const d = new Date(ts);
-        if (!Number.isFinite(d.getTime())) return String(ts);
-        const y = d.getUTCFullYear();
-        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        const hh = String(d.getUTCHours()).padStart(2, '0');
-        const mm = String(d.getUTCMinutes()).padStart(2, '0');
-        return `${y}-${m}-${day} ${hh}:${mm}`;
-      }
+    <div class="faq-item">
+      <p class="faq-q">Why publish during verification?</p>
+      <p class="faq-a">To avoid hindsight claims. Real-time public records are the credibility layer.</p>
+    </div>
 
-      async function hydrateProofStatus() {
-        const dayEl = document.getElementById('proofDay');
-        const integrityEl = document.getElementById('proofIntegrity');
-        const recordsEl = document.getElementById('proofRecords');
-        const timeEl = document.getElementById('proofTimeUtc');
-        const commitLinkTextEl = document.getElementById('proofCommitShaLink');
-        const commitPlainEl = document.getElementById('proofCommitShaPlain');
-        const commitLinkEl = document.getElementById('proofCommitLink');
-        if (!dayEl || !integrityEl || !recordsEl || !timeEl || !commitLinkEl || !commitLinkTextEl || !commitPlainEl) return;
+    <div class="faq-item">
+      <p class="faq-q">Can I unsubscribe?</p>
+      <p class="faq-a">Yes. You can unsubscribe anytime from the email link.</p>
+    </div>
+  </section>
+</div>
 
-        try {
-          const res = await fetch(`https://naito-dev.github.io/genki-btc-archive-public/log.json?ts=${Date.now()}`, { cache: 'no-store' });
-          if (!res.ok) throw new Error(`log_fetch_${res.status}`);
-          const log = await res.json();
-          const entries = Array.isArray(log?.entries) ? log.entries : [];
-          const latest = (log && typeof log === 'object' ? log.latest : null) || entries[entries.length - 1] || {};
+<footer>
+  <div class="wrap">
+    <p>
+      <a href="index.html">← Back to Dashboard</a>
+    </p>
+    <p style="margin-top:10px;">
+      Genki BTC Signal is an informational service and does not constitute investment advice or solicitation.<br>
+      Past records do not guarantee future results. Execution decisions remain your responsibility.
+    </p>
+  </div>
+</footer>
 
-          const dayCount = entries.length;
-          const integrity = latest?.chain_integrity || 'UNAVAILABLE';
-          const proofTime = latest?.updated_at_utc || latest?.timestamp_utc || log?.last_updated_utc || latest?.date || '';
+<script>
+  (function () {
+    const emailEl = document.getElementById('waitlistEmail');
+    const nameEl = document.getElementById('waitlistName');
+    const submitBtn = document.getElementById('waitlistSubmitBtn');
+    const statusEl = document.getElementById('waitlistStatus');
+    const WAITLIST_ENDPOINT = (
+      window.WAITLIST_ENDPOINT ||
+      'https://script.google.com/macros/s/AKfycbxzFt641ISSZJWtPXMSEVgQiDsITZ4J3jMrXoPw7Up_8QKtP1orayXnBsSMJETAnVC7/exec'
+    ).trim();
+    if (!emailEl || !submitBtn || !statusEl) return;
 
-          dayEl.textContent = `Day ${dayCount || 0}`;
-          integrityEl.textContent = String(integrity);
-          recordsEl.textContent = String(dayCount || 0);
-          timeEl.textContent = formatUtc(proofTime);
+    function isValidEmail(v) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
+    }
 
-          const fullSha = String(log?.commit_sha || latest?.commit_sha || '').trim();
-          const commitSha = fullSha ? fullSha.slice(0, 7) : 'UNAVAILABLE';
-          const commitUrl = String(log?.commit_url || latest?.commit_url || '').trim() ||
-            (fullSha ? `https://github.com/Naito-Dev/genki-btc-archive-public/commit/${fullSha}` : '');
-          if (commitUrl && commitSha !== 'UNAVAILABLE') {
-            commitLinkTextEl.textContent = commitSha;
-            commitLinkEl.href = commitUrl;
-            commitLinkEl.hidden = false;
-            commitPlainEl.hidden = true;
-          } else {
-            commitPlainEl.textContent = 'UNAVAILABLE';
-            commitPlainEl.hidden = false;
-            commitLinkEl.hidden = true;
-            commitLinkEl.removeAttribute('href');
-          }
-        } catch (err) {
-          dayEl.textContent = 'UNAVAILABLE';
-          integrityEl.textContent = 'UNAVAILABLE';
-          recordsEl.textContent = 'UNAVAILABLE';
-          timeEl.textContent = 'UNAVAILABLE';
-          commitPlainEl.textContent = 'UNAVAILABLE';
-          commitPlainEl.hidden = false;
-          commitLinkEl.hidden = true;
-          commitLinkEl.removeAttribute('href');
-        }
-      }
+    function setStatus(msg) {
+      statusEl.textContent = msg || '';
+    }
 
-      hydrateProofStatus();
-
-      submitBtn.addEventListener('click', async function () {
-        const email = String(emailEl.value || '').trim();
-        const name = String((nameEl && nameEl.value) || '').trim();
-        if (!isValidEmail(email)) {
-          setStatus('Please enter a valid email address.');
-          return;
-        }
-
-        submitBtn.disabled = true;
-        setStatus('Submitting...');
-        submitBtn.textContent = 'Submitting...';
-
-        const payload = {
-          timestamp_utc: new Date().toISOString(),
-          email: email,
-          name: name || '',
-          use_case: 'Waitlist',
-          page_lang: 'en',
-          source: 'sales-page-en'
-        };
-
-        if (!WAITLIST_ENDPOINT) {
-          setStatus('Submission failed. Please try again.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Reserve my spot';
-          return;
-        }
-
-        try {
-          let result;
-          try {
-            result = await submitJson(WAITLIST_ENDPOINT, payload);
-            if (!result.accepted) throw new Error('submit_not_accepted_json');
-          } catch (primaryErr) {
-            try {
-              result = await submitFormUrlEncoded(WAITLIST_ENDPOINT, payload);
-              if (!result.accepted) throw new Error('submit_not_accepted_form');
-            } catch (secondaryErr) {
-              result = await submitNoCorsForm(WAITLIST_ENDPOINT, payload);
-            }
-          }
-
-          setStatus('You are on the waitlist. We will notify you before public opening.');
-          submitBtn.textContent = 'Submitted';
-        } catch (_) {
-          try {
-            const key = 'genki_waitlist_leads_failed';
-            const failed = JSON.parse(localStorage.getItem(key) || '[]');
-            failed.push(payload);
-            localStorage.setItem(key, JSON.stringify(failed));
-          } catch (__){}
-          setStatus('Submission failed. Please try again.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Reserve my spot';
-        }
+    async function submitJson(endpoint, payload) {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
       });
-    })();
-  </script>
+      const bodyText = await res.text();
+      let bodyJson = null;
+      try { bodyJson = JSON.parse(bodyText); } catch (_) {}
+      const appOk = !!(
+        (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
+        /\"ok\"\s*:\s*true/i.test(bodyText) ||
+        /\bok\b/i.test(bodyText)
+      );
+      const accepted = res.ok && (appOk || !bodyJson);
+      return { accepted, status: res.status, body: bodyJson || bodyText };
+    }
+
+    async function submitFormUrlEncoded(endpoint, payload) {
+      const params = new URLSearchParams();
+      Object.keys(payload).forEach(function (k) {
+        const v = payload[k];
+        if (v !== null && v !== undefined) params.append(k, String(v));
+      });
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: params.toString()
+      });
+      const bodyText = await res.text();
+      let bodyJson = null;
+      try { bodyJson = JSON.parse(bodyText); } catch (_) {}
+      const appOk = !!(
+        (bodyJson && (bodyJson.ok === true || bodyJson.status === 'ok' || bodyJson.success === true)) ||
+        /\"ok\"\s*:\s*true/i.test(bodyText) ||
+        /\bok\b/i.test(bodyText)
+      );
+      const accepted = res.ok && (appOk || !bodyJson);
+      return { accepted, status: res.status, body: bodyJson || bodyText };
+    }
+
+    async function submitNoCorsForm(endpoint, payload) {
+      const params = new URLSearchParams();
+      Object.keys(payload).forEach(function (k) {
+        const v = payload[k];
+        if (v !== null && v !== undefined) params.append(k, String(v));
+      });
+      await fetch(endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: params.toString()
+      });
+      return { accepted: true, status: 0, body: 'no-cors' };
+    }
+
+    submitBtn.addEventListener('click', async function () {
+      const email = (emailEl.value || '').trim();
+      const name = (nameEl && nameEl.value ? nameEl.value : '').trim();
+      if (!isValidEmail(email)) {
+        setStatus('Please enter a valid email address.');
+        return;
+      }
+      if (!WAITLIST_ENDPOINT) {
+        setStatus('Endpoint is not configured.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      setStatus('Submitting...');
+      const payload = {
+        timestamp_utc: new Date().toISOString(),
+        email: email,
+        name: name || '',
+        use_case: 'Waitlist',
+        page_lang: 'en',
+        source: 'sales-page-en'
+      };
+
+      try {
+        let out = await submitJson(WAITLIST_ENDPOINT, payload);
+        if (!out.accepted) {
+          try {
+            out = await submitFormUrlEncoded(WAITLIST_ENDPOINT, payload);
+            if (!out.accepted) throw new Error('submit_not_accepted_form');
+          } catch (_) {
+            out = await submitNoCorsForm(WAITLIST_ENDPOINT, payload);
+          }
+        }
+        if (!out.accepted) throw new Error('submit_failed_' + out.status);
+        setStatus('Submitted. We will notify you before access opens.');
+        emailEl.value = '';
+        if (nameEl) nameEl.value = '';
+      } catch (e) {
+        setStatus('Submission failed. Please try again shortly.');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  })();
+</script>
+
 </body>
 </html>
