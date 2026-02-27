@@ -205,12 +205,12 @@ def compute_all_states(
             if c < ema and atr_ratio > Q_ATR:
                 breaker = True
 
-        if breaker:
+        if breaker and mode == "NORMAL":
             mode = "PROBATION"
             consec = 0
 
-        # Re-entry from probation
-        if mode == "PROBATION":
+        # Re-entry from probation (exclude breaker trigger day)
+        elif mode == "PROBATION":
             if c > ema:
                 consec += 1
             else:
