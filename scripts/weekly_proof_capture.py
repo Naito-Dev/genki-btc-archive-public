@@ -13,7 +13,6 @@ PROOF_ROOT = ROOT / "proof"
 VERIFICATION_WEEKLY = ROOT / "verification" / "weekly"
 LATEST_TXT = VERIFICATION_WEEKLY / "latest.txt"
 REPORT_GLOB = "last30_match_report_*.txt"
-DEFAULT_CHECK_URL = "https://btcsignal.org/verification/last30_match_report_2026-02-27.txt"
 JST = ZoneInfo("Asia/Tokyo")
 
 
@@ -57,6 +56,12 @@ def _parse_match_metrics(report_path: Path | None) -> dict[str, str]:
     return metrics
 
 
+def _public_verification_url(report_path: Path | None) -> str | None:
+    if not report_path:
+        return None
+    return f"https://btcsignal.org/verification/{report_path.name}"
+
+
 def main() -> int:
     now_utc = datetime.now(timezone.utc)
     now_jst = now_utc.astimezone(JST)
@@ -65,8 +70,12 @@ def main() -> int:
     ts_jst = now_jst.strftime("%Y-%m-%d %H:%M:%S %Z")
     ts_utc = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
 
-    check_url = DEFAULT_CHECK_URL
-    status_code, url_result = _http_status(check_url)
+    match_report = _latest_match_report()
+    check_url = _public_verification_url(match_report)
+    if check_url:
+        status_code, url_result = _http_status(check_url)
+    else:
+        status_code, url_result = None, "FAIL"
 
     weekly_dir = PROOF_ROOT / week_id
     weekly_dir.mkdir(parents=True, exist_ok=True)
@@ -83,7 +92,6 @@ def main() -> int:
     ]
     report_path.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
 
-    match_report = _latest_match_report()
     metrics = _parse_match_metrics(match_report)
     screenshot_status = "unavailable"
     screenshot_reason = "not_captured_by_script"
