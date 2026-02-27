@@ -23,6 +23,13 @@ REASON_MAP = {
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Post daily X draft to Discord")
     p.add_argument("--dashboard-url", default=os.getenv("DASHBOARD_URL", "https://btcsignal.org/"))
+    p.add_argument(
+        "--kpi-proof-url",
+        default=os.getenv(
+            "KPI_PROOF_URL",
+            "https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/verification/internal_kpi_model_d_2026-02-27.json",
+        ),
+    )
     p.add_argument("--ops-status", default=os.getenv("OPS_STATUS", "PASS"))
     return p.parse_args()
 
@@ -57,7 +64,7 @@ def map_reason(reason_raw: object) -> str:
     return REASON_MAP.get(reason, reason)
 
 
-def make_message(last: dict, states: list[str], day_n: int, ops_status: str, dashboard_url: str) -> str:
+def make_message(last: dict, states: list[str], day_n: int, ops_status: str, dashboard_url: str, kpi_proof_url: str) -> str:
     status_raw = str(last.get("state") or "").strip().upper()
     status = "BTC" if status_raw == "HOLD" else "CASH" if status_raw == "CASH" else "unavailable"
 
@@ -73,6 +80,7 @@ def make_message(last: dict, states: list[str], day_n: int, ops_status: str, das
     # X導線URLは本番ドメイン固定（短縮表記）
     _ = dashboard_url
     link_text = "[btcsignal.org](https://btcsignal.org/)"
+    proof_text = f"[KPI proof]({kpi_proof_url})"
 
     return (
         f"Genki Verification — Day {day}/365\n\n"
@@ -81,7 +89,8 @@ def make_message(last: dict, states: list[str], day_n: int, ops_status: str, das
         f"Updated: {updated}\n\n"
         f"Last 3: {last3}\n\n"
         f"No prediction. Just the record.\n"
-        f"{link_text}"
+        f"{link_text}\n"
+        f"{proof_text}"
     )
 
 
@@ -114,7 +123,7 @@ def post_message(msg: str) -> int:
 def main() -> int:
     args = parse_args()
     last, states, day_n = load_latest()
-    msg = make_message(last, states, day_n, args.ops_status, args.dashboard_url)
+    msg = make_message(last, states, day_n, args.ops_status, args.dashboard_url, args.kpi_proof_url)
     return post_message(msg)
 
 
