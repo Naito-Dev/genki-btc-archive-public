@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -62,7 +63,14 @@ def _public_verification_url(report_path: Path | None) -> str | None:
     return f"https://btcsignal.org/verification/{report_path.name}"
 
 
+def _parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Generate weekly proof artifacts")
+    p.add_argument("--check-url", dest="check_url", default=None, help="Override URL for reachability check")
+    return p.parse_args()
+
+
 def main() -> int:
+    args = _parse_args()
     now_utc = datetime.now(timezone.utc)
     now_jst = now_utc.astimezone(JST)
     week_id = _iso_week_id(now_jst)
@@ -71,7 +79,7 @@ def main() -> int:
     ts_utc = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
 
     match_report = _latest_match_report()
-    check_url = _public_verification_url(match_report)
+    check_url = args.check_url or _public_verification_url(match_report)
     if check_url:
         status_code, url_result = _http_status(check_url)
     else:
@@ -102,7 +110,9 @@ def main() -> int:
         "",
         f"- Week: `{week_id}`",
         f"- Proof URL: `https://btcsignal.org/proof/{week_id}/{report_path.name}`",
-        f"- result: `{metrics['result']}`",
+        f"- url_check_result: `{url_result}`",
+        f"- url_http_status: `{status_code if status_code is not None else 'unavailable'}`",
+        f"- match_result: `{metrics['result']}`",
         f"- compare_dates: `{metrics['compare_dates']}`",
         f"- matches: `{metrics['matches']}`",
         f"- mismatches: `{metrics['mismatches']}`",
