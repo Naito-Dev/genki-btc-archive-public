@@ -1,0 +1,6 @@
+week=2026-W09
+checked_url=https://btcsignal.org/verification/last30_match_report_2026-02-27.txt
+checked_at_jst=2026-02-27 23:48:32 JST
+checked_at_utc=2026-02-27 14:48:32 UTC
+http_status=200
+result=OK
