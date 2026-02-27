@@ -1006,6 +1006,17 @@
       };
     }
 
+    async function fetchLivePnlCache() {
+      const res = await fetch(`data/live_pnl_cache.json?ts=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) return null;
+      const j = await res.json();
+      return {
+        status: String(j?.status || "PENDING").toUpperCase(),
+        pnlPercent: parseFiniteNumber(j?.pnl_percent),
+        updatedAtUtc: j?.updated_at_utc || null,
+      };
+    }
+
     async function fetchLiveBtcPrice() {
       const endpoints = [
         {
@@ -1043,7 +1054,7 @@
       throw lastErr || new Error("price_feed_failed");
     }
 
-    function renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus, auditHealthy = true) {
+    function renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus, pnlCache = null, auditHealthy = true) {
       const pnlEl = document.getElementById("pnlPct");
       const pnlNoteEl = document.getElementById("pnlNote");
       let pnl = null;
@@ -1055,8 +1066,13 @@
           pnl = ((equity - baseline.equityUsd) / baseline.equityUsd) * 100;
         }
       }
+      if ((pnl === null || !Number.isFinite(Number(pnl))) && pnlCache && Number.isFinite(Number(pnlCache.pnlPercent))) {
+        pnl = Number(pnlCache.pnlPercent);
+      }
+
       if (pnl === null || !Number.isFinite(Number(pnl))) {
-        pnlEl.textContent = "P/L unavailable";
+        const cacheTs = pnlCache?.updatedAtUtc ? fmtUtc(pnlCache.updatedAtUtc) : null;
+        pnlEl.textContent = cacheTs ? `P/L pending (last update: ${cacheTs})` : "P/L pending";
         pnlEl.style.display = "block";
         if (pnlNoteEl) pnlNoteEl.style.display = "none";
         pnlEl.classList.remove("positive", "negative");
@@ -1157,6 +1173,12 @@
       } catch (_) {
         baseline = null;
       }
+      let pnlCache = null;
+      try {
+        pnlCache = await fetchLivePnlCache();
+      } catch (_) {
+        pnlCache = null;
+      }
 
       const usdt = parseFiniteNumber(snapshot?.usdtBalance);
       const btc = parseFiniteNumber(snapshot?.btcBalance);
@@ -1183,7 +1205,7 @@
       const dayN = cycleDate ? calcLiveDayN(TEST_START_DATE_JST, cycleDate) : null;
       liveLabelEl.textContent = dayN ? `LIVE TESTING • Day ${dayN}` : "LIVE TESTING";
 
-      renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus, auditHealthy);
+      renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus, pnlCache, auditHealthy);
       renderAudit(log, latest, btLog);
     }
 

@@ -34,6 +34,8 @@ LOGS_DIR = ROOT / "logs"
 STATE_JSON = ROOT / "output/state_live.json"
 DAILY_INPUT_ENV = ROOT / "daily_input.env"
 LIVE_SNAPSHOT_JSON = ROOT / "data/live_portfolio_snapshot.json"
+LIVE_BASELINE_JSON = ROOT / "data/live_test_baseline.json"
+LIVE_PNL_CACHE_JSON = ROOT / "data/live_pnl_cache.json"
 
 
 @dataclass
@@ -776,6 +778,83 @@ def save_live_portfolio_snapshot_from_latest(latest: dict) -> None:
     os.replace(tmp, LIVE_SNAPSHOT_JSON)
 
 
+def _load_json_file(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _baseline_equity_usd() -> Optional[float]:
+    baseline = _load_json_file(LIVE_BASELINE_JSON)
+    return _round_or_none(parse_float(baseline.get("equity_usd")), 2)
+
+
+def _snapshot_equity_usd(snapshot: dict, latest: dict) -> Optional[float]:
+    usdt = parse_float(snapshot.get("usdt_balance"))
+    btc = parse_float(snapshot.get("btc_balance"))
+    px = parse_float(snapshot.get("price_at_snapshot"))
+    if usdt is not None and btc is not None and px is not None:
+        return _round_or_none(usdt + btc * px, 2)
+    latest_ps = latest.get("portfolio_snapshot") if isinstance(latest.get("portfolio_snapshot"), dict) else {}
+    ps_eq = parse_float(latest_ps.get("equity_usd"))
+    if ps_eq is not None:
+        return _round_or_none(ps_eq, 2)
+    return _round_or_none(parse_float(latest.get("equity_usd")), 2)
+
+
+def save_live_pnl_cache_from_log(log: dict) -> None:
+    latest = log.get("latest") if isinstance(log.get("latest"), dict) else {}
+    snapshot = _load_json_file(LIVE_SNAPSHOT_JSON)
+    prev_cache = _load_json_file(LIVE_PNL_CACHE_JSON)
+
+    baseline = _baseline_equity_usd()
+    equity = _snapshot_equity_usd(snapshot, latest)
+    snap_status = str(snapshot.get("snapshot_status") or latest.get("snapshot_status") or "SYNC_PENDING").upper()
+
+    payload = {}
+    can_compute = baseline is not None and baseline > 0 and equity is not None and snap_status == "SYNCED"
+    if can_compute:
+        pnl_usd = _round_or_none(equity - baseline, 2)
+        pnl_percent = _round_or_none(((equity - baseline) / baseline) * 100.0, 2)
+        payload = {
+            "status": "LIVE",
+            "equity_usd": equity,
+            "baseline_equity_usd": baseline,
+            "pnl_usd": pnl_usd,
+            "pnl_percent": pnl_percent,
+            "updated_at_utc": latest.get("updated_at_utc") or _now_utc().replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        }
+    elif parse_float(prev_cache.get("pnl_percent")) is not None:
+        payload = {
+            "status": "CACHED",
+            "equity_usd": _round_or_none(parse_float(prev_cache.get("equity_usd")), 2),
+            "baseline_equity_usd": _round_or_none(parse_float(prev_cache.get("baseline_equity_usd")), 2),
+            "pnl_usd": _round_or_none(parse_float(prev_cache.get("pnl_usd")), 2),
+            "pnl_percent": _round_or_none(parse_float(prev_cache.get("pnl_percent")), 2),
+            "updated_at_utc": prev_cache.get("updated_at_utc"),
+        }
+    else:
+        payload = {
+            "status": "PENDING",
+            "equity_usd": None,
+            "baseline_equity_usd": _round_or_none(baseline, 2),
+            "pnl_usd": None,
+            "pnl_percent": None,
+            "updated_at_utc": latest.get("updated_at_utc") or _now_utc().replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        }
+
+    LIVE_PNL_CACHE_JSON.parent.mkdir(parents=True, exist_ok=True)
+    tmp = LIVE_PNL_CACHE_JSON.with_suffix(".json.tmp")
+    tmp.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    os.replace(tmp, LIVE_PNL_CACHE_JSON)
+
+
 def _validate_chain(entries: list[dict]) -> tuple[bool, str]:
     ordered = sorted(entries, key=lambda x: x.get("date", ""))
     prev = None
@@ -905,6 +984,7 @@ def main() -> None:
             save_daily_file(latest, today_utc)
             print("[Genki BTC Archive] backfilled latest financial fields (equity/base/pnl_percent).")
         save_live_portfolio_snapshot_from_latest(latest)
+        save_live_pnl_cache_from_log(log)
         print("No changes: today's UTC entry already exists.")
         return
     state = build_daily_state(start_date)
@@ -936,6 +1016,7 @@ def main() -> None:
     if isinstance(log.get("latest"), dict):
         save_daily_file(log["latest"], state.date_utc)
     save_live_portfolio_snapshot(state)
+    save_live_pnl_cache_from_log(log)
 
     msg = (
         f"[Genki BTC Archive] {state.date_utc} | {state.day} | allocation={state.allocation}% | "
