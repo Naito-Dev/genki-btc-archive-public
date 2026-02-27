@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,8 @@ VERIFICATION_WEEKLY = ROOT / "verification" / "weekly"
 LATEST_TXT = VERIFICATION_WEEKLY / "latest.txt"
 REPORT_GLOB = "last30_match_report_*.txt"
 JST = ZoneInfo("Asia/Tokyo")
+LIVE_SNAPSHOT_JSON = ROOT / "data" / "live_portfolio_snapshot.json"
+LIVE_PNL_CACHE_JSON = ROOT / "data" / "live_pnl_cache.json"
 
 
 def _iso_week_id(now_jst: datetime) -> str:
@@ -63,6 +66,40 @@ def _public_verification_url(report_path: Path | None) -> str | None:
     return f"https://btcsignal.org/verification/{report_path.name}"
 
 
+def _load_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        obj = json.loads(path.read_text(encoding="utf-8"))
+        return obj if isinstance(obj, dict) else {}
+    except Exception:
+        return {}
+
+
+def _evidence_snapshot() -> dict[str, str]:
+    snapshot = _load_json(LIVE_SNAPSHOT_JSON)
+    pnl = _load_json(LIVE_PNL_CACHE_JSON)
+
+    def pick(obj: dict, *keys: str) -> str:
+        for k in keys:
+            if k in obj and obj[k] is not None and obj[k] != "":
+                return str(obj[k])
+        return "unavailable"
+
+    return {
+        "snapshot_status": pick(snapshot, "snapshot_status", "status"),
+        "balance_source": pick(snapshot, "balance_source", "source"),
+        "balance_ts_utc": pick(snapshot, "balance_ts_utc", "ts_utc"),
+        "equity_usd": pick(snapshot, "equity_usd"),
+        "btc_balance": pick(snapshot, "btc_balance", "btc"),
+        "usdt_balance": pick(snapshot, "usdt_balance", "usdt"),
+        "pnl_status": pick(pnl, "status"),
+        "pnl_percent": pick(pnl, "pnl_percent"),
+        "pnl_usd": pick(pnl, "pnl_usd"),
+        "pnl_updated_at_utc": pick(pnl, "updated_at_utc"),
+    }
+
+
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Generate weekly proof artifacts")
     p.add_argument("--check-url", dest="check_url", default=None, help="Override URL for reachability check")
@@ -101,6 +138,7 @@ def main() -> int:
     report_path.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
 
     metrics = _parse_match_metrics(match_report)
+    evidence = _evidence_snapshot()
     screenshot_status = "unavailable"
     screenshot_reason = "not_captured_by_script"
 
@@ -122,6 +160,18 @@ def main() -> int:
         f"- screenshot_reason: `{screenshot_reason}`",
         "",
         f"- source_match_report: `{match_report.name if match_report else 'unavailable'}`",
+        "",
+        "## Evidence Snapshot",
+        f"- snapshot_status: `{evidence['snapshot_status']}`",
+        f"- balance_source: `{evidence['balance_source']}`",
+        f"- balance_ts_utc: `{evidence['balance_ts_utc']}`",
+        f"- equity_usd: `{evidence['equity_usd']}`",
+        f"- btc_balance: `{evidence['btc_balance']}`",
+        f"- usdt_balance: `{evidence['usdt_balance']}`",
+        f"- pnl_cache.status: `{evidence['pnl_status']}`",
+        f"- pnl_cache.pnl_percent: `{evidence['pnl_percent']}`",
+        f"- pnl_cache.pnl_usd: `{evidence['pnl_usd']}`",
+        f"- pnl_cache.updated_at_utc: `{evidence['pnl_updated_at_utc']}`",
     ]
     summary_path.write_text("\n".join(summary) + "\n", encoding="utf-8")
 
