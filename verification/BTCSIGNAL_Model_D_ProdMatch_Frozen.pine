@@ -52,12 +52,15 @@ if barstate.isconfirmed
         mode := MODE_PROB
         consec_ema := 0
     else if mode == MODE_PROB
-        if close > ema20
-            consec_ema += 1
-        else
+        if breaker_fired
             consec_ema := 0
-        if weekly_bull and consec_ema >= N_CONSEC
-            mode := MODE_NORMAL
+        else
+            if close > ema20
+                consec_ema += 1
+            else
+                consec_ema := 0
+            if weekly_bull and consec_ema >= N_CONSEC
+                mode := MODE_NORMAL
 
     raw_signal = mode == MODE_PROB ? STATE_CASH : v1_signal
     prev_state = final_state

@@ -209,14 +209,18 @@ def compute_all_states(
             mode = "PROBATION"
             consec = 0
 
-        # Re-entry from probation (exclude breaker trigger day)
+        # Re-entry from probation
+        # Freeze re-entry while breaker remains true.
         elif mode == "PROBATION":
-            if c > ema:
-                consec += 1
-            else:
+            if breaker:
                 consec = 0
-            if weekly_bull[i] and consec >= N_CONSEC:
-                mode = "NORMAL"
+            else:
+                if c > ema:
+                    consec += 1
+                else:
+                    consec = 0
+                if weekly_bull[i] and consec >= N_CONSEC:
+                    mode = "NORMAL"
 
         # Signal
         v1 = _v1_signal(closes[: i + 1])
