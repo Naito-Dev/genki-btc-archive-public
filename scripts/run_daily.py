@@ -826,6 +826,7 @@ def upsert_today(log: dict, state: DailyState) -> dict:
         ),
         "pnl": _round_or_none(state.pnl_usd, 2),
         "updated_at_utc": state.updated_at_utc,
+        "published_at_utc": state.timestamp_utc,
         "chain_integrity": "VALID",
         "chain_reason": "",
     }
