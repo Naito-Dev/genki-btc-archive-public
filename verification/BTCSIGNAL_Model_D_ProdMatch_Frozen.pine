@@ -63,6 +63,7 @@ if barstate.isconfirmed
                 consec_ema := 0
             if weekly_bull and consec_ema >= N_CONSEC
                 mode := MODE_NORMAL
+                consec_ema := 0
 
     raw_signal = mode == MODE_PROB ? STATE_CASH : v1_signal
     prev_state = final_state

@@ -221,6 +221,7 @@ def compute_all_states(
                     consec = 0
                 if weekly_bull[i] and consec >= N_CONSEC:
                     mode = "NORMAL"
+                    consec = 0
 
         # Signal
         v1 = _v1_signal(closes[: i + 1])
