@@ -22,7 +22,7 @@ REASON_MAP = {
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Post daily X draft to Discord")
-    p.add_argument("--dashboard-url", default=os.getenv("DASHBOARD_URL", "https://naito-dev.github.io/genki-btc-archive-public/"))
+    p.add_argument("--dashboard-url", default=os.getenv("DASHBOARD_URL", "https://btcsignal.org/"))
     p.add_argument("--ops-status", default=os.getenv("OPS_STATUS", "PASS"))
     return p.parse_args()
 
@@ -70,6 +70,10 @@ def make_message(last: dict, states: list[str], day_n: int, ops_status: str, das
     if ops not in {"PASS", "SAFE_STOP", "ERROR"}:
         ops = "unavailable"
 
+    # X導線URLは本番ドメイン固定（短縮表記）
+    _ = dashboard_url
+    link_text = "[btcsignal.org](https://btcsignal.org/)"
+
     return (
         f"Genki Verification — Day {day}/365\n\n"
         f"Status: {status}\n"
@@ -77,7 +81,7 @@ def make_message(last: dict, states: list[str], day_n: int, ops_status: str, das
         f"Updated: {updated}\n\n"
         f"Last 3: {last3}\n\n"
         f"No prediction. Just the record.\n"
-        f"{dashboard_url}"
+        f"{link_text}"
     )
 
 
