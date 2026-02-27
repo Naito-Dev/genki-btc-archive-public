@@ -475,6 +475,13 @@
       "close": 68426.27,
       "sma50": 86223.14,
       "reason": "risk_off_not_confirmed"
+    },
+    {
+      "date": "2026-02-27",
+      "state": "CASH",
+      "close": 67182.0,
+      "sma50": 85793.6,
+      "reason": "risk_off_not_confirmed"
     }
   ]
 }
