@@ -173,7 +173,8 @@
 
   .form-box { max-width: 400px; margin: 0 auto; }
 
-  .form-box input[type="email"] {
+  .form-box input[type="email"],
+  .form-box input[type="text"] {
     width: 100%;
     padding: 14px 16px;
     font-size: 15px;
@@ -185,7 +186,8 @@
     outline: none;
     transition: border-color 0.2s;
   }
-  .form-box input[type="email"]:focus { border-color: var(--gold); }
+  .form-box input[type="email"]:focus,
+  .form-box input[type="text"]:focus { border-color: var(--gold); }
   .form-box input::placeholder { color: var(--dim); }
 
   .btn-primary {
