@@ -239,6 +239,15 @@ def _env_float(name: str) -> Optional[float]:
         return None
 
 
+def _parse_float(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
 def _load_env_file(path: Path) -> None:
     if not path.exists():
         return
@@ -789,20 +798,20 @@ def _load_json_file(path: Path) -> dict:
 
 def _baseline_equity_usd() -> Optional[float]:
     baseline = _load_json_file(LIVE_BASELINE_JSON)
-    return _round_or_none(parse_float(baseline.get("equity_usd")), 2)
+    return _round_or_none(_parse_float(baseline.get("equity_usd")), 2)
 
 
 def _snapshot_equity_usd(snapshot: dict, latest: dict) -> Optional[float]:
-    usdt = parse_float(snapshot.get("usdt_balance"))
-    btc = parse_float(snapshot.get("btc_balance"))
-    px = parse_float(snapshot.get("price_at_snapshot"))
+    usdt = _parse_float(snapshot.get("usdt_balance"))
+    btc = _parse_float(snapshot.get("btc_balance"))
+    px = _parse_float(snapshot.get("price_at_snapshot"))
     if usdt is not None and btc is not None and px is not None:
         return _round_or_none(usdt + btc * px, 2)
     latest_ps = latest.get("portfolio_snapshot") if isinstance(latest.get("portfolio_snapshot"), dict) else {}
-    ps_eq = parse_float(latest_ps.get("equity_usd"))
+    ps_eq = _parse_float(latest_ps.get("equity_usd"))
     if ps_eq is not None:
         return _round_or_none(ps_eq, 2)
-    return _round_or_none(parse_float(latest.get("equity_usd")), 2)
+    return _round_or_none(_parse_float(latest.get("equity_usd")), 2)
 
 
 def save_live_pnl_cache_from_log(log: dict) -> None:
@@ -827,13 +836,13 @@ def save_live_pnl_cache_from_log(log: dict) -> None:
             "pnl_percent": pnl_percent,
             "updated_at_utc": latest.get("updated_at_utc") or _now_utc().replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         }
-    elif parse_float(prev_cache.get("pnl_percent")) is not None:
+    elif _parse_float(prev_cache.get("pnl_percent")) is not None:
         payload = {
             "status": "CACHED",
-            "equity_usd": _round_or_none(parse_float(prev_cache.get("equity_usd")), 2),
-            "baseline_equity_usd": _round_or_none(parse_float(prev_cache.get("baseline_equity_usd")), 2),
-            "pnl_usd": _round_or_none(parse_float(prev_cache.get("pnl_usd")), 2),
-            "pnl_percent": _round_or_none(parse_float(prev_cache.get("pnl_percent")), 2),
+            "equity_usd": _round_or_none(_parse_float(prev_cache.get("equity_usd")), 2),
+            "baseline_equity_usd": _round_or_none(_parse_float(prev_cache.get("baseline_equity_usd")), 2),
+            "pnl_usd": _round_or_none(_parse_float(prev_cache.get("pnl_usd")), 2),
+            "pnl_percent": _round_or_none(_parse_float(prev_cache.get("pnl_percent")), 2),
             "updated_at_utc": prev_cache.get("updated_at_utc"),
         }
     else:
