@@ -65,12 +65,16 @@ def main() -> int:
         entries = []
 
     live_entries = build_live_entries(entries)
+    live_start_date = live_entries[0]["date"] if live_entries else "unavailable"
+
     payload = {
         "meta": {
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "source": "btcsignal_log.json",
             "note": "warmup seed rows are excluded from this live decision log",
             "excluded_reason_patterns": list(EXCLUDE_REASON_PATTERNS),
+            "live_start_date": live_start_date,
+            "live_entries_count": len(live_entries),
         },
         "entries": live_entries,
     }
@@ -81,4 +85,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
