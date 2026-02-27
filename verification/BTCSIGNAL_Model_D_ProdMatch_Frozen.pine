@@ -1,0 +1,98 @@
+//@version=5
+indicator("BTCSIGNAL Model D (Prod-Match, Frozen)", overlay=true)
+
+// Frozen constants (must match production btcsignal_daily.py)
+K_MA100  = 0.985
+DROP_TH  = -0.10
+Q_ATR    = 0.04
+N_CONSEC = 7
+COOLDOWN = 3
+MIN_HOLD = 14
+
+STATE_CASH = 0
+STATE_HOLD = 1
+MODE_NORMAL = 0
+MODE_PROB = 1
+
+sma50_today = ta.sma(close, 50)
+sma50_yday = ta.sma(close, 50)[1]
+ma100 = ta.sma(close, 100)
+ema20 = ta.ema(close, 20)
+
+// Match Python _calc_atr: mean(abs(close[i]-close[i-1])) over min(i,20) bars
+daily_change = math.abs(close - close[1])
+atr20_window = math.max(1, math.min(bar_index, 20))
+atr20_sum = math.sum(daily_change, atr20_window)
+atr20 = bar_index > 0 ? atr20_sum / atr20_window : 0.0
+atr20_ratio = close > 0 ? atr20 / close : 0.0
+
+ret3 = (close / close[3]) - 1.0
+
+// Previous completed week only, no repaint
+wk_close = request.security(syminfo.tickerid, "W", close[1], lookahead=barmerge.lookahead_off)
+wk_sma10 = request.security(syminfo.tickerid, "W", ta.sma(close, 10)[1], lookahead=barmerge.lookahead_off)
+weekly_bull = na(wk_sma10) ? true : (wk_close > wk_sma10)
+
+v1_hold = close > sma50_today and close[1] > sma50_yday and sma50_today >= sma50_yday
+v1_signal = v1_hold ? STATE_HOLD : STATE_CASH
+
+var int mode = MODE_NORMAL
+var int consec_ema = 0
+var int final_state = STATE_CASH
+var int last_switch = -COOLDOWN - 1
+var int hold_start = -1
+
+breaker_a = not na(ma100) and close < ma100 * K_MA100
+breaker_b = not na(ret3) and ret3 <= DROP_TH
+breaker_c = close < ema20 and atr20_ratio > Q_ATR
+breaker_fired = bar_index >= 100 and not na(ma100) and (breaker_a or breaker_b or breaker_c)
+
+if barstate.isconfirmed
+    if mode == MODE_NORMAL and breaker_fired
+        mode := MODE_PROB
+        consec_ema := 0
+    else if mode == MODE_PROB
+        if close > ema20
+            consec_ema += 1
+        else
+            consec_ema := 0
+        if weekly_bull and consec_ema >= N_CONSEC
+            mode := MODE_NORMAL
+
+    raw_signal = mode == MODE_PROB ? STATE_CASH : v1_signal
+    prev_state = final_state
+    candidate = raw_signal
+
+    // Frozen priority: Breaker > MIN_HOLD > COOLDOWN
+    force_exit = prev_state == STATE_HOLD and candidate == STATE_CASH and (breaker_fired or mode == MODE_PROB)
+
+    if candidate != prev_state
+        if force_exit
+            last_switch := bar_index
+        else
+            if (bar_index - last_switch) < COOLDOWN
+                candidate := prev_state
+            else if candidate == STATE_CASH and prev_state == STATE_HOLD and hold_start >= 0 and (bar_index - hold_start) < MIN_HOLD
+                candidate := STATE_HOLD
+            else
+                last_switch := bar_index
+                if candidate == STATE_HOLD
+                    hold_start := bar_index
+    else if candidate == STATE_HOLD and hold_start < 0
+        hold_start := bar_index
+
+    final_state := candidate
+
+is_hold = final_state == STATE_HOLD
+is_prob = mode == MODE_PROB
+
+bgcolor(is_hold ? color.new(color.green, 85) : na, title="HOLD Zone")
+bgcolor(is_prob ? color.new(color.red, 90) : na, title="PROBATION Zone")
+
+plotshape(is_hold and not is_hold[1], title="→HOLD", style=shape.triangleup, location=location.belowbar, color=color.green, size=size.small, text="HOLD")
+plotshape((not is_hold) and is_hold[1], title="→CASH", style=shape.triangledown, location=location.abovebar, color=color.red, size=size.small, text="CASH")
+plotshape(breaker_fired and not breaker_fired[1], title="Breaker", style=shape.xcross, location=location.abovebar, color=color.orange, size=size.tiny, text="CB")
+
+plot(sma50_today, "SMA50", color=color.new(color.blue, 30), linewidth=2)
+plot(ma100, "MA100", color=color.new(color.purple, 30), linewidth=2)
+plot(ema20, "EMA20", color=color.new(color.orange, 40), linewidth=1)

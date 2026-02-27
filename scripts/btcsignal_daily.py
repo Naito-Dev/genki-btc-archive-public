@@ -246,38 +246,52 @@ def compute_all_states(
 
     for i in range(n):
         sig = raw_signals[i]["signal"]
+        raw = raw_signals[i]
         prev = final_states[-1]["state"] if final_states else "CASH"
+        force_exit = (
+            prev == "HOLD"
+            and sig == "CASH"
+            and (
+                bool(raw.get("breaker"))
+                or raw.get("mode") == "PROBATION"
+                or bool(raw.get("force_exit"))
+            )
+        )
 
         if sig != prev:
-            if (i - last_sw) < COOLDOWN:
-                sig = prev  # cooldown reject
-            elif sig == "CASH" and prev == "HOLD" and hold_start >= 0 and (i - hold_start) < MIN_HOLD:
-                sig = "HOLD"  # min_hold reject
-            else:
+            if force_exit:
+                # Breaker/probation exits are never blocked by cooldown/min_hold.
                 last_sw = i
-                if sig == "HOLD":
-                    hold_start = i
+            else:
+                if (i - last_sw) < COOLDOWN:
+                    sig = prev  # cooldown reject
+                elif sig == "CASH" and prev == "HOLD" and hold_start >= 0 and (i - hold_start) < MIN_HOLD:
+                    sig = "HOLD"  # min_hold reject (normal exits only)
+                else:
+                    last_sw = i
+                    if sig == "HOLD":
+                        hold_start = i
         elif sig == "HOLD" and hold_start < 0:
             hold_start = i
 
-        reason = _build_reason(sig, raw_signals[i], prev)
+        reason = _build_reason(sig, raw, prev)
 
         final_states.append(
             {
                 "date": dates[i],
                 "state": sig,
                 "close": round(closes[i], 2),
-                "sma50": round(raw_signals[i]["sma50"], 2) if raw_signals[i]["sma50"] else None,
+                "sma50": round(raw["sma50"], 2) if raw["sma50"] else None,
                 "reason": reason,
                 "model": "D",
                 "meta": {
-                    "mode": raw_signals[i]["mode"],
-                    "consec_above_ema": raw_signals[i]["consec"],
+                    "mode": raw["mode"],
+                    "consec_above_ema": raw["consec"],
                     "last_switch_idx": last_sw,
                     "hold_start_idx": hold_start,
-                    "ema20": raw_signals[i]["ema20"],
-                    "ma100": raw_signals[i]["ma100"],
-                    "atr20_ratio": raw_signals[i]["atr20_ratio"],
+                    "ema20": raw["ema20"],
+                    "ma100": raw["ma100"],
+                    "atr20_ratio": raw["atr20_ratio"],
                 },
             }
         )
@@ -372,4 +386,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
