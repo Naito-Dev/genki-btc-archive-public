@@ -2,7 +2,7 @@ name: Daily Archive Update
 
 on:
   schedule:
-    - cron: "5 12 * * *" # 12:05 UTC daily prep; deterministic publish at 12:12 UTC
+    - cron: "5 12 * * *" # 12:05 UTC daily prep; deterministic publish at 12:10 UTC
     - cron: "32 12 * * *" # 12:32 UTC missed-run check
   workflow_dispatch:
 
@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Deterministic publish gate (12:12 UTC ±120s)
+      - name: Deterministic publish gate (12:10 UTC ±120s)
         run: |
           set -euo pipefail
           if [ "${GITHUB_EVENT_NAME}" != "schedule" ]; then
@@ -47,7 +47,7 @@ jobs:
           fi
 
           TODAY_UTC="$(date -u +%F)"
-          TARGET_UTC="${TODAY_UTC}T12:12:00Z"
+          TARGET_UTC="${TODAY_UTC}T12:10:00Z"
           TARGET_EPOCH="$(date -u -d "${TARGET_UTC}" +%s)"
           NOW_EPOCH="$(date -u +%s)"
           WAIT_SEC=$(( TARGET_EPOCH - NOW_EPOCH ))

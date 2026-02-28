@@ -14,3 +14,6 @@
 - A確認: EN/JA LPのPhase表記は既に "Phase 0" で、"Phase Phase 0" は現行コードに存在しないことを確認。
 - B修正: index.html のCTA文言を助言性が低い表現へ変更（"Get daily updates by email" / "Subscribe for verification updates"）。
 - 変更範囲は index.html の2文言のみ（ロジック・ログ・ワークフロー変更なし）。
+- 日次 publish target を 12:12Z から 12:10Z（21:10 JST）へ統一。
+- dashboard の Signal Updated を published_at_utc 固定表示に変更（updated_at_utc fallbackを除去）。
+- 戦略ロジック・ログスキーマは未変更（workflow時刻制御と表示参照のみ）。
