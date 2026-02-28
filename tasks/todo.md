@@ -11,3 +11,6 @@
 - run-daily に publish SLO ログ（PUBLISHED_AT_UTC / PUBLISH_DELAY_SEC / PUBLISH_SLO_STATUS）を追加。
 - concurrency を cancel-in-progress=false に変更し、sleep中の重複実行競合を抑止。
 - schedule実行時のみ FORCE_TODAY=1 を注入し、同日手動runが先行しても12:12定刻runで当日エントリを再確定するよう補強。
+- A確認: EN/JA LPのPhase表記は既に "Phase 0" で、"Phase Phase 0" は現行コードに存在しないことを確認。
+- B修正: index.html のCTA文言を助言性が低い表現へ変更（"Get daily updates by email" / "Subscribe for verification updates"）。
+- 変更範囲は index.html の2文言のみ（ロジック・ログ・ワークフロー変更なし）。
