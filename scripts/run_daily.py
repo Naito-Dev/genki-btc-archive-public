@@ -512,8 +512,17 @@ def build_daily_state(start_date_utc: str) -> DailyState:
     # Load daily operator inputs (BTC/USDT snapshot) if present.
     _load_env_file(DAILY_INPUT_ENV)
 
-    today = _now_utc().date()
-    now_iso = _now_utc().replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    publish_override = os.getenv("PUBLISHED_AT_UTC", "").strip()
+    if publish_override:
+        try:
+            now_dt = datetime.fromisoformat(publish_override.replace("Z", "+00:00")).astimezone(timezone.utc)
+        except Exception:
+            now_dt = _now_utc()
+    else:
+        now_dt = _now_utc()
+
+    today = now_dt.date()
+    now_iso = now_dt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
     fixed_updated_iso = _fixed_updated_at_utc(today.isoformat())
 
     allocation = 0

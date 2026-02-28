@@ -2,7 +2,7 @@ name: Daily Archive Update
 
 on:
   schedule:
-    - cron: "12 12 * * *" # 12:12 UTC daily (21:12 JST fixed)
+    - cron: "5 12 * * *" # 12:05 UTC daily prep; deterministic publish at 12:12 UTC
     - cron: "32 12 * * *" # 12:32 UTC missed-run check
   workflow_dispatch:
 
@@ -11,11 +11,11 @@ permissions:
 
 concurrency:
   group: daily-archive-update
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   run-daily:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '12 12 * * *' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '5 12 * * *' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +30,49 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Deterministic publish gate (12:12 UTC ±120s)
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" != "schedule" ]; then
+            NOW_UTC="$(date -u +%FT%TZ)"
+            {
+              echo "PUBLISHED_AT_UTC=${NOW_UTC}"
+              echo "PUBLISH_TARGET_UTC=MANUAL"
+              echo "PUBLISH_DELAY_SEC=0"
+              echo "PUBLISH_SLO_STATUS=MANUAL"
+            } >> "$GITHUB_ENV"
+            echo "publish_gate mode=manual published_at_utc=${NOW_UTC} delay_sec=0 SLO=MANUAL"
+            exit 0
+          fi
+
+          TODAY_UTC="$(date -u +%F)"
+          TARGET_UTC="${TODAY_UTC}T12:12:00Z"
+          TARGET_EPOCH="$(date -u -d "${TARGET_UTC}" +%s)"
+          NOW_EPOCH="$(date -u +%s)"
+          WAIT_SEC=$(( TARGET_EPOCH - NOW_EPOCH ))
+          if [ "${WAIT_SEC}" -gt 0 ]; then
+            sleep "${WAIT_SEC}"
+          fi
+
+          PUBLISHED_AT_UTC="$(date -u +%FT%TZ)"
+          PUBLISHED_EPOCH="$(date -u +%s)"
+          DELAY_SEC=$(( PUBLISHED_EPOCH - TARGET_EPOCH ))
+          if [ "${DELAY_SEC}" -lt 0 ]; then DELAY_SEC=0; fi
+
+          if [ "${DELAY_SEC}" -le 120 ]; then
+            SLO_STATUS="OK"
+          else
+            SLO_STATUS="VIOLATION"
+          fi
+
+          {
+            echo "PUBLISHED_AT_UTC=${PUBLISHED_AT_UTC}"
+            echo "PUBLISH_TARGET_UTC=${TARGET_UTC}"
+            echo "PUBLISH_DELAY_SEC=${DELAY_SEC}"
+            echo "PUBLISH_SLO_STATUS=${SLO_STATUS}"
+          } >> "$GITHUB_ENV"
+          echo "publish_gate target=${TARGET_UTC} published_at_utc=${PUBLISHED_AT_UTC} delay_sec=${DELAY_SEC} SLO=${SLO_STATUS}"
+
       - name: Generate daily_input.env from Bitget read-only snapshot
         env:
           BITGET_API_KEY: ${{ secrets.BITGET_API_KEY }}
@@ -42,6 +85,7 @@ jobs:
         env:
           DRY_RUN: "0"
           DAILY_CUTOFF_JST: "09:00"
+          PUBLISHED_AT_UTC: ${{ env.PUBLISHED_AT_UTC }}
         run: |
           python scripts/run_daily.py
 
@@ -112,6 +156,10 @@ jobs:
         if: ${{ always() }}
         run: |
           echo "EXPECTED_DATE_UTC=$(date -u +%F)" >> "$GITHUB_ENV"
+          echo "PUBLISHED_AT_UTC=${PUBLISHED_AT_UTC:-UNAVAILABLE}" >> "$GITHUB_ENV"
+          echo "PUBLISH_TARGET_UTC=${PUBLISH_TARGET_UTC:-UNAVAILABLE}" >> "$GITHUB_ENV"
+          echo "PUBLISH_DELAY_SEC=${PUBLISH_DELAY_SEC:-UNAVAILABLE}" >> "$GITHUB_ENV"
+          echo "PUBLISH_SLO_STATUS=${PUBLISH_SLO_STATUS:-UNAVAILABLE}" >> "$GITHUB_ENV"
           python - <<'PY'
           import json
           from pathlib import Path
@@ -128,6 +176,7 @@ jobs:
           with open(".run_ctx.env", "w", encoding="utf-8") as f:
               f.write(f"ACTUAL_LATEST_DATE={latest_date}\n")
               f.write(f"LATEST_UPDATED_AT_UTC={latest_updated}\n")
+              f.write(f"PUBLISHED_AT_UTC={latest.get('published_at_utc','UNAVAILABLE') if isinstance(latest, dict) else 'UNAVAILABLE'}\n")
           PY
           cat .run_ctx.env >> "$GITHUB_ENV"
 
