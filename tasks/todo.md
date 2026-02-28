@@ -10,3 +10,4 @@
 - Daily Archive Update を 12:05 UTC 起動 + 12:12 UTC publish gate に変更し、定刻公開の前提を固定。
 - run-daily に publish SLO ログ（PUBLISHED_AT_UTC / PUBLISH_DELAY_SEC / PUBLISH_SLO_STATUS）を追加。
 - concurrency を cancel-in-progress=false に変更し、sleep中の重複実行競合を抑止。
+- schedule実行時のみ FORCE_TODAY=1 を注入し、同日手動runが先行しても12:12定刻runで当日エントリを再確定するよう補強。

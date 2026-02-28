@@ -40,6 +40,7 @@ jobs:
               echo "PUBLISH_TARGET_UTC=MANUAL"
               echo "PUBLISH_DELAY_SEC=0"
               echo "PUBLISH_SLO_STATUS=MANUAL"
+              echo "FORCE_TODAY=0"
             } >> "$GITHUB_ENV"
             echo "publish_gate mode=manual published_at_utc=${NOW_UTC} delay_sec=0 SLO=MANUAL"
             exit 0
@@ -70,6 +71,7 @@ jobs:
             echo "PUBLISH_TARGET_UTC=${TARGET_UTC}"
             echo "PUBLISH_DELAY_SEC=${DELAY_SEC}"
             echo "PUBLISH_SLO_STATUS=${SLO_STATUS}"
+            echo "FORCE_TODAY=1"
           } >> "$GITHUB_ENV"
           echo "publish_gate target=${TARGET_UTC} published_at_utc=${PUBLISHED_AT_UTC} delay_sec=${DELAY_SEC} SLO=${SLO_STATUS}"
 
