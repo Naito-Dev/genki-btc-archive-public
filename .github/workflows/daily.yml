@@ -178,7 +178,7 @@ jobs:
           python - <<'PY'
           import json, os
           from pathlib import Path
-          expected = os.environ["EXPECTED_DATE_UTC"]
+          expected = os.environ.get("EXPECTED_DATE_UTC", "").strip()
           p = Path("log.json")
           latest_date = "UNAVAILABLE"
           latest_updated = "UNAVAILABLE"
@@ -192,6 +192,9 @@ jobs:
           with open(".missed_ctx.env", "w", encoding="utf-8") as f:
               f.write(f"ACTUAL_LATEST_DATE={latest_date}\n")
               f.write(f"LATEST_UPDATED_AT_UTC={latest_updated}\n")
+          if not expected:
+              print("ERROR: EXPECTED_DATE_UTC is missing")
+              raise SystemExit(1)
           if latest_date != expected:
               raise SystemExit(1)
           PY
@@ -226,5 +229,9 @@ jobs:
           )
           data = json.dumps({"content": msg}).encode("utf-8")
           req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"}, method="POST")
-          urllib.request.urlopen(req, timeout=10).read()
+          try:
+              urllib.request.urlopen(req, timeout=10).read()
+          except Exception as e:
+              print(f"WARN: missed-run-check Discord notify failed: {type(e).__name__}: {e}")
+              raise SystemExit(0)
           PY
