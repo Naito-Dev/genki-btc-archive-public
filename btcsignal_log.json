@@ -52686,8 +52686,8 @@
     {
       "date": "2026-02-28",
       "state": "CASH",
-      "close": 65901.7,
-      "sma50": 85336.08,
+      "close": 63958.09,
+      "sma50": 85297.2,
       "reason": "crash_breaker_fired",
       "model": "D",
       "meta": {
@@ -52695,9 +52695,26 @@
         "consec_above_ema": 0,
         "last_switch_idx": 2976,
         "hold_start_idx": -1,
-        "ema20": 74801.37,
-        "ma100": 89033.56,
-        "atr20_ratio": 0.0289
+        "ema20": 74616.26,
+        "ma100": 89014.12,
+        "atr20_ratio": 0.0313
+      }
+    },
+    {
+      "date": "2026-03-01",
+      "state": "CASH",
+      "close": 66332.0,
+      "sma50": 84874.12,
+      "reason": "crash_breaker_fired",
+      "model": "D",
+      "meta": {
+        "mode": "PROBATION",
+        "consec_above_ema": 0,
+        "last_switch_idx": 2976,
+        "hold_start_idx": -1,
+        "ema20": 73827.29,
+        "ma100": 88611.61,
+        "atr20_ratio": 0.0318
       }
     }
   ]
