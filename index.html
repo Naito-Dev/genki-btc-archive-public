@@ -121,15 +121,6 @@
       max-width: 88%;
       display: none;
     }
-    .action-panel__change {
-      margin: 6px auto 0;
-      font-size: 11px;
-      line-height: 1.25;
-      color: rgba(208, 220, 242, .72);
-      text-align: center;
-      max-width: 88%;
-      display: block;
-    }
     .action-panel__stale {
       margin: 0 auto;
       font-size: 10px;
@@ -521,7 +512,6 @@
         <div class="action-panel__body">
           <div id="actionSignal" class="action-panel__signal">Unavailable</div>
           <p id="actionReason" class="action-panel__reason">Verification check incomplete. No action taken.</p>
-          <p id="actionChange" class="action-panel__change">Change: -</p>
           <p id="dataPending" class="action-panel__stale">Data update pending</p>
         </div>
         <div class="action-panel__metaDock">
@@ -1094,13 +1084,6 @@
 
       const displayAction = mapBtcsignalState(btLatest?.state);
       const displayReason = mapBtReason(btLatest?.reason);
-      let displayChange = "Change: -";
-      if (btEntries.length >= 2) {
-        const prevAction = mapBtcsignalState(btEntries[btEntries.length - 2]?.state);
-        if (displayAction !== "unavailable" && prevAction !== "unavailable") {
-          displayChange = displayAction === prevAction ? "Change: No change" : "Change: Changed";
-        }
-      }
 
       const actionEl = document.getElementById("actionSignal");
       actionEl.textContent = displayAction;
@@ -1109,8 +1092,6 @@
 
       const reasonEl = document.getElementById("actionReason");
       if (reasonEl) reasonEl.textContent = displayReason;
-      const changeEl = document.getElementById("actionChange");
-      if (changeEl) changeEl.textContent = displayChange;
 
       const cycleDate = toDateOnly(latest?.date);
       const signalUpdated = latest?.published_at_utc || "unavailable";
@@ -1174,8 +1155,6 @@
       document.getElementById("actionSignal").textContent = "unavailable";
       const reasonEl = document.getElementById("actionReason");
       if (reasonEl) reasonEl.textContent = "Verification data unavailable. No action taken.";
-      const changeEl = document.getElementById("actionChange");
-      if (changeEl) changeEl.textContent = "Change: -";
       const staleEl = document.getElementById("dataPending");
       if (staleEl) staleEl.style.display = "none";
     });
