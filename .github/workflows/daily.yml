@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: daily-archive-update
@@ -136,23 +137,45 @@ jobs:
         run: |
           python scripts/notify_x_draft_discord.py --ops-status PASS
 
-      - name: Commit and push if changed
+      - name: Stage tracked output files
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json btcsignal_log.json btcsignal_log_live.json
           [ -f data/live_test_baseline.json ] && git add data/live_test_baseline.json || true
           [ -f data/btcsignal_execution_log.csv ] && git add data/btcsignal_execution_log.csv || true
           [ -f data/btcsignal_execute_state.json ] && git add data/btcsignal_execute_state.json || true
 
+      - name: Detect staged changes
+        id: changes
+        run: |
           if git diff --cached --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."
-            exit 0
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
-          git commit -m "chore: daily log update"
-          git push
+      - name: Create PR for daily update
+        if: steps.changes.outputs.has_changes == 'true'
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: daily log update"
+          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          branch: "automation/daily-log-update-${{ github.run_id }}"
+          base: "main"
+          delete-branch: true
+          title: "chore: daily log update"
+          body: |
+            Automated daily archive update.
+
+      - name: Enable auto-merge (squash)
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --auto --squash --delete-branch
 
       - name: Collect run context
         if: ${{ always() }}
