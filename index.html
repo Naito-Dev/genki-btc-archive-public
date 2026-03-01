@@ -121,6 +121,15 @@
       max-width: 88%;
       display: none;
     }
+    .action-panel__change {
+      margin: 6px auto 0;
+      font-size: 11px;
+      line-height: 1.25;
+      color: rgba(208, 220, 242, .72);
+      text-align: center;
+      max-width: 88%;
+      display: block;
+    }
     .action-panel__stale {
       margin: 0 auto;
       font-size: 10px;
@@ -510,8 +519,9 @@
         <div class="action-panel__trustPills">
         </div>
         <div class="action-panel__body">
-          <div id="actionSignal" class="action-panel__signal">Wait</div>
+          <div id="actionSignal" class="action-panel__signal">Unavailable</div>
           <p id="actionReason" class="action-panel__reason">Verification check incomplete. No action taken.</p>
+          <p id="actionChange" class="action-panel__change">Change: -</p>
           <p id="dataPending" class="action-panel__stale">Data update pending</p>
         </div>
         <div class="action-panel__metaDock">
@@ -836,71 +846,8 @@
       if (mode === "sync" && key === "SYNCED") return "Synced";
       if (key === "DATA_STALE") return "Safety Hold (Market Data Unstable)";
       if (key === "API_ERROR") return "Risk Isolated (Connection Issue)";
-      if (key === "NO_TRADE" || key === "WAIT") return "Awaiting Conditions";
+      if (key === "NO_TRADE" || key === "WAIT") return "Conditions Not Met";
       return v;
-    }
-
-    function mapStatusLabelForDecision(raw) {
-      if (raw === null || raw === undefined || raw === "") return "UNAVAILABLE";
-      const v = String(raw).trim();
-      const key = v.toUpperCase();
-      if (key === "NO_TRADE" || key === "WAIT" || key === "AWAITING CONDITIONS") return "WAIT";
-      if (key === "DATA_STALE" || key === "API_ERROR" || key === "SAFETY HOLD" || key.startsWith("SAFETY HOLD")) return "SAFETY HOLD";
-      if (key === "BULLISH") return "BULLISH";
-      if (key === "STRONG BULLISH" || key === "STRONG_BULLISH") return "STRONG BULLISH";
-      return key;
-    }
-
-    function normalizeErrorType(latest) {
-      const candidates = [
-        latest?.error_type,
-        latest?.reason_code,
-      ];
-      const text = candidates.filter(Boolean).join(" ").toUpperCase();
-      if (text.includes("DRYRUN_PRICE_UNAVAILABLE") || text.includes("UNKNOWN_PRICE_STALE")) return "DRYRUN_PRICE_UNAVAILABLE";
-      if (text.includes("OPEN_ORDERS_EXIST")) return "OPEN_ORDERS_EXIST";
-      if (text.includes("OPEN_ORDERS_CHECK_FAILED")) return "OPEN_ORDERS_CHECK_FAILED";
-      if (text.includes("INVALID_STATE")) return "INVALID_STATE";
-      return "";
-    }
-
-    function normalizeSyncStatus(latest) {
-      const sync = String(latest?.snapshot_status || "").toUpperCase();
-      if (sync === "SYNC_PENDING") return "SYNC_PENDING";
-      if (sync === "SYNCED") return "SYNCED";
-      return "";
-    }
-
-    function getDisplayReason(statusLabel, errorType, syncStatus, hasData = true) {
-      if (!hasData) return "Verification data unavailable. No action taken.";
-      const st = String(statusLabel || "").toUpperCase();
-      const err = String(errorType || "").toUpperCase();
-      if (st === "WAIT") {
-        if (err === "DRYRUN_PRICE_UNAVAILABLE") return "Defensive posture due to data instability.";
-        if (err === "OPEN_ORDERS_EXIST") return "Defensive posture while existing orders are being verified.";
-        if (err === "OPEN_ORDERS_CHECK_FAILED") return "Defensive posture due to exchange verification issue.";
-        if (err === "INVALID_STATE") return "Defensive posture due to system state verification.";
-        if (String(syncStatus || "").toUpperCase() === "SYNC_PENDING") return "Verification check incomplete. No action taken.";
-        return "Criteria not met. No position adjustment.";
-      }
-      return "Verification check incomplete. No action taken.";
-    }
-
-    function runReasonMappingSelfTest() {
-      const tests = [
-        { input: ["WAIT", "DRYRUN_PRICE_UNAVAILABLE", "", true], expected: "Defensive posture due to data instability." },
-        { input: ["WAIT", "OPEN_ORDERS_EXIST", "", true], expected: "Defensive posture while existing orders are being verified." },
-        { input: ["WAIT", "OPEN_ORDERS_CHECK_FAILED", "", true], expected: "Defensive posture due to exchange verification issue." },
-        { input: ["WAIT", "INVALID_STATE", "", true], expected: "Defensive posture due to system state verification." },
-        { input: ["WAIT", "", "SYNC_PENDING", true], expected: "Verification check incomplete. No action taken." },
-        { input: ["WAIT", "", "", true], expected: "Criteria not met. No position adjustment." },
-        { input: ["WAIT", "", "", false], expected: "Verification data unavailable. No action taken." },
-      ];
-      const result = tests.map((t) => ({
-        input: t.input,
-        ok: getDisplayReason(...t.input) === t.expected,
-      }));
-      console.debug("[REASON_MAPPING_TEST]", result);
     }
 
     function formatRecentBtcPrice(raw) {
@@ -1147,6 +1094,13 @@
 
       const displayAction = mapBtcsignalState(btLatest?.state);
       const displayReason = mapBtReason(btLatest?.reason);
+      let displayChange = "Change: -";
+      if (btEntries.length >= 2) {
+        const prevAction = mapBtcsignalState(btEntries[btEntries.length - 2]?.state);
+        if (displayAction !== "unavailable" && prevAction !== "unavailable") {
+          displayChange = displayAction === prevAction ? "Change: No change" : "Change: Changed";
+        }
+      }
 
       const actionEl = document.getElementById("actionSignal");
       actionEl.textContent = displayAction;
@@ -1155,6 +1109,8 @@
 
       const reasonEl = document.getElementById("actionReason");
       if (reasonEl) reasonEl.textContent = displayReason;
+      const changeEl = document.getElementById("actionChange");
+      if (changeEl) changeEl.textContent = displayChange;
 
       const cycleDate = toDateOnly(latest?.date);
       const signalUpdated = latest?.published_at_utc || "unavailable";
@@ -1213,12 +1169,13 @@
       renderAudit(log, latest, btLog);
     }
 
-    runReasonMappingSelfTest();
     load().catch((e) => {
       console.error(e);
-      document.getElementById("actionSignal").textContent = "WAIT";
+      document.getElementById("actionSignal").textContent = "unavailable";
       const reasonEl = document.getElementById("actionReason");
       if (reasonEl) reasonEl.textContent = "Verification data unavailable. No action taken.";
+      const changeEl = document.getElementById("actionChange");
+      if (changeEl) changeEl.textContent = "Change: -";
       const staleEl = document.getElementById("dataPending");
       if (staleEl) staleEl.style.display = "none";
     });
