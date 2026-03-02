@@ -1,0 +1,102 @@
+name: Substack Status Monitor
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  monitor-heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate substack status heartbeat freshness
+        id: heartbeat
+        run: |
+          python3 - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          p = Path("substack/status.json")
+          if not p.exists():
+              print("HEARTBEAT_STALE=1")
+              print("HEARTBEAT_REASON=status.json missing")
+              raise SystemExit(1)
+
+          j = json.loads(p.read_text(encoding="utf-8"))
+          run_utc = str(j.get("run_utc") or "").strip()
+          if not run_utc:
+              print("HEARTBEAT_STALE=1")
+              print("HEARTBEAT_REASON=run_utc missing")
+              raise SystemExit(1)
+
+          dt = datetime.fromisoformat(run_utc.replace("Z", "+00:00"))
+          now = datetime.now(timezone.utc)
+          age_sec = int((now - dt).total_seconds())
+          print(f"HEARTBEAT_AGE_SEC={age_sec}")
+          if age_sec > 86400:
+              print("HEARTBEAT_STALE=1")
+              print(f"HEARTBEAT_REASON=stale>{age_sec}s")
+              raise SystemExit(1)
+
+          print("HEARTBEAT_STALE=0")
+          print("HEARTBEAT_REASON=ok")
+          PY
+
+      - name: Notify Discord on stale heartbeat (>24h)
+        if: ${{ failure() }}
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
+          RUN_ID: ${{ github.run_id }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          from pathlib import Path
+
+          webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
+          if not webhook:
+              raise SystemExit(0)
+
+          age = "unknown"
+          reason = "unknown"
+          p = Path("substack/status.json")
+          if p.exists():
+              try:
+                  j = json.loads(p.read_text(encoding="utf-8"))
+                  run_utc = j.get("run_utc", "unknown")
+                  status = j.get("status", "unknown")
+                  age = run_utc
+                  reason = status
+              except Exception:
+                  pass
+
+          msg = (
+              "⚠️ Substack heartbeat stale (>24h)\n"
+              f"workflow={os.environ.get('WORKFLOW_NAME')}\n"
+              f"run_id={os.environ.get('RUN_ID')}\n"
+              f"last_run_utc={age}\n"
+              f"status={reason}\n"
+              "reason=substack_status_stale"
+          )
+          data = json.dumps({"content": msg}).encode("utf-8")
+          req = urllib.request.Request(
+              webhook,
+              data=data,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              urllib.request.urlopen(req, timeout=10).read()
+          except Exception:
+              raise SystemExit(0)
+          PY
