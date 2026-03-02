@@ -1,8 +1,6 @@
 name: Substack Weekly Ops Draft
 
 on:
-  schedule:
-    - cron: "0 11 * * 3" # Wednesday 20:00 JST
   workflow_dispatch:
 
 permissions:
