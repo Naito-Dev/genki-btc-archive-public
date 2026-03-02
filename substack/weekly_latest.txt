@@ -1,0 +1,13 @@
+[SUBSTACK_WEEKLY]
+Subject: Weekly Ops • week ending 2026-03-02
+
+Body:
+Window: last 7 days (ending 2026-03-02)
+Days published: 6/7
+Missing days: 1
+Missing: 2026-03-02
+Delay: data unavailable
+
+Record-only. No prediction. No reasoning. No advice. Not investment advice.
+Public: https://btcsignal.org
+[/SUBSTACK_WEEKLY]

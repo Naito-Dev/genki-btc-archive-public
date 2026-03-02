@@ -1,0 +1,70 @@
+name: Substack Weekly Ops Draft
+
+on:
+  schedule:
+    - cron: "0 11 * * 3" # Wednesday 20:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: substack-weekly-draft
+  cancel-in-progress: false
+
+jobs:
+  generate-weekly-substack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate Substack Weekly Ops draft
+        run: |
+          python scripts/generate_substack_weekly.py
+
+      - name: Stage weekly output
+        run: |
+          [ -f substack/weekly_latest.txt ] && git add substack/weekly_latest.txt || true
+
+      - name: Detect staged changes
+        id: changes
+        run: |
+          if git diff --cached --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to commit."
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create PR for weekly draft update
+        if: steps.changes.outputs.has_changes == 'true'
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update weekly substack draft"
+          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          branch: "automation/substack-weekly-${{ github.run_id }}"
+          base: "main"
+          delete-branch: true
+          title: "chore: update weekly substack draft"
+          body: |
+            Automated weekly Substack Ops draft update.
+
+      - name: Enable auto-merge (squash)
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --auto --squash --delete-branch
