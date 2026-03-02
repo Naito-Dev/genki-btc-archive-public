@@ -137,9 +137,14 @@ jobs:
         run: |
           python scripts/notify_x_draft_discord.py --ops-status PASS
 
+      - name: Generate Substack Daily draft
+        run: |
+          python scripts/generate_substack_daily.py
+
       - name: Stage tracked output files
         run: |
           git add log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json btcsignal_log.json btcsignal_log_live.json
+          [ -f substack/daily_latest.txt ] && git add substack/daily_latest.txt || true
           [ -f data/live_test_baseline.json ] && git add data/live_test_baseline.json || true
           [ -f data/btcsignal_execution_log.csv ] && git add data/btcsignal_execution_log.csv || true
           [ -f data/btcsignal_execute_state.json ] && git add data/btcsignal_execute_state.json || true
