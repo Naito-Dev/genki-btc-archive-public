@@ -52716,6 +52716,23 @@
         "ma100": 88611.61,
         "atr20_ratio": 0.0318
       }
+    },
+    {
+      "date": "2026-03-02",
+      "state": "CASH",
+      "close": 65973.0,
+      "sma50": 84440.2,
+      "reason": "crash_breaker_fired",
+      "model": "D",
+      "meta": {
+        "mode": "PROBATION",
+        "consec_above_ema": 0,
+        "last_switch_idx": 2976,
+        "hold_start_idx": -1,
+        "ema20": 73079.26,
+        "ma100": 88256.37,
+        "atr20_ratio": 0.0323
+      }
     }
   ]
 }
