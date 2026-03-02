@@ -23,3 +23,8 @@ Updated: 2026-03-02
 - If `substack/status.json` is older than 24 hours, it fails and sends Discord alert.
 - Auto-heal: when stale is detected and cooldown allows, monitor dispatches one `Daily Archive Update` run automatically.
 - Loop guard: `substack/autoheal.json` stores `last_autoheal_utc`; monitor will not auto-heal again within 24 hours.
+
+## Weekly proof policy (Phase 0)
+- Weekly proof automation is disabled during Phase0.
+- Re-enable only after 60 consecutive days of stable daily runs.
+- Weekly proof must be isolated in its own workflow and must never block daily.
