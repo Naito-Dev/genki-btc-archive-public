@@ -66,3 +66,43 @@ Record-only. No prediction. No reasoning. No advice. Not investment advice.
 Public: https://btcsignal.org
 [/SUBSTACK_DAILY]
 ```
+
+## Substack Weekly Ops generation spec (genki-ops-bot)
+- Goal:
+  - Generate one weekly Substack-ready block focused on operational health only.
+  - No market commentary. Record-only style.
+  - Keep metrics minimal and instantly readable.
+- Trigger:
+  - Run every Wednesday at 20:00 JST.
+  - Window is last 7 days including run date.
+- Required inputs from public record:
+  - `days_published` = number of days with a record in the 7-day window
+  - `missing_days` = `7 - days_published`
+  - `max_delay_sec` = maximum `delay_sec` in the 7-day window (if available)
+- Missing delay data rule:
+  - If no `delay_sec` values are available in the window, output `Delay: data unavailable`.
+- Missing day rule:
+  - If `missing_days > 0`, print one line listing missing dates in `YYYY-MM-DD`.
+- Hard constraints:
+  - No prediction, no reasoning, no recommendations, no improvement proposals.
+  - Facts only.
+
+### Required output format (strict)
+```text
+[SUBSTACK_WEEKLY]
+Subject: Weekly Ops • week ending {YYYY-MM-DD}
+
+Body:
+Window: last 7 days (ending {YYYY-MM-DD})
+Days published: {X}/7
+Missing days: {Y}
+{IF Y>0: Missing: YYYY-MM-DD, ...}
+{Delay line one of the following:}
+- Max delay: {N} sec
+or
+- Delay: data unavailable
+
+Record-only. No prediction. No reasoning. No advice. Not investment advice.
+Public: https://btcsignal.org
+[/SUBSTACK_WEEKLY]
+```
