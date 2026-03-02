@@ -21,3 +21,5 @@ Updated: 2026-03-02
 ## Silent-stall prevention
 - `Substack Status Monitor` runs every 6 hours.
 - If `substack/status.json` is older than 24 hours, it fails and sends Discord alert.
+- Auto-heal: when stale is detected and cooldown allows, monitor dispatches one `Daily Archive Update` run automatically.
+- Loop guard: `substack/autoheal.json` stores `last_autoheal_utc`; monitor will not auto-heal again within 24 hours.

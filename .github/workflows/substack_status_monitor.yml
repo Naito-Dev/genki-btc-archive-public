@@ -6,7 +6,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
+  actions: write
 
 jobs:
   monitor-heartbeat:
@@ -24,68 +26,94 @@ jobs:
           import json
           from datetime import datetime, timezone
           from pathlib import Path
+          import os
 
+          out = Path(os.environ["GITHUB_OUTPUT"])
           p = Path("substack/status.json")
-          if not p.exists():
-              print("HEARTBEAT_STALE=1")
-              print("HEARTBEAT_REASON=status.json missing")
-              raise SystemExit(1)
-
-          j = json.loads(p.read_text(encoding="utf-8"))
-          run_utc = str(j.get("run_utc") or "").strip()
-          if not run_utc:
-              print("HEARTBEAT_STALE=1")
-              print("HEARTBEAT_REASON=run_utc missing")
-              raise SystemExit(1)
-
-          dt = datetime.fromisoformat(run_utc.replace("Z", "+00:00"))
+          autoheal = Path("substack/autoheal.json")
           now = datetime.now(timezone.utc)
-          age_sec = int((now - dt).total_seconds())
-          print(f"HEARTBEAT_AGE_SEC={age_sec}")
-          if age_sec > 86400:
-              print("HEARTBEAT_STALE=1")
-              print(f"HEARTBEAT_REASON=stale>{age_sec}s")
-              raise SystemExit(1)
 
-          print("HEARTBEAT_STALE=0")
-          print("HEARTBEAT_REASON=ok")
+          stale = False
+          reason = "ok"
+          age_sec = -1
+          last_run_utc = "unknown"
+
+          if not p.exists():
+              stale = True
+              reason = "status.json missing"
+          else:
+              try:
+                  j = json.loads(p.read_text(encoding="utf-8"))
+                  run_utc = str(j.get("run_utc") or "").strip()
+                  last_run_utc = run_utc or "unknown"
+                  if not run_utc:
+                      stale = True
+                      reason = "run_utc missing"
+                  else:
+                      dt = datetime.fromisoformat(run_utc.replace("Z", "+00:00"))
+                      age_sec = int((now - dt).total_seconds())
+                      if age_sec > 86400:
+                          stale = True
+                          reason = f"stale>{age_sec}s"
+              except Exception as e:
+                  stale = True
+                  reason = f"status parse error: {type(e).__name__}"
+
+          can_autoheal = False
+          last_autoheal_utc = "none"
+          autoheal_age_sec = -1
+          if stale:
+              if autoheal.exists():
+                  try:
+                      aj = json.loads(autoheal.read_text(encoding="utf-8"))
+                      ts = str(aj.get("last_autoheal_utc") or "").strip()
+                      last_autoheal_utc = ts or "none"
+                      if ts:
+                          adt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                          autoheal_age_sec = int((now - adt).total_seconds())
+                          can_autoheal = autoheal_age_sec > 86400
+                      else:
+                          can_autoheal = True
+                  except Exception:
+                      can_autoheal = True
+              else:
+                  can_autoheal = True
+
+          with out.open("a", encoding="utf-8") as f:
+              f.write(f"stale={'true' if stale else 'false'}\n")
+              f.write(f"reason={reason}\n")
+              f.write(f"age_sec={age_sec}\n")
+              f.write(f"last_run_utc={last_run_utc}\n")
+              f.write(f"can_autoheal={'true' if can_autoheal else 'false'}\n")
+              f.write(f"last_autoheal_utc={last_autoheal_utc}\n")
+              f.write(f"autoheal_age_sec={autoheal_age_sec}\n")
           PY
 
       - name: Notify Discord on stale heartbeat (>24h)
-        if: ${{ failure() }}
+        if: ${{ steps.heartbeat.outputs.stale == 'true' }}
         continue-on-error: true
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
           RUN_ID: ${{ github.run_id }}
           WORKFLOW_NAME: ${{ github.workflow }}
+          LAST_RUN_UTC: ${{ steps.heartbeat.outputs.last_run_utc }}
+          REASON: ${{ steps.heartbeat.outputs.reason }}
+          CAN_AUTOHEAL: ${{ steps.heartbeat.outputs.can_autoheal }}
         run: |
           python3 - <<'PY'
           import json, os, urllib.request
-          from pathlib import Path
 
           webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
           if not webhook:
               raise SystemExit(0)
 
-          age = "unknown"
-          reason = "unknown"
-          p = Path("substack/status.json")
-          if p.exists():
-              try:
-                  j = json.loads(p.read_text(encoding="utf-8"))
-                  run_utc = j.get("run_utc", "unknown")
-                  status = j.get("status", "unknown")
-                  age = run_utc
-                  reason = status
-              except Exception:
-                  pass
-
           msg = (
               "⚠️ Substack heartbeat stale (>24h)\n"
               f"workflow={os.environ.get('WORKFLOW_NAME')}\n"
               f"run_id={os.environ.get('RUN_ID')}\n"
-              f"last_run_utc={age}\n"
-              f"status={reason}\n"
+              f"last_run_utc={os.environ.get('LAST_RUN_UTC','unknown')}\n"
+              f"reason={os.environ.get('REASON','unknown')}\n"
+              f"autoheal_eligible={os.environ.get('CAN_AUTOHEAL','false')}\n"
               "reason=substack_status_stale"
           )
           data = json.dumps({"content": msg}).encode("utf-8")
@@ -100,3 +128,129 @@ jobs:
           except Exception:
               raise SystemExit(0)
           PY
+
+      - name: Trigger auto-heal dispatch (once per 24h)
+        if: ${{ steps.heartbeat.outputs.stale == 'true' && steps.heartbeat.outputs.can_autoheal == 'true' }}
+        id: dispatch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run "Daily Archive Update" --ref main
+          echo "triggered=true" >> "$GITHUB_OUTPUT"
+
+      - name: Write auto-heal marker
+        if: ${{ steps.heartbeat.outputs.stale == 'true' && steps.heartbeat.outputs.can_autoheal == 'true' }}
+        run: |
+          python3 - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          p = Path("substack/autoheal.json")
+          p.parent.mkdir(parents=True, exist_ok=True)
+          payload = {
+              "last_autoheal_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+              "triggered_by_run_id": "${{ github.run_id }}",
+              "reason": "${{ steps.heartbeat.outputs.reason }}",
+              "monitor_workflow": "${{ github.workflow }}",
+          }
+          p.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          print("OK: wrote substack/autoheal.json")
+          PY
+
+      - name: Create PR for auto-heal marker
+        if: ${{ steps.heartbeat.outputs.stale == 'true' && steps.heartbeat.outputs.can_autoheal == 'true' }}
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update substack autoheal marker"
+          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          branch: "automation/substack-autoheal-${{ github.run_id }}"
+          base: "main"
+          delete-branch: true
+          title: "chore: update substack autoheal marker"
+          body: |
+            Automated auto-heal marker update.
+          add-paths: |
+            substack/autoheal.json
+
+      - name: Enable auto-merge for auto-heal marker
+        if: ${{ steps.cpr.outputs.pull-request-number != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --auto --squash --delete-branch
+
+      - name: Notify Discord auto-heal dispatch result
+        if: ${{ steps.heartbeat.outputs.stale == 'true' && steps.heartbeat.outputs.can_autoheal == 'true' }}
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
+          RUN_ID: ${{ github.run_id }}
+          PR_URL: ${{ steps.cpr.outputs.pull-request-url || 'UNAVAILABLE' }}
+          DISPATCHED: ${{ steps.dispatch.outputs.triggered || 'false' }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
+          if not webhook:
+              raise SystemExit(0)
+          msg = (
+              "✅ Auto-heal dispatched Daily Archive Update\n"
+              f"monitor_run_id={os.environ.get('RUN_ID')}\n"
+              f"dispatched={os.environ.get('DISPATCHED','false')}\n"
+              f"autoheal_pr={os.environ.get('PR_URL','UNAVAILABLE')}\n"
+          )
+          data = json.dumps({"content": msg}).encode("utf-8")
+          req = urllib.request.Request(
+              webhook,
+              data=data,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              urllib.request.urlopen(req, timeout=10).read()
+          except Exception:
+              raise SystemExit(0)
+          PY
+
+      - name: Notify Discord when auto-heal suppressed (cooldown)
+        if: ${{ steps.heartbeat.outputs.stale == 'true' && steps.heartbeat.outputs.can_autoheal != 'true' }}
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
+          RUN_ID: ${{ github.run_id }}
+          LAST_AUTOHEAL_UTC: ${{ steps.heartbeat.outputs.last_autoheal_utc }}
+          AUTOHEAL_AGE_SEC: ${{ steps.heartbeat.outputs.autoheal_age_sec }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
+          if not webhook:
+              raise SystemExit(0)
+          msg = (
+              "⚠️ Auto-heal suppressed by 24h cooldown\n"
+              f"monitor_run_id={os.environ.get('RUN_ID')}\n"
+              f"last_autoheal_utc={os.environ.get('LAST_AUTOHEAL_UTC','none')}\n"
+              f"autoheal_age_sec={os.environ.get('AUTOHEAL_AGE_SEC','-1')}\n"
+          )
+          data = json.dumps({"content": msg}).encode("utf-8")
+          req = urllib.request.Request(
+              webhook,
+              data=data,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          try:
+              urllib.request.urlopen(req, timeout=10).read()
+          except Exception:
+              raise SystemExit(0)
+          PY
+
+      - name: Fail when stale and auto-heal not allowed
+        if: ${{ steps.heartbeat.outputs.stale == 'true' && steps.heartbeat.outputs.can_autoheal != 'true' }}
+        run: |
+          echo "stale heartbeat unresolved due to cooldown; manual action required"
+          exit 1
