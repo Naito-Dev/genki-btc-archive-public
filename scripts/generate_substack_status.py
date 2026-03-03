@@ -14,6 +14,7 @@ OUT = ROOT / "substack" / "status.json"
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Generate Substack status heartbeat")
     p.add_argument("--status", default="success", choices=["success", "failure", "cancelled"], help="GitHub job.status value")
+    p.add_argument("--reason", default="", help="explicit status reason override")
     p.add_argument("--in", dest="infile", default=str(LIVE_LOG))
     p.add_argument("--out", dest="outfile", default=str(OUT))
     p.add_argument("--run-id", default="")
@@ -49,8 +50,12 @@ def main() -> int:
     latest_date, latest_state, base_status = load_latest(src)
     status = base_status
     reason = ""
+    explicit_reason = (args.reason or "").strip()
 
-    if args.status != "success":
+    if explicit_reason:
+        status = "pipeline_failed"
+        reason = explicit_reason
+    elif args.status != "success":
         status = "pipeline_failed"
         reason = f"job_status={args.status}"
     elif base_status != "ok":

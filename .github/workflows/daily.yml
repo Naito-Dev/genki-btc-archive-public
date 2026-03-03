@@ -101,12 +101,24 @@ jobs:
           EOF
 
       - name: Run daily log update
+        id: run_daily
         env:
           DRY_RUN: "0"
           DAILY_CUTOFF_JST: "09:00"
           PUBLISHED_AT_UTC: ${{ env.PUBLISHED_AT_UTC }}
         run: |
-          python scripts/run_daily.py
+          set +e
+          python scripts/run_daily.py 2>&1 | tee .run_daily.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            chain_line="$(grep -n 'chain validation failed:' .run_daily.log | tail -n1 | sed 's/^.*chain validation failed: //')"
+            if [ -n "${chain_line}" ]; then
+              echo "CHAIN_FAIL_REASON=chain_broken:${chain_line}" >> "$GITHUB_ENV"
+            else
+              echo "CHAIN_FAIL_REASON=unknown" >> "$GITHUB_ENV"
+            fi
+          fi
+          exit "$rc"
 
       - name: Generate BTCSIGNAL daily proof (HOLD/CASH)
         run: |
@@ -160,7 +172,7 @@ jobs:
       - name: Generate Substack status heartbeat
         if: ${{ always() }}
         run: |
-          python scripts/generate_substack_status.py --status "${{ job.status }}" --run-id "${{ github.run_id }}" --workflow "${{ github.workflow }}"
+          python scripts/generate_substack_status.py --status "${{ job.status }}" --reason "${{ env.CHAIN_FAIL_REASON || '' }}" --run-id "${{ github.run_id }}" --workflow "${{ github.workflow }}"
 
       - name: Stage tracked output files
         if: ${{ always() }}
@@ -258,6 +270,8 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           WORKFLOW_NAME: ${{ github.workflow }}
           JOB_NAME: run-daily
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CHAIN_FAIL_REASON: ${{ env.CHAIN_FAIL_REASON || 'unknown' }}
           PR_URL: ${{ steps.cpr.outputs.pull-request-url || 'UNAVAILABLE' }}
         run: |
           python - <<'PY'
@@ -270,11 +284,12 @@ jobs:
               f"workflow={os.environ.get('WORKFLOW_NAME')}\n"
               f"job={os.environ.get('JOB_NAME')}\n"
               f"run_id={os.environ.get('RUN_ID')}\n"
+              f"run_url={os.environ.get('RUN_URL','UNAVAILABLE')}\n"
               f"pr_url={os.environ.get('PR_URL','UNAVAILABLE')}\n"
               f"expected_date_utc={os.environ.get('EXPECTED_DATE_UTC','UNAVAILABLE')}\n"
               f"actual_latest_date={os.environ.get('ACTUAL_LATEST_DATE','UNAVAILABLE')}\n"
               f"latest_updated_at_utc={os.environ.get('LATEST_UPDATED_AT_UTC','UNAVAILABLE')}\n"
-              f"reason=daily_run_failed"
+              f"reason={os.environ.get('CHAIN_FAIL_REASON','daily_run_failed')}"
           )
           data = json.dumps({"content": msg}).encode("utf-8")
           req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"}, method="POST")
