@@ -147,4 +147,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except Exception as exc:  # fail-open: daily publish must continue
+        write_pending(f"unexpected_error:{type(exc).__name__}")
+        print(f"PENDING: unexpected_error:{type(exc).__name__}")
+        raise SystemExit(0)

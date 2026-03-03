@@ -77,12 +77,28 @@ jobs:
           echo "publish_gate target=${TARGET_UTC} published_at_utc=${PUBLISHED_AT_UTC} delay_sec=${DELAY_SEC} SLO=${SLO_STATUS}"
 
       - name: Generate daily_input.env from Bitget read-only snapshot
+        continue-on-error: true
         env:
           BITGET_API_KEY: ${{ secrets.BITGET_API_KEY }}
           BITGET_API_SECRET: ${{ secrets.BITGET_API_SECRET }}
           BITGET_API_PASSPHRASE: ${{ secrets.BITGET_API_PASSPHRASE }}
         run: |
           python scripts/generate_daily_input_env.py
+
+      - name: Ensure daily_input.env fallback exists
+        run: |
+          if [ -f daily_input.env ]; then
+            exit 0
+          fi
+          NOW_UTC="$(date -u +%FT%TZ)"
+          cat > daily_input.env <<EOF
+          SNAPSHOT_STATUS=SYNC_PENDING
+          BALANCE_SOURCE=unavailable
+          BALANCE_TS_UTC=${NOW_UTC}
+          BTC_UNITS=
+          USDT_UNITS=
+          SNAPSHOT_REASON=daily_input_missing_after_bitget_step
+          EOF
 
       - name: Run daily log update
         env:
