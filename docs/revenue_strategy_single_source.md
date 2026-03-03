@@ -14,6 +14,10 @@
 - Fairness: published_at_utc is enforced for live phase (contract_start=2026-02-26, bootstrap exception recorded).
 - Paid is OFF during the 6-month validation period.
 
+## Phase 0 KPI Progress (as of 2026-03-03)
+- Audit PASS streak rule: `chain_integrity == "VALID"` (from `logs/*.json`)
+- Current Audit PASS streak: `8 days`
+
 ## Pricing & Packaging (Target)
 | Tier | Price | What the customer gets | Notes |
 |---|---:|---|---|

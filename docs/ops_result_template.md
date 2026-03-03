@@ -11,7 +11,8 @@
 - 対象: 09:00 / 21:00
 - 判定: PASS / FAIL
 - run_id: (取れた時のみ)
-- audit.pass:
+- audit_pass_rule: chain_integrity==VALID
+- chain_integrity:
 - sync_status: (21:00のみ)
 - 理由（FAIL時必須）:
 
