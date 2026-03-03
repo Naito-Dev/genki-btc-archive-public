@@ -754,7 +754,7 @@
       const limit = Math.min(recentVisibleCount, recentDecisionRows.length);
       const rows = recentDecisionRows.slice(0, limit);
       list.innerHTML = rows.length
-        ? rows.map((r) => `<li>${r.date} | ${r.status} | BTC ${r.btcPriceText}</li>`).join("")
+        ? rows.map((r) => `<li>${r.date} | ${r.status} | BTC/USD ${r.btcPriceText}</li>`).join("")
         : "<li>Unavailable</li>";
       if (moreBtn) {
         moreBtn.style.display = limit < recentDecisionRows.length ? "inline-flex" : "none";
