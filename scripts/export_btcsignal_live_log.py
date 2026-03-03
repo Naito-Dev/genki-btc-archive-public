@@ -53,6 +53,16 @@ def is_valid_iso_utc_z(v: str) -> bool:
     return True
 
 
+def parse_finite_number(v):
+    if v is None:
+        return None
+    try:
+        n = float(v)
+    except Exception:
+        return None
+    return n if n == n and n not in (float("inf"), float("-inf")) else None
+
+
 def build_core_published_map(core_log: dict) -> dict[str, str]:
     out: dict[str, str] = {}
     rows = core_log.get("entries", []) if isinstance(core_log, dict) else []
@@ -94,6 +104,7 @@ def build_live_entries(entries: list[dict], core_published_map: dict[str, str]) 
                 "state": to_public_state(str(e.get("state") or "")),
                 "reason": reason or "unavailable",
                 "published_at_utc": published_at_utc,
+                "btc_usd": parse_finite_number(e.get("close")),
             }
         )
     return out, exceptions
