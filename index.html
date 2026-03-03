@@ -597,8 +597,8 @@
 
   <script>
     // Display source map (single-source integrity rules):
-    // - Status label: btcsignal_log.json.entries[-1].state -> BTC/CASH
-    // - Reason text: btcsignal_log.json.entries[-1].reason
+    // - Status label: btcsignal_log_live.json.entries[-1].state -> BTC/CASH
+    // - Reason text: btcsignal_log_live.json.entries[-1].reason
     // - Signal Updated timestamp: log.json.latest.published_at_utc (strict; no fallback)
     // - LIVE TESTING Day N: TEST_START_DATE_JST + log.json.latest.date
     // - LIVE TESTING equity/P&L: data/live_portfolio_snapshot.json + data/live_test_baseline.json
@@ -724,7 +724,7 @@
     }
 
     async function fetchBtSignalLog() {
-      const res = await fetch(`btcsignal_log.json?ts=${Date.now()}`, { cache: "no-store" });
+      const res = await fetch(`btcsignal_log_live.json?ts=${Date.now()}`, { cache: "no-store" });
       if (!res.ok) throw new Error(`btcsignal_${res.status}`);
       return await res.json();
     }
@@ -735,7 +735,7 @@
         .map((e) => {
           const date = toDateOnly(e?.date);
           const status = mapBtcsignalState(e?.state);
-          const btcPrice = parseFiniteNumber(e?.close);
+          const btcPrice = parseFiniteNumber(e?.btc_usd);
           return { date, status, btcPrice };
         })
         .filter((r) => !!r.date && r.date >= TEST_START_DATE_JST && r.status !== "unavailable")
