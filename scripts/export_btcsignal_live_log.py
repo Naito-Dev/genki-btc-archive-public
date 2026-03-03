@@ -10,6 +10,7 @@ SRC = ROOT / "btcsignal_log.json"
 CORE_LOG = ROOT / "log.json"
 OUT = ROOT / "btcsignal_log_live.json"
 LIVE_CONTRACT_START_DATE = "2026-02-26"
+BOOTSTRAP_EXCEPTION_DATE = "2026-02-26"
 
 EXCLUDE_REASON_PATTERNS = (
     "data_warmup_seed",
@@ -69,8 +70,9 @@ def build_core_published_map(core_log: dict) -> dict[str, str]:
     return out
 
 
-def build_live_entries(entries: list[dict], core_published_map: dict[str, str]) -> list[dict]:
+def build_live_entries(entries: list[dict], core_published_map: dict[str, str]) -> tuple[list[dict], list[str]]:
     out: list[dict] = []
+    exceptions: list[str] = []
     for e in entries:
         reason = str(e.get("reason") or "").strip()
         if is_warmup(reason):
@@ -82,7 +84,9 @@ def build_live_entries(entries: list[dict], core_published_map: dict[str, str]) 
         published_at_utc = str(e.get("published_at_utc") or "").strip()
         if not is_valid_iso_utc_z(published_at_utc):
             published_at_utc = str(core_published_map.get(d10) or "").strip()
-        if d10 >= LIVE_CONTRACT_START_DATE and not is_valid_iso_utc_z(published_at_utc):
+        if d10 == BOOTSTRAP_EXCEPTION_DATE and not is_valid_iso_utc_z(published_at_utc):
+            exceptions.append(f"{BOOTSTRAP_EXCEPTION_DATE}: published_at_utc missing (bootstrap)")
+        elif d10 >= LIVE_CONTRACT_START_DATE and not is_valid_iso_utc_z(published_at_utc):
             raise ValueError(f"published_at_missing_or_invalid:{d10}")
         out.append(
             {
@@ -92,7 +96,7 @@ def build_live_entries(entries: list[dict], core_published_map: dict[str, str]) 
                 "published_at_utc": published_at_utc,
             }
         )
-    return out
+    return out, exceptions
 
 
 def main() -> int:
@@ -103,7 +107,7 @@ def main() -> int:
         entries = []
     core_published_map = build_core_published_map(core)
 
-    live_entries = build_live_entries(entries, core_published_map)
+    live_entries, contract_exceptions = build_live_entries(entries, core_published_map)
     live_start_date = live_entries[0]["date"] if live_entries else "unavailable"
 
     payload = {
@@ -114,6 +118,7 @@ def main() -> int:
             "excluded_reason_patterns": list(EXCLUDE_REASON_PATTERNS),
             "live_start_date": live_start_date,
             "live_contract_start_date": LIVE_CONTRACT_START_DATE,
+            "contract_exceptions": contract_exceptions,
             "live_entries_count": len(live_entries),
         },
         "entries": live_entries,
