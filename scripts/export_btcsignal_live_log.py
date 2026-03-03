@@ -7,7 +7,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "btcsignal_log.json"
+CORE_LOG = ROOT / "log.json"
 OUT = ROOT / "btcsignal_log_live.json"
+LIVE_CONTRACT_START_DATE = "2026-02-26"
 
 EXCLUDE_REASON_PATTERNS = (
     "data_warmup_seed",
@@ -50,7 +52,26 @@ def is_valid_iso_utc_z(v: str) -> bool:
     return True
 
 
-def build_live_entries(entries: list[dict]) -> list[dict]:
+def build_core_published_map(core_log: dict) -> dict[str, str]:
+    out: dict[str, str] = {}
+    rows = core_log.get("entries", []) if isinstance(core_log, dict) else []
+    if not isinstance(rows, list):
+        return out
+    for e in rows:
+        if not isinstance(e, dict):
+            continue
+        d = str(e.get("date") or "").strip()[:10]
+        if not d:
+            continue
+        ts = str(e.get("published_at_utc") or "").strip()
+        if not ts:
+            ts = str(e.get("timestamp_utc") or "").strip()
+        if is_valid_iso_utc_z(ts):
+            out[d] = ts
+    return out
+
+
+def build_live_entries(entries: list[dict], core_published_map: dict[str, str]) -> list[dict]:
     out: list[dict] = []
     for e in entries:
         reason = str(e.get("reason") or "").strip()
@@ -59,12 +80,15 @@ def build_live_entries(entries: list[dict]) -> list[dict]:
         date = str(e.get("date") or "").strip()
         if not date:
             continue
+        d10 = date[:10]
         published_at_utc = str(e.get("published_at_utc") or "").strip()
         if not is_valid_iso_utc_z(published_at_utc):
-            raise ValueError(f"published_at_missing_or_invalid:{date[:10]}")
+            published_at_utc = str(core_published_map.get(d10) or "").strip()
+        if d10 >= LIVE_CONTRACT_START_DATE and not is_valid_iso_utc_z(published_at_utc):
+            raise ValueError(f"published_at_missing_or_invalid:{d10}")
         out.append(
             {
-                "date": date[:10],
+                "date": d10,
                 "state": to_public_state(str(e.get("state") or "")),
                 "reason": reason or "unavailable",
                 "published_at_utc": published_at_utc,
@@ -75,11 +99,13 @@ def build_live_entries(entries: list[dict]) -> list[dict]:
 
 def main() -> int:
     src = load_json(SRC, {"entries": []})
+    core = load_json(CORE_LOG, {"entries": []})
     entries = src.get("entries", []) if isinstance(src, dict) else []
     if not isinstance(entries, list):
         entries = []
+    core_published_map = build_core_published_map(core)
 
-    live_entries = build_live_entries(entries)
+    live_entries = build_live_entries(entries, core_published_map)
     live_start_date = live_entries[0]["date"] if live_entries else "unavailable"
 
     payload = {
@@ -89,6 +115,7 @@ def main() -> int:
             "note": "warmup seed rows are excluded from this live decision log",
             "excluded_reason_patterns": list(EXCLUDE_REASON_PATTERNS),
             "live_start_date": live_start_date,
+            "live_contract_start_date": LIVE_CONTRACT_START_DATE,
             "live_entries_count": len(live_entries),
         },
         "entries": live_entries,
