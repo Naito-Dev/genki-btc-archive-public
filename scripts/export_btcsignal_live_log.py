@@ -64,8 +64,6 @@ def build_core_published_map(core_log: dict) -> dict[str, str]:
         if not d:
             continue
         ts = str(e.get("published_at_utc") or "").strip()
-        if not ts:
-            ts = str(e.get("timestamp_utc") or "").strip()
         if is_valid_iso_utc_z(ts):
             out[d] = ts
     return out
