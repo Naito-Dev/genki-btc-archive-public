@@ -523,7 +523,7 @@
 
       <section class="action-panel">
         <div class="action-panel__label">LAST CONFIRMED RECORD</div>
-        <div id="recordDate" class="action-panel__recordDate">Record date: unavailable (Yesterday’s confirmed record)</div>
+        <div id="recordDate" class="action-panel__recordDate">Date: unavailable</div>
         <div class="action-panel__trustPills">
         </div>
         <div class="action-panel__body">
@@ -533,7 +533,7 @@
         </div>
         <div class="action-panel__metaDock">
           <div id="metaPrice" class="meta-pill meta-pill--price">BTC $67,950.98</div>
-          <div id="metaUpdated" class="meta-pill meta-pill--updated">Record published unavailable</div>
+          <div id="metaUpdated" class="meta-pill meta-pill--updated" style="display:none"></div>
           <p class="meta-warning">Delayed record (not real-time). Not investment advice.</p>
         </div>
       </section>
@@ -642,17 +642,20 @@
       return `${y}-${m}-${day} ${hh}:${mm} UTC`;
     }
 
-    function findLastKnownPublishedAt(entries) {
-      if (!Array.isArray(entries) || entries.length === 0) return { value: null, isLastKnown: false };
+    function findDisplayEntry(entries) {
+      if (!Array.isArray(entries) || entries.length === 0) {
+        return { entry: null, hasPublished: false };
+      }
       for (let i = entries.length - 1; i >= 0; i -= 1) {
+        const row = entries[i];
         const ts = entries[i]?.published_at_utc;
         if (!ts) continue;
         const d = new Date(ts);
         if (Number.isFinite(d.getTime())) {
-          return { value: ts, isLastKnown: i !== entries.length - 1 };
+          return { entry: row, hasPublished: true };
         }
       }
-      return { value: null, isLastKnown: false };
+      return { entry: entries[entries.length - 1], hasPublished: false };
     }
 
     function isIsoDate(v) {
@@ -1124,7 +1127,8 @@
 
       const latest = log?.latest || {};
       const btEntries = Array.isArray(btLog?.entries) ? btLog.entries : [];
-      const btLatest = btEntries.length ? btEntries[btEntries.length - 1] : {};
+      const displayInfo = findDisplayEntry(btEntries);
+      const btLatest = displayInfo.entry || {};
 
       const displayAction = mapBtcsignalState(btLatest?.state);
       const displayReason = mapBtReason(btLatest?.reason);
@@ -1140,17 +1144,25 @@
       const recordDate = toDateOnly(btLatest?.date);
       const recordDateEl = document.getElementById("recordDate");
       if (recordDateEl) {
-        recordDateEl.textContent = `Record date: ${recordDate || "unavailable"} (Yesterday’s confirmed record)`;
+        recordDateEl.textContent = `Date: ${recordDate || "unavailable"}`;
       }
 
       const cycleDate = toDateOnly(latest?.date);
       // source of truth: published_at_utc (confirmed record time)
-      const publishedInfo = findLastKnownPublishedAt(btEntries);
+      const publishedAt = btLatest?.published_at_utc || null;
       const basePrice = parseFiniteNumber(latest?.btc_price);
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
-      const publishedText = fmtPublishedUtcStrict(publishedInfo.value);
-      const publishedSuffix = publishedInfo.isLastKnown && publishedText !== "unavailable" ? " (last known)" : "";
-      document.getElementById("metaUpdated").textContent = `Record published ${publishedText}${publishedSuffix}`;
+      const metaUpdatedEl = document.getElementById("metaUpdated");
+      const publishedText = fmtPublishedUtcStrict(publishedAt);
+      if (metaUpdatedEl) {
+        if (displayInfo.hasPublished && publishedText !== "unavailable") {
+          metaUpdatedEl.style.display = "inline-flex";
+          metaUpdatedEl.textContent = `Published: ${publishedText}`;
+        } else {
+          metaUpdatedEl.style.display = "none";
+          metaUpdatedEl.textContent = "";
+        }
+      }
 
       const staleEl = document.getElementById("dataPending");
       if (staleEl) staleEl.style.display = displayAction === "unavailable" ? "block" : "none";
