@@ -39,6 +39,17 @@ def is_warmup(reason: str) -> bool:
     return any(p in r for p in EXCLUDE_REASON_PATTERNS)
 
 
+def is_valid_iso_utc_z(v: str) -> bool:
+    s = str(v or "").strip()
+    if not s or not s.endswith("Z"):
+        return False
+    try:
+        datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except Exception:
+        return False
+    return True
+
+
 def build_live_entries(entries: list[dict]) -> list[dict]:
     out: list[dict] = []
     for e in entries:
@@ -48,11 +59,15 @@ def build_live_entries(entries: list[dict]) -> list[dict]:
         date = str(e.get("date") or "").strip()
         if not date:
             continue
+        published_at_utc = str(e.get("published_at_utc") or "").strip()
+        if not is_valid_iso_utc_z(published_at_utc):
+            raise ValueError(f"published_at_missing_or_invalid:{date[:10]}")
         out.append(
             {
                 "date": date[:10],
                 "state": to_public_state(str(e.get("state") or "")),
                 "reason": reason or "unavailable",
+                "published_at_utc": published_at_utc,
             }
         )
     return out

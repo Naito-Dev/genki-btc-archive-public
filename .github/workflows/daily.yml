@@ -113,9 +113,9 @@ jobs:
           if [ "$rc" -ne 0 ]; then
             chain_line="$(grep -n 'chain validation failed:' .run_daily.log | tail -n1 | sed 's/^.*chain validation failed: //')"
             if [ -n "${chain_line}" ]; then
-              echo "CHAIN_FAIL_REASON=chain_broken:${chain_line}" >> "$GITHUB_ENV"
+              echo "DAILY_FAIL_REASON=chain_broken:${chain_line}" >> "$GITHUB_ENV"
             else
-              echo "CHAIN_FAIL_REASON=unknown" >> "$GITHUB_ENV"
+              echo "DAILY_FAIL_REASON=unknown" >> "$GITHUB_ENV"
             fi
           fi
           exit "$rc"
@@ -125,8 +125,20 @@ jobs:
           python scripts/btcsignal_daily.py
 
       - name: Export BTCSIGNAL live decision log (seed excluded)
+        id: export_live
         run: |
-          python scripts/export_btcsignal_live_log.py
+          set +e
+          python scripts/export_btcsignal_live_log.py 2>&1 | tee .export_live.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            missing_line="$(grep -n 'published_at_missing_or_invalid:' .export_live.log | tail -n1 | sed 's/^.*published_at_missing_or_invalid:/published_at_missing:/')"
+            if [ -n "${missing_line}" ]; then
+              echo "DAILY_FAIL_REASON=${missing_line}" >> "$GITHUB_ENV"
+            else
+              echo "DAILY_FAIL_REASON=published_at_missing" >> "$GITHUB_ENV"
+            fi
+          fi
+          exit "$rc"
 
       - name: Ensure Live Testing baseline (2026-02-26)
         run: |
@@ -172,7 +184,7 @@ jobs:
       - name: Generate Substack status heartbeat
         if: ${{ always() }}
         run: |
-          python scripts/generate_substack_status.py --status "${{ job.status }}" --reason "${{ env.CHAIN_FAIL_REASON || '' }}" --run-id "${{ github.run_id }}" --workflow "${{ github.workflow }}"
+          python scripts/generate_substack_status.py --status "${{ job.status }}" --reason "${{ env.DAILY_FAIL_REASON || '' }}" --run-id "${{ github.run_id }}" --workflow "${{ github.workflow }}"
 
       - name: Stage tracked output files
         if: ${{ always() }}
@@ -271,7 +283,7 @@ jobs:
           WORKFLOW_NAME: ${{ github.workflow }}
           JOB_NAME: run-daily
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          CHAIN_FAIL_REASON: ${{ env.CHAIN_FAIL_REASON || 'unknown' }}
+          DAILY_FAIL_REASON: ${{ env.DAILY_FAIL_REASON || 'unknown' }}
           PR_URL: ${{ steps.cpr.outputs.pull-request-url || 'UNAVAILABLE' }}
         run: |
           python - <<'PY'
@@ -289,7 +301,7 @@ jobs:
               f"expected_date_utc={os.environ.get('EXPECTED_DATE_UTC','UNAVAILABLE')}\n"
               f"actual_latest_date={os.environ.get('ACTUAL_LATEST_DATE','UNAVAILABLE')}\n"
               f"latest_updated_at_utc={os.environ.get('LATEST_UPDATED_AT_UTC','UNAVAILABLE')}\n"
-              f"reason={os.environ.get('CHAIN_FAIL_REASON','daily_run_failed')}"
+              f"reason={os.environ.get('DAILY_FAIL_REASON','daily_run_failed')}"
           )
           data = json.dumps({"content": msg}).encode("utf-8")
           req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"}, method="POST")
