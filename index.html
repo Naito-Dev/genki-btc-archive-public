@@ -612,6 +612,18 @@
       return `${y}-${m}-${day} ${hh}:${mm} UTC`;
     }
 
+    function fmtPublishedUtcStrict(v) {
+      if (!v) return "unavailable";
+      const d = new Date(v);
+      if (!Number.isFinite(d.getTime())) return "unavailable";
+      const y = d.getUTCFullYear();
+      const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(d.getUTCDate()).padStart(2, "0");
+      const hh = String(d.getUTCHours()).padStart(2, "0");
+      const mm = String(d.getUTCMinutes()).padStart(2, "0");
+      return `${y}-${m}-${day} ${hh}:${mm} UTC`;
+    }
+
     function isIsoDate(v) {
       return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
     }
@@ -660,6 +672,7 @@
     function mapBtcsignalState(raw) {
       const k = String(raw || "").trim().toUpperCase();
       if (k === "HOLD") return "BTC";
+      if (k === "BTC") return "BTC";
       if (k === "CASH") return "CASH";
       return "unavailable";
     }
@@ -1073,7 +1086,7 @@
     async function load() {
       const [logRes, btLogRes] = await Promise.all([
         fetch(`log.json?ts=${Date.now()}`, { cache: "no-store" }),
-        fetch(`btcsignal_log.json?ts=${Date.now()}`, { cache: "no-store" }),
+        fetch(`btcsignal_log_live.json?ts=${Date.now()}`, { cache: "no-store" }),
       ]);
       const log = await logRes.json();
       const btLog = btLogRes.ok ? await btLogRes.json() : { entries: [] };
@@ -1094,10 +1107,11 @@
       if (reasonEl) reasonEl.textContent = displayReason;
 
       const cycleDate = toDateOnly(latest?.date);
-      const signalUpdated = latest?.published_at_utc || "unavailable";
+      // source of truth: published_at_utc (confirmed record time)
+      const signalUpdated = btLatest?.published_at_utc || null;
       const basePrice = parseFiniteNumber(latest?.btc_price);
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
-      document.getElementById("metaUpdated").textContent = `Signal Updated ${fmtUtc(signalUpdated)}`;
+      document.getElementById("metaUpdated").textContent = `Signal Updated ${fmtPublishedUtcStrict(signalUpdated)}`;
 
       const staleEl = document.getElementById("dataPending");
       if (staleEl) staleEl.style.display = displayAction === "unavailable" ? "block" : "none";
