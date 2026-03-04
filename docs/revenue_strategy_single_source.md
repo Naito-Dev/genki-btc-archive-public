@@ -76,6 +76,10 @@ Past records do not guarantee future results. You are solely responsible for any
 ## Guardrails
 - No strategy changes without updating this file.
 - No engineering changes that affect pricing/funnel/copy without updating this file.
+- STRICT SEPARATION OF IDENTITY (Machine vs Human):
+  - BTCSIGNAL (the bot/service) must operate strictly as an emotionless, automated machine. It publishes logs. Nothing else.
+  - The personal ideological blog (genkibtc.substack.com) and human market philosophies must NEVER be published on the BTCSIGNAL Substack or its connected X account.
+  - The personal blog MUST NOT link to, promote, or explain the BTCSIGNAL algorithm, to absolutely prevent "reasoning/advice" cross-contamination.
 
 ## Phase 0 KPI Tracking (Updated: 2026-03-04)
 *Strategy uses this section to track progress toward unlocking Phase 1 (Paid).*
