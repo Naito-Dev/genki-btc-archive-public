@@ -181,6 +181,45 @@ jobs:
         run: |
           python scripts/generate_substack_daily.py
 
+      - name: Post to X (Phase 0, once per latest_date)
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          X_USERNAME: ${{ vars.X_USERNAME || '' }}
+        run: |
+          set -euo pipefail
+
+          # Fail-closed: only attempt posting when the daily workflow status file says ok.
+          if [ ! -f substack/status.json ]; then
+            echo "X_POST: skip (missing substack/status.json)"
+            exit 0
+          fi
+          status=$(python -c 'import json;print(json.load(open("substack/status.json"))["status"])' 2>/dev/null || echo "")
+          if [ "$status" != "ok" ]; then
+            echo "X_POST: skip (status=$status)"
+            exit 0
+          fi
+
+          # Require secrets; otherwise skip (test env).
+          if [ -z "${X_API_KEY:-}" ] || [ -z "${X_API_SECRET:-}" ] || [ -z "${X_ACCESS_TOKEN:-}" ] || [ -z "${X_ACCESS_TOKEN_SECRET:-}" ]; then
+            echo "X_POST: skip (missing X_* secrets)"
+            exit 0
+          fi
+
+          python -m pip -q install requests requests_oauthlib
+
+          thread_json=$(python scripts/generate_x_thread_phase0.py)
+          echo "THREAD_JSON=$thread_json" > .x_thread.json
+
+          python scripts/post_x_thread.py --thread-json "$thread_json" | tee .x_post_result.txt
+
+          # Stage state file for PR if it exists.
+          [ -f x/last_posted.json ] && git add x/last_posted.json || true
+
       - name: Generate Substack status heartbeat
         if: ${{ always() }}
         run: |
