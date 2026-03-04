@@ -76,3 +76,16 @@ Past records do not guarantee future results. You are solely responsible for any
 ## Guardrails
 - No strategy changes without updating this file.
 - No engineering changes that affect pricing/funnel/copy without updating this file.
+
+## Phase 0 KPI Tracking (Updated: 2026-03-04)
+*Strategy uses this section to track progress toward unlocking Phase 1 (Paid).*
+### Definitions
+- **Audit PASS Streak**: Count of consecutive days where `chain_integrity == "VALID"` in the logs. (Target: 150 days)
+- **Waitlist Count**: Manual count from the Google Sheets backend. (Target: 50 subs)
+- **Substack Daily Ops**: Automation status of the daily draft/post. (Target: Stable)
+- **Substack Weekly Ops**: Automation status of the weekly draft/post. (Target: Stable)
+### Current Status
+- Audit PASS Streak: **8 days** (On track)
+- Waitlist Count: **[MANUAL UPDATE REQUIRED]**
+- Substack Daily: **Stable** (Auto-generation OK)
+- Substack Weekly: **PENDING** (In manual testing phase)
