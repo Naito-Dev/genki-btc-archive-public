@@ -76,6 +76,7 @@ Past records do not guarantee future results. You are solely responsible for any
 ## Guardrails
 - No strategy changes without updating this file.
 - No engineering changes that affect pricing/funnel/copy without updating this file.
+- UI disambiguation: **price label is "BTC/USD"** (do not use BTC/CASH labels for price).
 - STRICT SEPARATION OF IDENTITY (Machine vs Human):
   - BTCSIGNAL (the bot/service) must operate strictly as an emotionless, automated machine. It publishes logs. Nothing else.
   - The personal ideological blog (genkibtc.substack.com) and human market philosophies must NEVER be published on the BTCSIGNAL Substack or its connected X account.
