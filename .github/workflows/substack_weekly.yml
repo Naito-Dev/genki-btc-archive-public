@@ -1,6 +1,8 @@
 name: Substack Weekly Ops Draft
 
 on:
+  schedule:
+    - cron: "0 11 * * 3"  # Wed 20:00 JST
   workflow_dispatch:
 
 permissions:
@@ -26,12 +28,17 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Generate weekly ops facts JSON
+        run: |
+          python scripts/generate_weekly_ops_json.py
+
       - name: Generate Substack Weekly Ops draft
         run: |
-          python scripts/generate_substack_weekly.py
+          python scripts/generate_substack_weekly.py --ops-json substack/weekly_ops_latest.json
 
       - name: Stage weekly output
         run: |
+          [ -f substack/weekly_ops_latest.json ] && git add substack/weekly_ops_latest.json || true
           [ -f substack/weekly_latest.txt ] && git add substack/weekly_latest.txt || true
 
       - name: Detect staged changes
