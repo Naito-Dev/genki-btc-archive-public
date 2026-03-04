@@ -30,7 +30,7 @@ def build_block(latest_date: str, state: str, s1: str, s2: str, s3: str) -> str:
         f"3-day record: {s1} → {s2} → {s3}\n"
         "Published when the public record updates.\n"
         "Record-only. No prediction. No reasoning. No advice. Not investment advice.\n"
-        "Public: https://btcsignal.org\n"
+        "Public: [btcsignal.org](https://btcsignal.org)\n"
         "[/SUBSTACK_DAILY]\n"
     )
 
