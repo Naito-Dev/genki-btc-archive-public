@@ -14,7 +14,7 @@ Delay: data unavailable
 
 Integrity:
 Chain integrity (VALID days): 6/7
-Last 30-day match report: unavailable
+Last 30-day match report: PASS
 
 Links:
 Public log: https://btcsignal.org

@@ -1,0 +1,21 @@
+{
+  "week_ending": "2026-03-04",
+  "window_dates": [
+    "2026-02-26",
+    "2026-02-27",
+    "2026-02-28",
+    "2026-03-01",
+    "2026-03-02",
+    "2026-03-03",
+    "2026-03-04"
+  ],
+  "days_published": 6,
+  "missing_days": 1,
+  "missing_dates": [
+    "2026-03-04"
+  ],
+  "max_delay_sec": null,
+  "valid_days": 6,
+  "last30_match_status": "PASS",
+  "generated_at_utc": "2026-03-04T08:42:21Z"
+}
