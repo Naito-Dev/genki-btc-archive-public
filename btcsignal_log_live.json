@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at_utc": "2026-03-04T12:25:57.898937+00:00",
+    "generated_at_utc": "2026-03-04T13:01:00.482238+00:00",
     "source": "btcsignal_log.json",
     "note": "warmup seed rows are excluded from this live decision log",
     "excluded_reason_patterns": [
@@ -21740,7 +21740,7 @@
       "date": "2026-03-04",
       "state": "CASH",
       "reason": "crash_breaker_fired",
-      "published_at_utc": "2026-03-04T12:25:37Z",
+      "published_at_utc": "2026-03-04T13:00:57Z",
       "btc_usd": 70658.6
     }
   ]
