@@ -31,8 +31,8 @@
 - Total = $3,975 (~600k JPY)
 
 ## Conversion Funnel (Fixed)
-1) X daily/weekly posts
-2) Reply with Substack Free link
+1) X daily automated posts (1/2 record, 2/2 links)
+2) 2/2 contains links strictly pointing to both btcsignal.org (log) and btcsignal.substack.com (email)
 3) Substack Free: weekly email for 6 months
 4) Each email ends with: “Upgrade to Daily Log ->” (future)
 5) btcsignal.org = trust/verification hub (NOT checkout)

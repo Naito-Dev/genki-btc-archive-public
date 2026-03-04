@@ -89,7 +89,7 @@ def build_block(end_str: str, days_published: int, missing: list[str], max_delay
         [
             "",
             "Record-only. No prediction. No reasoning. No advice. Not investment advice.",
-            "Public: https://btcsignal.org",
+            "Public: [btcsignal.org](https://btcsignal.org)",
             "[/SUBSTACK_WEEKLY]",
             "",
         ]
