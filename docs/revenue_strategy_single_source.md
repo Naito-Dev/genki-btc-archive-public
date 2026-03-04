@@ -77,6 +77,8 @@ Past records do not guarantee future results. You are solely responsible for any
 - No strategy changes without updating this file.
 - No engineering changes that affect pricing/funnel/copy without updating this file.
 - UI disambiguation: **price label is "BTC/USD"** (do not use BTC/CASH labels for price).
+- Dev Log policy: **facts-only**; reference **only real merged PR numbers/URLs** (no guesses).
+- Timing policy: UI timestamps source from `published_at_utc` for the confirmed record time. Note: bootstrap exception exists for 2026-02-26.
 - STRICT SEPARATION OF IDENTITY (Machine vs Human):
   - BTCSIGNAL (the bot/service) must operate strictly as an emotionless, automated machine. It publishes logs. Nothing else.
   - The personal ideological blog (genkibtc.substack.com) and human market philosophies must NEVER be published on the BTCSIGNAL Substack or its connected X account.
