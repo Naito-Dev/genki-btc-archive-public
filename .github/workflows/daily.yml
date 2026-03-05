@@ -11,12 +11,60 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: daily-archive-update
+  group: daily-archive
   cancel-in-progress: false
 
 jobs:
-  run-daily:
+  precheck-idempotency:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '5 12 * * *' }}
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      skip_reason: ${{ steps.check.outputs.skip_reason }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check if already published today (JST)
+        id: check
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          out = Path(os.environ["GITHUB_OUTPUT"])
+          today_jst = datetime.now(ZoneInfo("Asia/Tokyo")).date().isoformat()
+          should_run = True
+          skip_reason = ""
+
+          p = Path("btcsignal_log_live.json")
+          try:
+              if p.exists():
+                  j = json.loads(p.read_text(encoding="utf-8"))
+                  entries = j.get("entries") or []
+                  latest = entries[-1] if entries else {}
+                  latest_date = str((latest or {}).get("date") or "").strip()[:10]
+                  if latest_date and latest_date == today_jst:
+                      should_run = False
+                      skip_reason = "already_published_today_jst"
+          except Exception:
+              # Fail-open for idempotency check itself: still run daily pipeline.
+              should_run = True
+              skip_reason = ""
+
+          with out.open("a", encoding="utf-8") as f:
+              f.write(f"should_run={'true' if should_run else 'false'}\n")
+              f.write(f"skip_reason={skip_reason}\n")
+          PY
+
+  run-daily:
+    needs: precheck-idempotency
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule == '5 12 * * *') && needs.precheck-idempotency.outputs.should_run == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -346,6 +394,15 @@ jobs:
           req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"}, method="POST")
           urllib.request.urlopen(req, timeout=10).read()
           PY
+
+  run-daily-noop:
+    needs: precheck-idempotency
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule == '5 12 * * *') && needs.precheck-idempotency.outputs.should_run != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: No-op due to idempotency guard
+        run: |
+          echo "NOOP: daily run skipped (${{ needs.precheck-idempotency.outputs.skip_reason || 'idempotency_guard' }})"
 
   missed-run-check:
     if: ${{ github.event_name == 'schedule' && github.event.schedule == '32 12 * * *' }}
