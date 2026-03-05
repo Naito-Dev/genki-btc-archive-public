@@ -72,43 +72,6 @@ jobs:
             echo "reason=doc_exists" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Post Discord outcome (always)
-        if: ${{ always() }}
-        continue-on-error: true
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_X_WEBHOOK_URL || secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
-          GEN_STATUS: ${{ steps.gen.outputs.status || 'fail' }}
-          GEN_REASON: ${{ steps.gen.outputs.reason || '' }}
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          import urllib.request
-          from pathlib import Path
-
-          webhook = os.getenv("DISCORD_WEBHOOK_URL", "").strip()
-          if not webhook:
-              raise SystemExit(0)
-
-          st = os.getenv("GEN_STATUS", "fail")
-          if st == "ok":
-              body = Path(".tmp/devlog/discord.txt").read_text(encoding="utf-8")
-              content = "DEVLOG_OK\n" + body
-          elif st == "noop":
-              content = f"DEVLOG_OK:NOOP reason={os.getenv('GEN_REASON','doc_exists')}"
-          else:
-              content = f"DEVLOG_FAIL:{os.getenv('GEN_REASON','unknown')}"
-
-          payload = json.dumps({"content": content}).encode("utf-8")
-          req = urllib.request.Request(
-              webhook,
-              data=payload,
-              headers={"Content-Type": "application/json"},
-              method="POST",
-          )
-          urllib.request.urlopen(req, timeout=15).read()
-          PY
-
       - name: Stage docs output
         if: ${{ steps.gen.outputs.status == 'ok' }}
         run: |
@@ -157,3 +120,90 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --auto --squash --delete-branch
+
+      - name: Post Discord success (DEVLOG_OK)
+        if: ${{ steps.gen.outputs.status == 'ok' || steps.gen.outputs.status == 'noop' }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
+          GEN_STATUS: ${{ steps.gen.outputs.status }}
+          PR_URL: ${{ steps.cpr.outputs.pull-request-url || '' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import re
+          import urllib.request
+          from pathlib import Path
+
+          webhook = os.getenv("DISCORD_WEBHOOK_URL", "").strip()
+          if not webhook:
+              raise RuntimeError("DEVLOG_FAIL:missing_discord_webhook")
+
+          st = os.getenv("GEN_STATUS", "ok")
+          meta = json.loads(Path(".tmp/devlog/meta.json").read_text(encoding="utf-8"))
+          week_ending = str(meta.get("week_ending") or "").strip()
+          doc_path = str(meta.get("doc_path") or "").strip()
+          if not week_ending:
+              m = re.search(r"(\d{4}-\d{2}-\d{2})\.md$", doc_path)
+              week_ending = m.group(1) if m else "unknown"
+          doc_url = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY')}/blob/main/docs/devlog/{week_ending}.md"
+          pr_url = os.getenv("PR_URL", "").strip()
+          run_url = os.getenv("RUN_URL", "").strip()
+
+          lines = [
+              "DEVLOG_OK",
+              f"week ending {week_ending}",
+          ]
+          if pr_url:
+              lines.append(f"pr: {pr_url}")
+          else:
+              lines.append(f"doc: {doc_url}")
+          lines.append(f"run_url: {run_url}")
+          if st == "noop":
+              lines.append("note: NOOP (doc already exists)")
+
+          payload = json.dumps({"content": "\n".join(lines)}, ensure_ascii=False).encode("utf-8")
+          req = urllib.request.Request(
+              webhook,
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          urllib.request.urlopen(req, timeout=15).read()
+          PY
+
+      - name: Post Discord failure (DEVLOG_FAIL)
+        if: ${{ steps.gen.outputs.status == 'fail' }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
+          GEN_REASON: ${{ steps.gen.outputs.reason || 'unknown' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          webhook = os.getenv("DISCORD_WEBHOOK_URL", "").strip()
+          if not webhook:
+              raise RuntimeError("DEVLOG_FAIL:missing_discord_webhook")
+
+          reason = os.getenv("GEN_REASON", "unknown").strip()
+          run_url = os.getenv("RUN_URL", "").strip()
+          content = f"DEVLOG_FAIL:{reason}\nrun_url: {run_url}"
+          payload = json.dumps({"content": content}, ensure_ascii=False).encode("utf-8")
+          req = urllib.request.Request(
+              webhook,
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          urllib.request.urlopen(req, timeout=15).read()
+          PY
+
+      - name: Fail workflow on DEVLOG_FAIL
+        if: ${{ steps.gen.outputs.status == 'fail' }}
+        run: |
+          echo "DEVLOG_FAIL:${{ steps.gen.outputs.reason || 'unknown' }}"
+          exit 1
