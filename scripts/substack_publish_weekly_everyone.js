@@ -125,53 +125,28 @@ async function clickIfExists(locator) {
 
   await page.waitForTimeout(5000);
 
-  // Capture PUBLIC /p/ URL from the opened public page URL bar (do not accept /publish/post/).
-  // Do NOT guess slug.
+  // Capture PUBLIC /p/ URL (do not accept /publish/post/).
   await page.goto('https://btcsignal.substack.com/publish/posts', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(2500);
 
-  // Open the post by subject (lands on editor /publish/post/...)
-  const subjectHit = page.locator(`text=${subject}`).first();
-  if ((await subjectHit.count()) === 0) {
+  // Try to find a public link associated with the subject.
+  let href = null;
+  const subjectPublicLink = page.locator(`a[href*="/p/"]:has-text("${subject}")`).first();
+  if ((await subjectPublicLink.count()) > 0) {
+    href = await subjectPublicLink.getAttribute('href');
+  }
+  if (!href) {
+    const anyP = page.locator('a[href*="/p/"]').first();
+    if ((await anyP.count()) > 0) href = await anyP.getAttribute('href');
+  }
+
+  if (!href || !href.includes('/p/')) {
     await context.close();
     throw new Error('public_post_url_not_found');
   }
-  await subjectHit.click({ timeout: 20000 });
-  await page.waitForTimeout(2000);
 
-  // From editor, open public page.
-  // Common Substack UI: "View post" link/button opens a new tab.
-  let publicUrl = null;
-  const viewPost = page.getByRole('link', { name: /view post/i }).first();
-  const viewPostBtn = page.getByRole('button', { name: /view post/i }).first();
-
-  const tryOpen = async (locator) => {
-    if ((await locator.count()) === 0) return null;
-    const p = context.waitForEvent('page', { timeout: 10000 }).catch(() => null);
-    await locator.click({ timeout: 20000 });
-    const newPage = await p;
-    if (newPage) {
-      await newPage.waitForLoadState('domcontentloaded', { timeout: 20000 }).catch(() => {});
-      const u = newPage.url();
-      await newPage.close().catch(() => {});
-      return u;
-    }
-    // Fallback: some UIs navigate same tab.
-    return page.url();
-  };
-
-  publicUrl = await tryOpen(viewPost);
-  if (!publicUrl) publicUrl = await tryOpen(viewPostBtn);
-  if (!publicUrl) {
-    // Last resort: look for any href containing /p/ on the editor page, then open it and read URL bar.
-    const pLink = page.locator('a[href*="/p/"]').first();
-    if ((await pLink.count()) > 0) {
-      const href = await pLink.getAttribute('href');
-      publicUrl = href && href.startsWith('http') ? href : (href ? `https://btcsignal.substack.com${href}` : null);
-    }
-  }
-
-  if (!publicUrl || !publicUrl.startsWith('https://btcsignal.substack.com/p/')) {
+  const publicUrl = href.startsWith('http') ? href : `https://btcsignal.substack.com${href}`;
+  if (!publicUrl.startsWith('https://btcsignal.substack.com/p/')) {
     await context.close();
     throw new Error('public_post_url_not_found');
   }
