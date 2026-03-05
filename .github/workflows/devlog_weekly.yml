@@ -1,0 +1,159 @@
+name: DevLog Weekly
+
+on:
+  schedule:
+    - cron: "0 13 * * 3" # Wed 22:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: devlog-weekly
+  cancel-in-progress: false
+
+jobs:
+  devlog-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate weekly Dev Log payloads
+        id: gen
+        run: |
+          set +e
+          mkdir -p .tmp/devlog
+          python scripts/generate_devlog_weekly.py \
+            --repo "${{ github.repository }}" \
+            --out-discord ".tmp/devlog/discord.txt" \
+            --out-meta ".tmp/devlog/meta.json" \
+            > .tmp/devlog/generate.log 2>&1
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "status=fail" >> "$GITHUB_OUTPUT"
+            reason=$(python - <<'PY'
+          from pathlib import Path
+          txt = Path(".tmp/devlog/generate.log").read_text(encoding="utf-8", errors="ignore")
+          marker = "DEVLOG_FAIL:"
+          idx = txt.find(marker)
+          if idx >= 0:
+              line = txt[idx:].splitlines()[0].strip()
+              print(line)
+          else:
+              print("DEVLOG_FAIL:generator_failed")
+          PY
+            )
+            echo "reason=${reason}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          status=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path(".tmp/devlog/meta.json")
+          if not p.exists():
+              print("fail")
+              raise SystemExit
+          j = json.loads(p.read_text(encoding="utf-8"))
+          print(str(j.get("status") or "fail"))
+          PY
+          )
+          echo "status=${status}" >> "$GITHUB_OUTPUT"
+          if [ "$status" = "noop" ]; then
+            echo "reason=doc_exists" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post Discord outcome (always)
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_X_WEBHOOK_URL || secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
+          GEN_STATUS: ${{ steps.gen.outputs.status || 'fail' }}
+          GEN_REASON: ${{ steps.gen.outputs.reason || '' }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          webhook = os.getenv("DISCORD_WEBHOOK_URL", "").strip()
+          if not webhook:
+              raise SystemExit(0)
+
+          st = os.getenv("GEN_STATUS", "fail")
+          if st == "ok":
+              body = Path(".tmp/devlog/discord.txt").read_text(encoding="utf-8")
+              content = "DEVLOG_OK\n" + body
+          elif st == "noop":
+              content = f"DEVLOG_OK:NOOP reason={os.getenv('GEN_REASON','doc_exists')}"
+          else:
+              content = f"DEVLOG_FAIL:{os.getenv('GEN_REASON','unknown')}"
+
+          payload = json.dumps({"content": content}).encode("utf-8")
+          req = urllib.request.Request(
+              webhook,
+              data=payload,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          urllib.request.urlopen(req, timeout=15).read()
+          PY
+
+      - name: Stage docs output
+        if: ${{ steps.gen.outputs.status == 'ok' }}
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          meta = json.loads(Path(".tmp/devlog/meta.json").read_text(encoding="utf-8"))
+          p = Path(meta["doc_path"])
+          if p.exists():
+              print(f"staging {p}")
+              import subprocess
+              subprocess.check_call(["git","add",str(p)])
+          PY
+
+      - name: Detect staged docs changes
+        if: ${{ always() }}
+        id: changes
+        run: |
+          if git diff --cached --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create PR (docs only)
+        if: ${{ steps.changes.outputs.has_changes == 'true' }}
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "docs: add weekly devlog"
+          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          branch: "automation/devlog-weekly-${{ github.run_id }}"
+          base: "main"
+          delete-branch: true
+          title: "docs: add weekly devlog"
+          body: |
+            Automated weekly Dev Log (facts-only).
+          add-paths: |
+            docs/devlog/*.md
+
+      - name: Enable auto-merge (squash)
+        if: ${{ steps.cpr.outputs.pull-request-number != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --auto --squash --delete-branch
