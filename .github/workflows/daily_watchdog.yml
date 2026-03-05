@@ -1,0 +1,223 @@
+name: Daily Publish Watchdog
+
+on:
+  schedule:
+    - cron: "17 12 * * *" # 21:17 JST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: daily-publish-watchdog
+  cancel-in-progress: false
+
+jobs:
+  slo-watchdog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate SLO status and dispatch eligibility
+        id: eval
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+          import time
+          import urllib.request
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          out = os.environ["GITHUB_OUTPUT"]
+          stamp = int(time.time())
+          live_url = f"https://www.btcsignal.org/btcsignal_log_live.json?v={stamp}"
+          with urllib.request.urlopen(live_url, timeout=20) as r:
+              live = json.loads(r.read().decode("utf-8"))
+
+          entries = live.get("entries") or []
+          latest = entries[-1] if entries else {}
+          latest_date = str(latest.get("date") or "").strip()[:10]
+          today_jst = datetime.now(ZoneInfo("Asia/Tokyo")).date().isoformat()
+
+          mode = "noop"
+          reason = "up_to_date"
+          existing_dispatch_url = ""
+
+          if latest_date != today_jst:
+              cmd = [
+                  "gh",
+                  "run",
+                  "list",
+                  "--repo",
+                  os.environ["GITHUB_REPOSITORY"],
+                  "--workflow",
+                  "Daily Archive Update",
+                  "--event",
+                  "workflow_dispatch",
+                  "--limit",
+                  "20",
+                  "--json",
+                  "databaseId,url,createdAt",
+              ]
+              res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+              runs = json.loads(res.stdout or "[]")
+              found_today_dispatch = False
+              for run in runs:
+                  created = str(run.get("createdAt") or "")
+                  if not created:
+                      continue
+                  dt = datetime.fromisoformat(created.replace("Z", "+00:00")).astimezone(ZoneInfo("Asia/Tokyo"))
+                  if dt.date().isoformat() == today_jst:
+                      found_today_dispatch = True
+                      existing_dispatch_url = str(run.get("url") or "")
+                      break
+              if found_today_dispatch:
+                  mode = "noop"
+                  reason = "already_dispatched_today"
+              else:
+                  mode = "breach_dispatch_needed"
+                  reason = "latest_date_stale"
+
+          with open(out, "a", encoding="utf-8") as f:
+              f.write(f"mode={mode}\n")
+              f.write(f"reason={reason}\n")
+              f.write(f"today_jst={today_jst}\n")
+              f.write(f"latest_date={latest_date}\n")
+              f.write(f"live_url={live_url}\n")
+              f.write(f"existing_dispatch_url={existing_dispatch_url}\n")
+          PY
+
+      - name: Notify Discord NOOP
+        if: ${{ steps.eval.outputs.mode == 'noop' }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
+          TODAY_JST: ${{ steps.eval.outputs.today_jst }}
+          LATEST_DATE: ${{ steps.eval.outputs.latest_date }}
+          REASON: ${{ steps.eval.outputs.reason }}
+          EXISTING_DISPATCH_URL: ${{ steps.eval.outputs.existing_dispatch_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
+          if not webhook:
+              raise RuntimeError("NOOP notify failed: missing discord webhook")
+
+          lines = [
+              "NOOP",
+              f"today_jst={os.environ.get('TODAY_JST','')}",
+              f"latest_date={os.environ.get('LATEST_DATE','')}",
+              f"reason={os.environ.get('REASON','')}",
+          ]
+          existing = os.environ.get("EXISTING_DISPATCH_URL", "").strip()
+          if existing:
+              lines.append(f"dispatch_url={existing}")
+          lines.append(f"run_url={os.environ.get('RUN_URL','')}")
+          payload = json.dumps({"content": "\n".join(lines)}, ensure_ascii=False).encode("utf-8")
+          req = urllib.request.Request(webhook, data=payload, headers={"Content-Type": "application/json"}, method="POST")
+          urllib.request.urlopen(req, timeout=15).read()
+          PY
+
+      - name: Notify Discord SLO_BREACH
+        if: ${{ steps.eval.outputs.mode == 'breach_dispatch_needed' }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
+          TODAY_JST: ${{ steps.eval.outputs.today_jst }}
+          LATEST_DATE: ${{ steps.eval.outputs.latest_date }}
+          LIVE_URL: ${{ steps.eval.outputs.live_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
+          if not webhook:
+              raise RuntimeError("SLO_BREACH notify failed: missing discord webhook")
+
+          msg = (
+              "SLO_BREACH:dashboard_not_updated_by_21:17\n"
+              f"today_jst={os.environ.get('TODAY_JST','')}\n"
+              f"latest_date={os.environ.get('LATEST_DATE','')}\n"
+              f"live_url={os.environ.get('LIVE_URL','')}\n"
+              f"run_url={os.environ.get('RUN_URL','')}"
+          )
+          payload = json.dumps({"content": msg}, ensure_ascii=False).encode("utf-8")
+          req = urllib.request.Request(webhook, data=payload, headers={"Content-Type": "application/json"}, method="POST")
+          urllib.request.urlopen(req, timeout=15).read()
+          PY
+
+      - name: Trigger one-shot dispatch for Daily Archive Update
+        if: ${{ steps.eval.outputs.mode == 'breach_dispatch_needed' }}
+        id: heal
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run "Daily Archive Update" --repo "${{ github.repository }}" --ref main
+          sleep 5
+          RUN_ID=$(gh run list --repo "${{ github.repository }}" --workflow "Daily Archive Update" --event workflow_dispatch --limit 1 --json databaseId -q '.[0].databaseId')
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${RUN_ID}"
+          echo "dispatch_run_id=${RUN_ID}" >> "$GITHUB_OUTPUT"
+          echo "dispatch_run_url=${RUN_URL}" >> "$GITHUB_OUTPUT"
+          gh run watch "$RUN_ID" --repo "${{ github.repository }}" --exit-status
+
+      - name: Verify healed state and notify SLO_HEALED
+        if: ${{ steps.eval.outputs.mode == 'breach_dispatch_needed' }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.DISCORD1 || secrets.DISCORD }}
+          TODAY_JST: ${{ steps.eval.outputs.today_jst }}
+          DISPATCH_RUN_URL: ${{ steps.heal.outputs.dispatch_run_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.request
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
+          if not webhook:
+              raise RuntimeError("SLO_HEALED notify failed: missing discord webhook")
+
+          stamp = int(time.time())
+          url = f"https://www.btcsignal.org/btcsignal_log_live.json?v={stamp}"
+          with urllib.request.urlopen(url, timeout=20) as r:
+              live = json.loads(r.read().decode("utf-8"))
+          entries = live.get("entries") or []
+          latest = entries[-1] if entries else {}
+          latest_date = str(latest.get("date") or "").strip()[:10]
+          today_jst = os.environ.get("TODAY_JST", datetime.now(ZoneInfo("Asia/Tokyo")).date().isoformat())
+
+          if latest_date != today_jst:
+              msg = (
+                  "SLO_BREACH:heal_failed_after_dispatch\n"
+                  f"today_jst={today_jst}\n"
+                  f"latest_date={latest_date}\n"
+                  f"dispatch_run_url={os.environ.get('DISPATCH_RUN_URL','')}\n"
+                  f"run_url={os.environ.get('RUN_URL','')}"
+              )
+              payload = json.dumps({"content": msg}, ensure_ascii=False).encode("utf-8")
+              req = urllib.request.Request(webhook, data=payload, headers={"Content-Type": "application/json"}, method="POST")
+              urllib.request.urlopen(req, timeout=15).read()
+              raise SystemExit(1)
+
+          msg = (
+              "SLO_HEALED:workflow_dispatch_triggered\n"
+              f"today_jst={today_jst}\n"
+              f"latest_date={latest_date}\n"
+              f"dispatch_run_url={os.environ.get('DISPATCH_RUN_URL','')}\n"
+              f"run_url={os.environ.get('RUN_URL','')}"
+          )
+          payload = json.dumps({"content": msg}, ensure_ascii=False).encode("utf-8")
+          req = urllib.request.Request(webhook, data=payload, headers={"Content-Type": "application/json"}, method="POST")
+          urllib.request.urlopen(req, timeout=15).read()
+          PY
