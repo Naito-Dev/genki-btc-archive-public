@@ -249,8 +249,8 @@
     ];
 
     const pmChecklist = [
-      { id: "pm1", title: ".env.live があるか確認", cmd: "ls -la /Users/Claw/tradep-test/.env.live", check: "なければ中止して相談" },
-      { id: "pm2", title: ".env.live を読み込む", cmd: "cd /Users/Claw/tradep-test && set -a && source .env.live && set +a", check: "読み込み後に次ステップへ進む" },
+      { id: "pm1", title: "secrets/.env.live があるか確認", cmd: "ls -la /Users/Claw/tradep-test/secrets/.env.live", check: "なければ中止して相談" },
+      { id: "pm2", title: "secrets/.env.live を読み込む", cmd: "cd /Users/Claw/tradep-test && set -a && source secrets/.env.live && set +a", check: "読み込み後に次ステップへ進む" },
       { id: "pm3", title: "DRY_RUN 実行", cmd: "python3 /Users/Claw/tradep-test/scripts/send_waitlist_daily.py --status-type WAIT --allocation-band 30 --leads-source /tmp/waitlist_single.csv --dry-run", check: "DRY_RUN_OK / recipient_count > 0" },
       { id: "pm4", title: "LIVE 実行", cmd: "MAIL_MODE=smtp python3 /Users/Claw/tradep-test/scripts/send_waitlist_daily.py --status-type WAIT --allocation-band 30 --leads-source /tmp/waitlist_single.csv --live", check: "LIVE_OK / success_count>=1 / failure_count=0" },
       { id: "pm5", title: "送信ログ確認（直近3行）", cmd: "tail -n 3 /Users/Claw/tradep-test/output/waitlist_email_send_log.ndjson", check: "今回のrun_id行で success_count, failure_count を確認（tail -n 1 は古い dry_run 行の可能性あり）" },
