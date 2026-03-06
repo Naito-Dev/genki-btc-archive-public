@@ -11,7 +11,8 @@ from pathlib import Path
 from urllib import error, parse, request
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT_PATH = ROOT / "daily_input.env"
+OUT_DIR = ROOT / ".runtime"
+OUT_PATH = OUT_DIR / "daily_input.env"
 
 
 def utc_now_iso() -> str:
@@ -47,6 +48,7 @@ def build_headers(method: str, request_path: str, query: dict[str, str], body: s
 
 def write_env(payload: dict[str, str]) -> None:
     lines = [f"{k}={v}" for k, v in payload.items()]
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

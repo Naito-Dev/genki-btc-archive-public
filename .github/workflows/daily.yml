@@ -135,11 +135,12 @@ jobs:
 
       - name: Ensure daily_input.env fallback exists
         run: |
-          if [ -f daily_input.env ]; then
+          mkdir -p .runtime
+          if [ -f .runtime/daily_input.env ]; then
             exit 0
           fi
           NOW_UTC="$(date -u +%FT%TZ)"
-          cat > daily_input.env <<EOF
+          cat > .runtime/daily_input.env <<EOF
           SNAPSHOT_STATUS=SYNC_PENDING
           BALANCE_SOURCE=unavailable
           BALANCE_TS_UTC=${NOW_UTC}
