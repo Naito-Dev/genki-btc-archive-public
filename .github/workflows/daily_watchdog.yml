@@ -61,12 +61,13 @@ jobs:
                   "--limit",
                   "20",
                   "--json",
-                  "databaseId,url,createdAt",
+                  "databaseId,url,createdAt,conclusion,event",
               ]
               res = subprocess.run(cmd, capture_output=True, text=True, check=True)
               runs = json.loads(res.stdout or "[]")
               found_today_dispatch = False
               found_today_success = False
+
               for run in runs:
                   created = str(run.get("createdAt") or "")
                   if not created:
@@ -76,6 +77,7 @@ jobs:
                       found_today_success = True
                       existing_success_url = str(run.get("url") or "")
                       break
+
               if not found_today_success:
                   for run in runs:
                       created = str(run.get("createdAt") or "")
@@ -86,6 +88,7 @@ jobs:
                           found_today_dispatch = True
                           existing_dispatch_url = str(run.get("url") or "")
                           break
+
               if found_today_success:
                   mode = "noop"
                   reason = "already_succeeded_today"
@@ -117,14 +120,16 @@ jobs:
           EXISTING_SUCCESS_URL: ${{ steps.eval.outputs.existing_success_url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          python3 - <<'PY'
+          set -eu
+
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "NOOP notify failed: missing discord webhook"
+            exit 1
+          fi
+
+          payload=$(python3 - <<'PY'
           import json
           import os
-          import urllib.request
-
-          webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
-          if not webhook:
-              raise RuntimeError("NOOP notify failed: missing discord webhook")
 
           lines = [
               "NOOP",
@@ -139,10 +144,20 @@ jobs:
           if existing:
               lines.append(f"dispatch_url={existing}")
           lines.append(f"run_url={os.environ.get('RUN_URL','')}")
-          payload = json.dumps({"content": "\n".join(lines)}, ensure_ascii=False).encode("utf-8")
-          req = urllib.request.Request(webhook, data=payload, headers={"Content-Type": "application/json"}, method="POST")
-          urllib.request.urlopen(req, timeout=15).read()
+          print(json.dumps({"content": "\n".join(lines)}, ensure_ascii=False))
           PY
+          )
+
+          code=$(curl -sS -o /tmp/discord_body.txt -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "$DISCORD_WEBHOOK_URL")
+
+          echo "discord_http_code=$code"
+          echo "discord_response_body:"
+          cat /tmp/discord_body.txt || true
+
+          test "$code" = "204"
 
       - name: Notify Discord SLO_BREACH
         if: ${{ steps.eval.outputs.mode == 'breach_dispatch_needed' }}
@@ -153,14 +168,16 @@ jobs:
           LIVE_URL: ${{ steps.eval.outputs.live_url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          python3 - <<'PY'
+          set -eu
+
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "SLO_BREACH notify failed: missing discord webhook"
+            exit 1
+          fi
+
+          payload=$(python3 - <<'PY'
           import json
           import os
-          import urllib.request
-
-          webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
-          if not webhook:
-              raise RuntimeError("SLO_BREACH notify failed: missing discord webhook")
 
           msg = (
               "SLO_BREACH:dashboard_not_updated_by_21:17\n"
@@ -169,10 +186,20 @@ jobs:
               f"live_url={os.environ.get('LIVE_URL','')}\n"
               f"run_url={os.environ.get('RUN_URL','')}"
           )
-          payload = json.dumps({"content": msg}, ensure_ascii=False).encode("utf-8")
-          req = urllib.request.Request(webhook, data=payload, headers={"Content-Type": "application/json"}, method="POST")
-          urllib.request.urlopen(req, timeout=15).read()
+          print(json.dumps({"content": msg}, ensure_ascii=False))
           PY
+          )
+
+          code=$(curl -sS -o /tmp/discord_body.txt -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "$DISCORD_WEBHOOK_URL")
+
+          echo "discord_http_code=$code"
+          echo "discord_response_body:"
+          cat /tmp/discord_body.txt || true
+
+          test "$code" = "204"
 
       - name: Trigger one-shot dispatch for Daily Archive Update
         if: ${{ steps.eval.outputs.mode == 'breach_dispatch_needed' }}
@@ -196,7 +223,14 @@ jobs:
           DISPATCH_RUN_URL: ${{ steps.heal.outputs.dispatch_run_url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          python3 - <<'PY'
+          set -eu
+
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "SLO_HEALED notify failed: missing discord webhook"
+            exit 1
+          fi
+
+          payload=$(python3 - <<'PY'
           import json
           import os
           import time
@@ -204,14 +238,11 @@ jobs:
           from datetime import datetime
           from zoneinfo import ZoneInfo
 
-          webhook = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
-          if not webhook:
-              raise RuntimeError("SLO_HEALED notify failed: missing discord webhook")
-
           stamp = int(time.time())
           url = f"https://www.btcsignal.org/btcsignal_log_live.json?v={stamp}"
           with urllib.request.urlopen(url, timeout=20) as r:
               live = json.loads(r.read().decode("utf-8"))
+
           entries = live.get("entries") or []
           latest = entries[-1] if entries else {}
           latest_date = str(latest.get("date") or "").strip()[:10]
@@ -225,19 +256,26 @@ jobs:
                   f"dispatch_run_url={os.environ.get('DISPATCH_RUN_URL','')}\n"
                   f"run_url={os.environ.get('RUN_URL','')}"
               )
-              payload = json.dumps({"content": msg}, ensure_ascii=False).encode("utf-8")
-              req = urllib.request.Request(webhook, data=payload, headers={"Content-Type": "application/json"}, method="POST")
-              urllib.request.urlopen(req, timeout=15).read()
-              raise SystemExit(1)
+          else:
+              msg = (
+                  "SLO_HEALED:workflow_dispatch_triggered\n"
+                  f"today_jst={today_jst}\n"
+                  f"latest_date={latest_date}\n"
+                  f"dispatch_run_url={os.environ.get('DISPATCH_RUN_URL','')}\n"
+                  f"run_url={os.environ.get('RUN_URL','')}"
+              )
 
-          msg = (
-              "SLO_HEALED:workflow_dispatch_triggered\n"
-              f"today_jst={today_jst}\n"
-              f"latest_date={latest_date}\n"
-              f"dispatch_run_url={os.environ.get('DISPATCH_RUN_URL','')}\n"
-              f"run_url={os.environ.get('RUN_URL','')}"
-          )
-          payload = json.dumps({"content": msg}, ensure_ascii=False).encode("utf-8")
-          req = urllib.request.Request(webhook, data=payload, headers={"Content-Type": "application/json"}, method="POST")
-          urllib.request.urlopen(req, timeout=15).read()
+          print(json.dumps({"content": msg}, ensure_ascii=False))
           PY
+          )
+
+          code=$(curl -sS -o /tmp/discord_body.txt -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "$DISCORD_WEBHOOK_URL")
+
+          echo "discord_http_code=$code"
+          echo "discord_response_body:"
+          cat /tmp/discord_body.txt || true
+
+          test "$code" = "204"
