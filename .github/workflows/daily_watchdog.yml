@@ -45,6 +45,7 @@ jobs:
           mode = "noop"
           reason = "up_to_date"
           existing_dispatch_url = ""
+          existing_success_url = ""
 
           if latest_date != today_jst:
               cmd = [
@@ -65,16 +66,30 @@ jobs:
               res = subprocess.run(cmd, capture_output=True, text=True, check=True)
               runs = json.loads(res.stdout or "[]")
               found_today_dispatch = False
+              found_today_success = False
               for run in runs:
                   created = str(run.get("createdAt") or "")
                   if not created:
                       continue
                   dt = datetime.fromisoformat(created.replace("Z", "+00:00")).astimezone(ZoneInfo("Asia/Tokyo"))
-                  if dt.date().isoformat() == today_jst:
-                      found_today_dispatch = True
-                      existing_dispatch_url = str(run.get("url") or "")
+                  if dt.date().isoformat() == today_jst and str(run.get("conclusion") or "") == "success":
+                      found_today_success = True
+                      existing_success_url = str(run.get("url") or "")
                       break
-              if found_today_dispatch:
+              if not found_today_success:
+                  for run in runs:
+                      created = str(run.get("createdAt") or "")
+                      if not created:
+                          continue
+                      dt = datetime.fromisoformat(created.replace("Z", "+00:00")).astimezone(ZoneInfo("Asia/Tokyo"))
+                      if dt.date().isoformat() == today_jst and str(run.get("event") or "") == "workflow_dispatch":
+                          found_today_dispatch = True
+                          existing_dispatch_url = str(run.get("url") or "")
+                          break
+              if found_today_success:
+                  mode = "noop"
+                  reason = "already_succeeded_today"
+              elif found_today_dispatch:
                   mode = "noop"
                   reason = "already_dispatched_today"
               else:
@@ -88,6 +103,7 @@ jobs:
               f.write(f"latest_date={latest_date}\n")
               f.write(f"live_url={live_url}\n")
               f.write(f"existing_dispatch_url={existing_dispatch_url}\n")
+              f.write(f"existing_success_url={existing_success_url}\n")
           PY
 
       - name: Notify Discord NOOP
@@ -98,6 +114,7 @@ jobs:
           LATEST_DATE: ${{ steps.eval.outputs.latest_date }}
           REASON: ${{ steps.eval.outputs.reason }}
           EXISTING_DISPATCH_URL: ${{ steps.eval.outputs.existing_dispatch_url }}
+          EXISTING_SUCCESS_URL: ${{ steps.eval.outputs.existing_success_url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           python3 - <<'PY'
@@ -115,6 +132,9 @@ jobs:
               f"latest_date={os.environ.get('LATEST_DATE','')}",
               f"reason={os.environ.get('REASON','')}",
           ]
+          success_url = os.environ.get("EXISTING_SUCCESS_URL", "").strip()
+          if success_url:
+              lines.append(f"success_url={success_url}")
           existing = os.environ.get("EXISTING_DISPATCH_URL", "").strip()
           if existing:
               lines.append(f"dispatch_url={existing}")
