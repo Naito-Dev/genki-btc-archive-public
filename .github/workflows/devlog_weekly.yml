@@ -184,27 +184,31 @@ jobs:
           GEN_REASON: ${{ steps.gen.outputs.reason || 'unknown' }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          python - <<'PY'
+          set -eu
+
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "DEVLOG_FAIL notify failed: missing discord webhook"
+            exit 1
+          fi
+
+          payload=$(python - <<'PY'
           import json
           import os
-          import urllib.request
-
-          webhook = os.getenv("DISCORD_WEBHOOK_URL", "").strip()
-          if not webhook:
-              raise RuntimeError("DEVLOG_FAIL:missing_discord_webhook")
 
           reason = os.getenv("GEN_REASON", "unknown").strip()
           run_url = os.getenv("RUN_URL", "").strip()
           content = f"DEVLOG_FAIL:{reason}\nrun_url: {run_url}"
-          payload = json.dumps({"content": content}, ensure_ascii=False).encode("utf-8")
-          req = urllib.request.Request(
-              webhook,
-              data=payload,
-              headers={"Content-Type": "application/json"},
-              method="POST",
-          )
-          urllib.request.urlopen(req, timeout=15).read()
+          print(json.dumps({"content": content}, ensure_ascii=False))
           PY
+          )
+
+          code=$(curl -sS -o /tmp/discord_body.txt -w "%{http_code}"             -H "Content-Type: application/json"             -d "$payload"             "$DISCORD_WEBHOOK_URL")
+
+          echo "discord_http_code=$code"
+          echo "discord_response_body:"
+          cat /tmp/discord_body.txt || true
+
+          test "$code" = "204"
 
       - name: Fail workflow on DEVLOG_FAIL
         if: ${{ steps.gen.outputs.status == 'fail' }}
