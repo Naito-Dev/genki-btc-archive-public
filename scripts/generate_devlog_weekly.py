@@ -138,7 +138,7 @@ def collect_changes(start: date, end: date, repo: str) -> list[ChangeItem]:
         "--until",
         before,
         "--format=%H%x1f%cI%x1f%s",
-        "main",
+        "origin/main",
     )
     items: list[ChangeItem] = []
     seen_pr: set[int] = set()
