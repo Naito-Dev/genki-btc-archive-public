@@ -53,6 +53,31 @@ def is_valid_iso_utc_z(v: str) -> bool:
     return True
 
 
+def parse_iso_utc_z(v: str) -> datetime | None:
+    s = str(v or "").strip()
+    if not s or not s.endswith("Z"):
+        return None
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00")).astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def classify_published_at_reason(record_date: str, published_at_utc: str) -> str:
+    s = str(published_at_utc or "").strip()
+    if not s:
+        return f"published_at_missing:{record_date}"
+    dt = parse_iso_utc_z(s)
+    if dt is None:
+        return f"published_at_invalid_format:{record_date}"
+    ts_date = dt.date().isoformat()
+    if ts_date < record_date:
+        return f"published_at_invalid_old_date:{record_date}:{s}"
+    if ts_date > record_date:
+        return f"published_at_invalid_future_date:{record_date}:{s}"
+    return ""
+
+
 def parse_finite_number(v):
     if v is None:
         return None
@@ -94,10 +119,11 @@ def build_live_entries(entries: list[dict], core_published_map: dict[str, str]) 
         published_at_utc = str(e.get("published_at_utc") or "").strip()
         if not is_valid_iso_utc_z(published_at_utc):
             published_at_utc = str(core_published_map.get(d10) or "").strip()
-        if d10 == BOOTSTRAP_EXCEPTION_DATE and not is_valid_iso_utc_z(published_at_utc):
+        published_reason = classify_published_at_reason(d10, published_at_utc)
+        if d10 == BOOTSTRAP_EXCEPTION_DATE and published_reason == f"published_at_missing:{BOOTSTRAP_EXCEPTION_DATE}":
             exceptions.append(f"{BOOTSTRAP_EXCEPTION_DATE}: published_at_utc missing (bootstrap)")
-        elif d10 >= LIVE_CONTRACT_START_DATE and not is_valid_iso_utc_z(published_at_utc):
-            raise ValueError(f"published_at_missing_or_invalid:{d10}")
+        elif d10 >= LIVE_CONTRACT_START_DATE and published_reason:
+            raise ValueError(published_reason)
         out.append(
             {
                 "date": d10,

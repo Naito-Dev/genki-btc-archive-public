@@ -172,6 +172,92 @@ jobs:
         run: |
           python scripts/btcsignal_daily.py
 
+      - name: Wait for published_at readiness
+        id: published_ready
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import time
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          out = Path(os.environ["GITHUB_OUTPUT"])
+          env = Path(os.environ["GITHUB_ENV"])
+          target_date = datetime.now(ZoneInfo("Asia/Tokyo")).date().isoformat()
+          attempts = 3
+          sleep_sec = 30
+
+          def valid_iso_utc_z(value: str) -> bool:
+              s = str(value or "").strip()
+              if not s or not s.endswith("Z"):
+                  return False
+              try:
+                  datetime.fromisoformat(s.replace("Z", "+00:00"))
+              except Exception:
+                  return False
+              return True
+
+          def latest_btcsignal_ts() -> str:
+              path = Path("btcsignal_log.json")
+              if not path.exists():
+                  return ""
+              try:
+                  data = json.loads(path.read_text(encoding="utf-8"))
+              except Exception:
+                  return ""
+              entries = data.get("entries") if isinstance(data, dict) else None
+              if not isinstance(entries, list):
+                  return ""
+              for entry in reversed(entries):
+                  if not isinstance(entry, dict):
+                      continue
+                  if str(entry.get("date") or "").strip()[:10] != target_date:
+                      continue
+                  return str(entry.get("published_at_utc") or "").strip()
+              return ""
+
+          def latest_core_ts() -> str:
+              path = Path("log.json")
+              if not path.exists():
+                  return ""
+              try:
+                  data = json.loads(path.read_text(encoding="utf-8"))
+              except Exception:
+                  return ""
+              latest = data.get("latest") if isinstance(data, dict) else None
+              if not isinstance(latest, dict):
+                  return ""
+              if str(latest.get("date") or "").strip()[:10] != target_date:
+                  return ""
+              return str(latest.get("published_at_utc") or "").strip()
+
+          ready = False
+          detail = "published_at_not_ready"
+          for attempt in range(1, attempts + 1):
+              live_ts = latest_btcsignal_ts()
+              core_ts = latest_core_ts()
+              if valid_iso_utc_z(live_ts) or valid_iso_utc_z(core_ts):
+                  ready = True
+                  detail = f"ready_on_attempt_{attempt}"
+                  break
+              detail = f"published_at_not_ready:{target_date}:attempt_{attempt}:btcsignal={live_ts or 'missing'}:core={core_ts or 'missing'}"
+              print(detail)
+              if attempt < attempts:
+                  time.sleep(sleep_sec)
+
+          with out.open("a", encoding="utf-8") as f:
+              f.write(f"ready={'true' if ready else 'false'}\n")
+              f.write(f"detail={detail}\n")
+          if ready:
+              raise SystemExit(0)
+
+          with env.open("a", encoding="utf-8") as f:
+              f.write(f"DAILY_FAIL_REASON={detail}\n")
+          raise SystemExit(1)
+          PY
+
       - name: Export BTCSIGNAL live decision log (seed excluded)
         id: export_live
         run: |
@@ -179,9 +265,9 @@ jobs:
           python scripts/export_btcsignal_live_log.py 2>&1 | tee .export_live.log
           rc=${PIPESTATUS[0]}
           if [ "$rc" -ne 0 ]; then
-            missing_line="$(grep -n 'published_at_missing_or_invalid:' .export_live.log | tail -n1 | sed 's/^.*published_at_missing_or_invalid:/published_at_missing:/')"
-            if [ -n "${missing_line}" ]; then
-              echo "DAILY_FAIL_REASON=${missing_line}" >> "$GITHUB_ENV"
+            reason_line="$(grep -E 'ValueError: published_at_[^[:space:]]+' .export_live.log | tail -n1 | sed 's/^.*ValueError: //')"
+            if [ -n "${reason_line}" ]; then
+              echo "DAILY_FAIL_REASON=${reason_line}" >> "$GITHUB_ENV"
             else
               echo "DAILY_FAIL_REASON=published_at_missing" >> "$GITHUB_ENV"
             fi
