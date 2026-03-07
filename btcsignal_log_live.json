@@ -21758,7 +21758,7 @@
       "btc_usd": 70528.0
     },
     {
-      "date": "2026-03-07",
+      "date": "2026-03-06",
       "state": "CASH",
       "reason": "crash_breaker_fired",
       "published_at_utc": "2026-03-07T05:30:38Z",
