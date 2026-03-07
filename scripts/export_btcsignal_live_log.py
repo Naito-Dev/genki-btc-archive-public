@@ -6,9 +6,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "btcsignal_log.json"
-CORE_LOG = ROOT / "log.json"
-OUT = ROOT / "btcsignal_log_live.json"
+SRC = ROOT / "data" / "btcsignal_log.json"
+CORE_LOG = ROOT / "data" / "log.json"
+OUT = ROOT / "data" / "btcsignal_log_live.json"
 LIVE_CONTRACT_START_DATE = "2026-02-26"
 BOOTSTRAP_EXCEPTION_DATE = "2026-02-26"
 
