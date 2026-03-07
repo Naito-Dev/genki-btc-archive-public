@@ -169,9 +169,21 @@ jobs:
           fi
           exit "$rc"
 
-      - name: Generate BTCSIGNAL daily proof (HOLD/CASH)
+      - name: Import private BTCSIGNAL result
+        id: import_private
         run: |
-          python scripts/btcsignal_daily.py
+          set +e
+          python scripts/import_private_signal_result.py 2>&1 | tee .import_private.log
+          rc=${PIPESTATUS[0]}
+          if [ "$rc" -ne 0 ]; then
+            reason_line="$(tail -n1 .import_private.log | tr -d "\r")"
+            if [ -n "${reason_line}" ]; then
+              echo "DAILY_FAIL_REASON=${reason_line}" >> "$GITHUB_ENV"
+            else
+              echo "DAILY_FAIL_REASON=private_signal_import_failed" >> "$GITHUB_ENV"
+            fi
+          fi
+          exit "$rc"
 
       - name: Wait for published_at readiness
         id: published_ready
@@ -366,7 +378,7 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         run: |
           if [ "${JOB_STATUS}" = "success" ]; then
-            git add data/log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json data/btcsignal_log.json data/btcsignal_log_live.json
+            git add data/log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json data/btcsignal_log.json data/btcsignal_log_live.json btcsignal_log.json btcsignal_log_live.json
             [ -f substack/daily_latest.txt ] && git add substack/daily_latest.txt || true
             [ -f data/live_test_baseline.json ] && git add data/live_test_baseline.json || true
             [ -f data/btcsignal_execution_log.csv ] && git add data/btcsignal_execution_log.csv || true
@@ -410,6 +422,8 @@ jobs:
             data/btcsignal_execute_state.json
             data/btcsignal_log.json
             data/btcsignal_log_live.json
+            btcsignal_log.json
+            btcsignal_log_live.json
             substack/daily_latest.txt
             substack/status.json
 
