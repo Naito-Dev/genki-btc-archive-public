@@ -1,0 +1,21 @@
+{
+  "entries": [
+    {
+      "date": "2026-03-07",
+      "state": "CASH",
+      "close": 67945.0,
+      "sma50": null,
+      "reason": "data_warmup",
+      "model": "D",
+      "meta": {
+        "mode": "NORMAL",
+        "consec_above_ema": 0,
+        "last_switch_idx": -4,
+        "hold_start_idx": -1,
+        "ema20": 67945.0,
+        "ma100": null,
+        "atr20_ratio": 0.0
+      }
+    }
+  ]
+}
