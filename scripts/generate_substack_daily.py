@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LIVE_LOG = ROOT / "btcsignal_log_live.json"
+LIVE_LOG = ROOT / "data" / "btcsignal_log_live.json"
 OUT = ROOT / "substack" / "daily_latest.txt"
 
 

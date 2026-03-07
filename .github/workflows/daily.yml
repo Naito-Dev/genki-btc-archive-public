@@ -42,7 +42,7 @@ jobs:
           should_run = True
           skip_reason = ""
 
-          p = Path("btcsignal_log_live.json")
+          p = Path("data/btcsignal_log_live.json")
           try:
               if p.exists():
                   j = json.loads(p.read_text(encoding="utf-8"))
@@ -201,7 +201,7 @@ jobs:
               return True
 
           def latest_btcsignal_ts() -> str:
-              path = Path("btcsignal_log.json")
+              path = Path("data/btcsignal_log.json")
               if not path.exists():
                   return ""
               try:
@@ -220,7 +220,7 @@ jobs:
               return ""
 
           def latest_core_ts() -> str:
-              path = Path("log.json")
+              path = Path("data/log.json")
               if not path.exists():
                   return ""
               try:
@@ -366,7 +366,7 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         run: |
           if [ "${JOB_STATUS}" = "success" ]; then
-            git add log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json btcsignal_log.json btcsignal_log_live.json
+            git add data/log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json data/btcsignal_log.json data/btcsignal_log_live.json
             [ -f substack/daily_latest.txt ] && git add substack/daily_latest.txt || true
             [ -f data/live_test_baseline.json ] && git add data/live_test_baseline.json || true
             [ -f data/btcsignal_execution_log.csv ] && git add data/btcsignal_execution_log.csv || true
@@ -401,15 +401,15 @@ jobs:
           body: |
             Automated daily archive update.
           add-paths: |
-            log.json
+            data/log.json
             logs/*.json
             data/live_portfolio_snapshot.json
             data/live_pnl_cache.json
             data/live_test_baseline.json
             data/btcsignal_execution_log.csv
             data/btcsignal_execute_state.json
-            btcsignal_log.json
-            btcsignal_log_live.json
+            data/btcsignal_log.json
+            data/btcsignal_log_live.json
             substack/daily_latest.txt
             substack/status.json
 

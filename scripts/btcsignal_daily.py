@@ -15,8 +15,8 @@ from pathlib import Path
 from statistics import mean
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC_LOG = ROOT / "log.json"
-OUT_LOG = ROOT / "btcsignal_log.json"
+SRC_LOG = ROOT / "data" / "log.json"
+OUT_LOG = ROOT / "data" / "btcsignal_log.json"
 
 # ──── Model D Parameters (FROZEN) ──────────────────
 K_MA100 = 0.985
