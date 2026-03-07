@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "data" / "btcsignal_log.json"
 CORE_LOG = ROOT / "data" / "log.json"
 OUT = ROOT / "data" / "btcsignal_log_live.json"
+OUT_ROOT = ROOT / "btcsignal_log_live.json"
 LIVE_CONTRACT_START_DATE = "2026-02-26"
 BOOTSTRAP_EXCEPTION_DATE = "2026-02-26"
 
@@ -161,7 +162,8 @@ def main() -> int:
         "entries": live_entries,
     }
     save_json(OUT, payload)
-    print(f"OK: wrote {OUT.name} entries={len(live_entries)}")
+    save_json(OUT_ROOT, payload)
+    print(f"OK: wrote {OUT.name} and {OUT_ROOT.name} entries={len(live_entries)}")
     return 0
 
 
