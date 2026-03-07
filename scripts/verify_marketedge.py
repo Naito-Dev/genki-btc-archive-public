@@ -328,6 +328,27 @@ def sensitivity_grid(d1: pd.DataFrame, m15: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values(["congestion_threshold", "midpoint_frac"])
 
 
+def export_regime_labels(d1: pd.DataFrame, out_path: Path, congestion_threshold: float = DEFAULT_CONGESTION) -> pd.DataFrame:
+    regime = build_regime_table(d1, congestion_threshold).copy()
+    labels = regime.reset_index().rename(columns={"timestamp": "date"})
+    labels["date"] = labels["date"].dt.strftime("%Y-%m-%d")
+    labels["class_label"] = np.where(labels["target_weight"] > 0, "BTC", "non-BTC")
+    labels = labels[
+        [
+            "date",
+            "class_label",
+            "target_weight",
+            "bullish_structure",
+            "bearish_structure",
+            "ppp",
+            "strict70_to0_trigger",
+        ]
+    ]
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    labels.to_csv(out_path, index=False)
+    return labels
+
+
 def render_report(
     result: RunResult,
     base_metrics: Dict[str, float],
@@ -407,6 +428,12 @@ def main() -> None:
         default=Path("output/marketedge_trades.csv"),
         help="Output CSV path for trade log",
     )
+    parser.add_argument(
+        "--labels-out",
+        type=Path,
+        default=Path("output/marketedge_regime_labels.csv"),
+        help="Output CSV path for date/class_label regime labels",
+    )
     args = parser.parse_args()
 
     d1 = load_ohlcv(args.d1, "D1")
@@ -422,11 +449,13 @@ def main() -> None:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     report = render_report(result, base_metrics, crash2018, crash2022, sens, args.d1, args.m15)
     args.out.write_text(report, encoding="utf-8")
+    labels = export_regime_labels(d1, args.labels_out)
     if not result.trade_log.empty:
         args.trades_out.parent.mkdir(parents=True, exist_ok=True)
         result.trade_log.to_csv(args.trades_out, index=False)
 
     print(f"Report written: {args.out}")
+    print(f"Regime labels written: {args.labels_out} ({len(labels)} rows)")
     if not result.trade_log.empty:
         print(f"Trade log written: {args.trades_out} ({len(result.trade_log)} rows)")
 
