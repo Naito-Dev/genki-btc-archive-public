@@ -1,7 +1,7 @@
 {
-  "balance_ts_utc": "2026-03-08T12:43:18Z",
+  "balance_ts_utc": "2026-03-08T12:51:24Z",
   "btc_balance": 6.1e-07,
-  "price_at_snapshot": 67387.0,
+  "price_at_snapshot": 67329.0,
   "snapshot_status": "SYNCED",
   "source": "BITGET_READONLY",
   "updated_at_utc": "2026-03-08T00:00:00Z",

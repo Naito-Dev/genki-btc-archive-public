@@ -52818,6 +52818,24 @@
         "ma100": 86595.8,
         "atr20_ratio": 0.0362
       }
+    },
+    {
+      "date": "2026-03-08",
+      "state": "HOLD",
+      "close": 64221.6,
+      "reason": "private_current_signal",
+      "published_at_utc": "2026-03-08T12:51:08Z",
+      "signal_source": "private_btcsignal",
+      "schema_version": "1.0",
+      "proof": {
+        "logic_version": "current",
+        "input_hash": "sha256:ed04a8ee9bd3c6bca6d66b4befaf98805d3d37c505b6c63ef713893462e7d3a7",
+        "output_hash": "sha256:73b3d14202866ef776faa4ef307074c9e3ab26a3de0cd72b44b2e11d507eab48"
+      },
+      "ops": {
+        "delay_sec": 0,
+        "status": "ok"
+      }
     }
   ]
 }
