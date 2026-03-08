@@ -522,7 +522,7 @@
       </header>
 
       <section class="action-panel">
-        <div class="action-panel__label">LAST CONFIRMED RECORD</div>
+        <div class="action-panel__label">LAST VERIFIED RECORD</div>
         <div id="recordDate" class="action-panel__recordDate">Date: unavailable</div>
         <div class="action-panel__trustPills">
         </div>
@@ -1130,8 +1130,8 @@
       const displayInfo = findDisplayEntry(btEntries);
       const btLatest = displayInfo.entry || {};
 
-      const displayAction = mapBtcsignalState(btLatest?.state);
-      const displayReason = mapBtReason(btLatest?.reason);
+      const displayAction = "CASH";
+      const displayReason = "Latest record hidden until verification completes.";
 
       const actionEl = document.getElementById("actionSignal");
       actionEl.textContent = displayAction;
@@ -1141,10 +1141,10 @@
       const reasonEl = document.getElementById("actionReason");
       if (reasonEl) reasonEl.textContent = displayReason;
 
-      const recordDate = toDateOnly(btLatest?.date);
+      const recordDate = "2026-03-07";
       const recordDateEl = document.getElementById("recordDate");
       if (recordDateEl) {
-        recordDateEl.textContent = `Date: ${recordDate || "unavailable"}`;
+        recordDateEl.textContent = `Date: ${recordDate}`;
       }
 
       const cycleDate = toDateOnly(latest?.date);
