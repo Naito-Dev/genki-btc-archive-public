@@ -5,6 +5,11 @@ on:
     - cron: "5 12 * * *" # 12:05 UTC daily prep; deterministic publish at 12:10 UTC
     - cron: "32 12 * * *" # 12:32 UTC missed-run check
   workflow_dispatch:
+    inputs:
+      private_result_b64:
+        description: "base64 encoded private_signal_result.json"
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -42,7 +47,7 @@ jobs:
           should_run = True
           skip_reason = ""
 
-          p = Path("data/btcsignal_log_live.json")
+          p = Path("btcsignal_log_live.json")
           try:
               if p.exists():
                   j = json.loads(p.read_text(encoding="utf-8"))
@@ -168,6 +173,22 @@ jobs:
             fi
           fi
           exit "$rc"
+
+      - name: Materialize private BTCSIGNAL result
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.private_result_b64 != '' }}
+        run: |
+          set -euo pipefail
+          mkdir -p .runtime
+          printf %s '${{ inputs.private_result_b64 }}' | base64 --decode > .runtime/private_signal_result.json
+          test -s .runtime/private_signal_result.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path(".runtime/private_signal_result.json")
+          j = json.loads(p.read_text(encoding="utf-8"))
+          print("OK: materialized private result")
+          print("keys:", sorted(j.keys()))
+          PY
 
       - name: Import private BTCSIGNAL result
         id: import_private
@@ -378,7 +399,7 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         run: |
           if [ "${JOB_STATUS}" = "success" ]; then
-            git add data/log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json data/btcsignal_log.json data/btcsignal_log_live.json btcsignal_log.json btcsignal_log_live.json
+            git add data/log.json logs/*.json data/live_portfolio_snapshot.json data/live_pnl_cache.json data/btcsignal_log.json btcsignal_log.json btcsignal_log_live.json
             [ -f substack/daily_latest.txt ] && git add substack/daily_latest.txt || true
             [ -f data/live_test_baseline.json ] && git add data/live_test_baseline.json || true
             [ -f data/btcsignal_execution_log.csv ] && git add data/btcsignal_execution_log.csv || true
@@ -421,7 +442,6 @@ jobs:
             data/btcsignal_execution_log.csv
             data/btcsignal_execute_state.json
             data/btcsignal_log.json
-            data/btcsignal_log_live.json
             btcsignal_log.json
             btcsignal_log_live.json
             substack/daily_latest.txt
