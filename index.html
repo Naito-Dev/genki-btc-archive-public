@@ -569,7 +569,6 @@
           </div>
           <div class="audit-section">
             <div class="audit-title">Current Risk Exposure</div>
-            <div class="audit-row"><div class="k">Position Status</div><div id="auditAlloc">-</div></div>
             <div class="audit-row"><div class="k">Risk Posture</div><div id="auditTarget">-</div></div>
             <div class="audit-row"><div class="k">Status</div><div id="auditStatus">-</div></div>
             <div class="audit-row"><div class="k">Data Sync</div><div id="auditSnapshot">-</div></div>
@@ -739,6 +738,7 @@
           return { date, status, btcPrice };
         })
         .filter((r) => !!r.date && r.date >= TEST_START_DATE_JST && r.status !== "unavailable")
+        .filter((r) => !(r.date === "2026-03-08" && r.status === "BTC"))
         .map((r) => ({
           date: r.date,
           status: r.status,
@@ -753,9 +753,11 @@
       const collapseBtn = document.getElementById("auditRecentCollapseBtn");
       const limit = Math.min(recentVisibleCount, recentDecisionRows.length);
       const rows = recentDecisionRows.slice(0, limit);
-      list.innerHTML = rows.length
-        ? rows.map((r) => `<li>${r.date} | ${r.status} | BTC/USD ${r.btcPriceText}</li>`).join("")
-        : "<li>Unavailable</li>";
+      const items = rows.length
+        ? rows.map((r) => `<li>${r.date} | ${r.status} | BTC/USD ${r.btcPriceText}</li>`)
+        : ["<li>Unavailable</li>"];
+      items.push('<li class="audit-note">2026-03-08 record invalidated due to export mapping bug.</li>');
+      list.innerHTML = items.join("");
       if (moreBtn) {
         moreBtn.style.display = limit < recentDecisionRows.length ? "inline-flex" : "none";
       }
@@ -937,7 +939,6 @@
     function renderAudit(log, latest, btLog) {
       document.getElementById("auditChainStatus").textContent = mapStatusDisplay(latest?.chain_integrity, "integrity");
       document.getElementById("auditLogicVersion").textContent = latest?.logic_version ?? "Unavailable";
-      document.getElementById("auditAlloc").textContent = "Subscriber-only";
       document.getElementById("auditTarget").textContent = "Capital Protection Active";
       document.getElementById("auditStatus").textContent = mapStatusDisplay(latest?.status, "status");
       document.getElementById("auditSnapshot").textContent = mapStatusDisplay(latest?.snapshot_status, "sync");
@@ -1130,8 +1131,8 @@
       const displayInfo = findDisplayEntry(btEntries);
       const btLatest = displayInfo.entry || {};
 
-      const displayAction = "CASH";
-      const displayReason = "Latest record hidden until verification completes.";
+      const displayAction = mapBtcsignalState(btLatest?.state);
+      const displayReason = mapBtReason(btLatest?.reason);
 
       const actionEl = document.getElementById("actionSignal");
       actionEl.textContent = displayAction;
@@ -1141,7 +1142,7 @@
       const reasonEl = document.getElementById("actionReason");
       if (reasonEl) reasonEl.textContent = displayReason;
 
-      const recordDate = "2026-03-07";
+      const recordDate = toDateOnly(btLatest?.date) || "unavailable";
       const recordDateEl = document.getElementById("recordDate");
       if (recordDateEl) {
         recordDateEl.textContent = `Date: ${recordDate}`;
@@ -1150,7 +1151,7 @@
       const cycleDate = toDateOnly(latest?.date);
       // source of truth: published_at_utc (confirmed record time)
       const publishedAt = btLatest?.published_at_utc || null;
-      const basePrice = parseFiniteNumber(latest?.btc_price);
+      const basePrice = parseFiniteNumber(btLatest?.btc_usd);
       document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
       const metaUpdatedEl = document.getElementById("metaUpdated");
       const publishedText = fmtPublishedUtcStrict(publishedAt);
