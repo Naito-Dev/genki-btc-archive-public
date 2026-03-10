@@ -1148,7 +1148,7 @@
         recordDateEl.textContent = `Date: ${recordDate}`;
       }
 
-      const cycleDate = toDateOnly(latest?.date);
+      const cycleDate = toDateOnly(btLatest?.date) || toDateOnly(latest?.date);
       // source of truth: published_at_utc (confirmed record time)
       const publishedAt = btLatest?.published_at_utc || null;
       const basePrice = parseFiniteNumber(btLatest?.btc_usd);
