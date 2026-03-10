@@ -1,9 +1,9 @@
 [SUBSTACK_DAILY]
-Subject: CASH • Daily Record • 2026-03-09
+Subject: CASH • Daily Record • 2026-03-10
 
 Body:
 Confirmed record (BTC / CASH): CASH
-3-day record: CASH → BTC → CASH
+3-day record: BTC → CASH → CASH
 Published when the public record updates.
 Record-only. No prediction. No reasoning. No advice. Not investment advice.
 Public: [btcsignal.org](https://btcsignal.org)
