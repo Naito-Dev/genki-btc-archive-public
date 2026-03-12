@@ -518,7 +518,7 @@
     <section class="hero-card">
       <header class="hero-header">
         <h1>BTC SIGNAL</h1>
-        <p class="hero-subtitle">Premium BTC risk-control dashboard with full audit transparency.</p>
+        <p class="hero-subtitle">BTC record and verification dashboard.</p>
       </header>
 
       <section class="action-panel">
@@ -574,14 +574,14 @@
             <div class="audit-row"><div class="k">Data Sync</div><div id="auditSnapshot">-</div></div>
           </div>
           <div class="audit-section">
-            <div class="audit-title">Recent Verified Decisions</div>
+            <div class="audit-title">Recent Recorded Decisions</div>
             <ul id="auditRecentList" class="audit-list"><li>-</li></ul>
             <button id="auditRecentMoreBtn" class="proof-toggle" type="button" onclick="showMoreDecisions()" style="display:none; margin-top:8px;">Show more</button>
             <button id="auditRecentCollapseBtn" class="proof-toggle" type="button" onclick="collapseDecisions()" style="display:none; margin-top:8px;">Collapse</button>
           </div>
           <div class="audit-section">
             <div class="audit-title">Proof of Integrity</div>
-            <div id="proofSummary" class="proof-summary">Latest proof available • Hash verified record</div>
+            <div id="proofSummary" class="proof-summary">Latest proof available • Hash record attached</div>
             <button id="proofToggleBtn" class="proof-toggle" type="button" onclick="toggleProofDetails()">Show raw proof</button>
             <div id="proofCode" class="proof-code" style="display:none">-</div>
             <button id="copyProofBtn" class="proof-copy" type="button" onclick="copyLatestProof()" style="display:none">Copy Latest Proof</button>
@@ -881,7 +881,7 @@
       if (raw === null || raw === undefined || raw === "") return "Unavailable";
       const v = String(raw).trim();
       const key = v.toUpperCase();
-      if (mode === "integrity" && key === "VALID") return "Verified";
+      if (mode === "integrity" && key === "VALID") return "Integrity checked";
       if (mode === "sync" && key === "SYNCED") return "Synced";
       if (key === "DATA_STALE") return "Safety Hold (Market Data Unstable)";
       if (key === "API_ERROR") return "Risk Isolated (Connection Issue)";
@@ -939,7 +939,7 @@
     function renderAudit(log, latest, btLog) {
       document.getElementById("auditChainStatus").textContent = mapStatusDisplay(latest?.chain_integrity, "integrity");
       document.getElementById("auditLogicVersion").textContent = latest?.logic_version ?? "Unavailable";
-      document.getElementById("auditTarget").textContent = "Capital Protection Active";
+      document.getElementById("auditTarget").textContent = "Current regime status";
       document.getElementById("auditStatus").textContent = mapStatusDisplay(latest?.status, "status");
       document.getElementById("auditSnapshot").textContent = mapStatusDisplay(latest?.snapshot_status, "sync");
 
@@ -955,7 +955,7 @@
       };
       document.getElementById("proofCode").textContent = JSON.stringify(proof, null, 2);
       const summary = latest?.hash
-        ? "Latest proof available • Hash verified record"
+        ? "Latest proof available • Hash record attached"
         : "Latest proof unavailable";
       document.getElementById("proofSummary").textContent = summary;
     }
@@ -1062,7 +1062,7 @@
       if (pnl === null || !Number.isFinite(Number(pnl))) {
         const cacheTs = pnlCache?.updatedAtUtc ? fmtUtc(pnlCache.updatedAtUtc) : null;
         pnlEl.textContent = cacheTs ? `P/L pending (last update: ${cacheTs})` : "P/L pending";
-        pnlEl.style.display = "block";
+        pnlEl.style.display = "none";
         if (pnlNoteEl) pnlNoteEl.style.display = "none";
         pnlEl.classList.remove("positive", "negative");
         pnlEl.classList.add("flat");
@@ -1070,7 +1070,7 @@
         const val = Number(pnl);
         const sign = val > 0 ? "+" : "";
         pnlEl.textContent = `P/L ${sign}${val.toFixed(2)}%`;
-        pnlEl.style.display = "block";
+        pnlEl.style.display = "none";
         if (pnlNoteEl) pnlNoteEl.style.display = "block";
         pnlEl.classList.remove("positive", "negative", "flat");
         pnlEl.classList.add(val > 0 ? "positive" : val < 0 ? "negative" : "flat");
