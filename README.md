@@ -1,6 +1,6 @@
 # Genki BTC Signal — Public Verification Archive
 
-> A rules-based BTC allocation signal built for holders who value capital protection over speculation.
+> A rules-based BTC allocation signal public archive focused on records and verification.
 
 Japanese version: [README.ja.md](./README.ja.md)
 
@@ -8,7 +8,7 @@ Japanese version: [README.ja.md](./README.ja.md)
 
 ## What This Repository Is
 
-This is the public proof archive for Genki BTC Signal — a daily risk-control service for BTC spot holders.
+This is the public proof archive for Genki BTC Signal — a daily BTC record and verification archive.
 
 Every day, the system evaluates market structure and outputs the current candidate allocation levels:
 
@@ -81,19 +81,6 @@ Operational/context fields (may vary by logic version):
 
 No account data, order payloads, API tokens, or environment variables are stored in this repository.
 
-## Reference Performance Metrics
-
-The following metrics are derived from historical backtesting and are provided for reference only. They are not guarantees of future performance.
-
-| Metric | Value |
-|---|---|
-| Final Equity | 15.17x |
-| CAGR | 41.02% |
-| Max Drawdown | -19.79% |
-| Avg Exposure | 11.80% |
-
-Live forward testing is currently in progress with real capital. Results are published in this archive as records accumulate.
-
 ## How to Verify the Log
 
 Anyone can confirm that published records have not been altered.
@@ -128,8 +115,6 @@ The first entry uses an empty string in place of `prev_hash`.
 ## Current Status
 
 - Phase: Live verification in progress
-- Capital deployed: Real funds, limited scale (verification phase)
-- Paid access: Opens after verification period — join the waitlist
 - Public dashboard: View live signal status
 - Verification center: Technical Verification & Reproducibility Center
 
