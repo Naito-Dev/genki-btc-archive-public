@@ -532,7 +532,7 @@
           <p id="dataPending" class="action-panel__stale">Data update pending</p>
         </div>
         <div class="action-panel__metaDock">
-          <div id="metaPrice" class="meta-pill meta-pill--price">BTC $67,950.98</div>
+          <div id="metaPrice" class="meta-pill meta-pill--price">Price temporarily hidden during verification.</div>
           <div id="metaUpdated" class="meta-pill meta-pill--updated" style="display:none"></div>
           <p class="meta-warning">Delayed record (not real-time). Not investment advice.</p>
         </div>
@@ -742,7 +742,6 @@
         .map((r) => ({
           date: r.date,
           status: r.status,
-          btcPriceText: r.btcPrice !== null ? fmtUsd(r.btcPrice) : "unavailable",
         }))
         .reverse();
     }
@@ -754,8 +753,9 @@
       const limit = Math.min(recentVisibleCount, recentDecisionRows.length);
       const rows = recentDecisionRows.slice(0, limit);
       const items = rows.length
-        ? rows.map((r) => `<li>${r.date} | ${r.status} | BTC/USD ${r.btcPriceText}</li>`)
+        ? rows.map((r) => `<li>${r.date} | ${r.status}</li>`)
         : ["<li>Unavailable</li>"];
+      items.push('<li class="audit-note">Price temporarily hidden during verification.</li>');
       items.push('<li class="audit-note">2026-03-08 record invalidated due to export mapping bug.</li>');
       list.innerHTML = items.join("");
       if (moreBtn) {
@@ -1151,8 +1151,7 @@
       const cycleDate = toDateOnly(btLatest?.date) || toDateOnly(latest?.date);
       // source of truth: published_at_utc (confirmed record time)
       const publishedAt = btLatest?.published_at_utc || null;
-      const basePrice = parseFiniteNumber(btLatest?.btc_usd);
-      document.getElementById("metaPrice").textContent = `BTC ${fmtUsd(basePrice)}`;
+      document.getElementById("metaPrice").textContent = "Price temporarily hidden during verification.";
       const metaUpdatedEl = document.getElementById("metaUpdated");
       const publishedText = fmtPublishedUtcStrict(publishedAt);
       if (metaUpdatedEl) {
