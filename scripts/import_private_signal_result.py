@@ -66,10 +66,14 @@ def validate_payload(payload: dict) -> dict:
     published_at_utc = str(payload.get('published_at_utc') or '').strip()
     require(valid_iso_utc_z(published_at_utc), 'invalid_payload:published_at_utc')
     btc_usd = payload.get('btc_usd')
-    try:
-        btc_usd = float(btc_usd)
-    except Exception:
-        raise ValueError('invalid_payload:btc_usd')
+    if btc_usd is None:
+        close = None
+    else:
+        try:
+            btc_usd = float(btc_usd)
+        except Exception:
+            raise ValueError('invalid_payload:btc_usd')
+        close = round(btc_usd, 2)
     signal_source = str(payload.get('signal_source') or '').strip()
     require(signal_source == 'private_btcsignal', 'invalid_payload:signal_source')
     schema_version = str(payload.get('schema_version') or '').strip()
@@ -94,7 +98,7 @@ def validate_payload(payload: dict) -> dict:
     return {
         'date': date,
         'state': legacy_state,
-        'close': round(btc_usd, 2),
+        'close': close,
         'reason': reason_public,
         'published_at_utc': published_at_utc,
         'signal_source': signal_source,
