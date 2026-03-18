@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_IN = ROOT / '.runtime' / 'private_signal_result.json'
 OUT_LOG = ROOT / 'data' / 'btcsignal_log.json'
 OUT_LOG_ROOT = ROOT / 'btcsignal_log.json'
+SOURCE_LOG = ROOT / 'data' / 'log.json'
 
 
 def parse_args() -> argparse.Namespace:
@@ -47,6 +48,41 @@ def valid_iso_utc_z(value: str) -> bool:
     return True
 
 
+def parse_optional_float(value):
+    if value is None:
+        return None
+    try:
+        num = float(value)
+    except Exception:
+        return None
+    if num != num or num in {float('inf'), float('-inf')}:
+        return None
+    return num
+
+
+def lookup_close_from_run_daily(date: str):
+    if not SOURCE_LOG.exists():
+        return None
+    try:
+        payload = load_json(SOURCE_LOG)
+    except Exception:
+        return None
+    latest = payload.get('latest')
+    if isinstance(latest, dict) and str(latest.get('date') or '').strip()[:10] == date:
+        price = parse_optional_float(latest.get('btc_price'))
+        return round(price, 2) if price is not None else None
+    entries = payload.get('entries')
+    if isinstance(entries, list):
+        for row in reversed(entries):
+            if not isinstance(row, dict):
+                continue
+            if str(row.get('date') or '').strip()[:10] != date:
+                continue
+            price = parse_optional_float(row.get('btc_price'))
+            return round(price, 2) if price is not None else None
+    return None
+
+
 def to_legacy_state(state: str) -> str:
     s = str(state or '').strip().upper()
     if s == 'BTC':
@@ -67,7 +103,7 @@ def validate_payload(payload: dict) -> dict:
     require(valid_iso_utc_z(published_at_utc), 'invalid_payload:published_at_utc')
     btc_usd = payload.get('btc_usd')
     if btc_usd is None:
-        close = None
+        close = lookup_close_from_run_daily(date)
     else:
         try:
             btc_usd = float(btc_usd)
