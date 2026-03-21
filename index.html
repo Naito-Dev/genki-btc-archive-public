@@ -633,12 +633,9 @@
       if (!v) return "unavailable";
       const d = new Date(v);
       if (!Number.isFinite(d.getTime())) return "unavailable";
-      const y = d.getUTCFullYear();
-      const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-      const day = String(d.getUTCDate()).padStart(2, "0");
       const hh = String(d.getUTCHours()).padStart(2, "0");
       const mm = String(d.getUTCMinutes()).padStart(2, "0");
-      return `${y}-${m}-${day} ${hh}:${mm} UTC`;
+      return `${hh}:${mm} UTC`;
     }
 
     function findDisplayEntry(entries) {
