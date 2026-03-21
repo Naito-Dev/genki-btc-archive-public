@@ -523,7 +523,7 @@
 
       <section class="action-panel">
         <div class="action-panel__label">LAST VERIFIED RECORD</div>
-        <div id="recordDate" class="action-panel__recordDate">Date: unavailable</div>
+        <div id="recordDate" class="action-panel__recordDate">Record: unavailable</div>
         <div class="action-panel__trustPills">
         </div>
         <div class="action-panel__body">
@@ -1143,29 +1143,26 @@
       if (reasonEl) reasonEl.textContent = displayReason;
 
       const recordDate = toDateOnly(btLatest?.date) || "unavailable";
-      const recordDateEl = document.getElementById("recordDate");
-      if (recordDateEl) {
-        recordDateEl.textContent = `Date: ${recordDate}`;
-      }
-
       const cycleDate = toDateOnly(btLatest?.date) || toDateOnly(latest?.date);
       // source of truth: published_at_utc (confirmed record time)
       const publishedAt = btLatest?.published_at_utc || null;
+      const publishedText = fmtPublishedUtcStrict(publishedAt);
+      const recordDateEl = document.getElementById("recordDate");
+      if (recordDateEl) {
+        recordDateEl.textContent = displayInfo.hasPublished && publishedText !== "unavailable"
+          ? `Record: ${recordDate} · Published ${publishedText}`
+          : `Record: ${recordDate}`;
+      }
+
       const basePrice = parseFiniteNumber(btLatest?.btc_usd);
       const metaPriceEl = document.getElementById("metaPrice");
       metaPriceEl.textContent = basePrice !== null
         ? `BTC ${fmtUsd(basePrice)}`
         : "Price temporarily hidden during verification.";
       const metaUpdatedEl = document.getElementById("metaUpdated");
-      const publishedText = fmtPublishedUtcStrict(publishedAt);
       if (metaUpdatedEl) {
-        if (displayInfo.hasPublished && publishedText !== "unavailable") {
-          metaUpdatedEl.style.display = "inline-flex";
-          metaUpdatedEl.textContent = `Published: ${publishedText}`;
-        } else {
-          metaUpdatedEl.style.display = "none";
-          metaUpdatedEl.textContent = "";
-        }
+        metaUpdatedEl.style.display = "none";
+        metaUpdatedEl.textContent = "";
       }
 
       const staleEl = document.getElementById("dataPending");
