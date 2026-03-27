@@ -1,0 +1,119 @@
+name: Private Signal Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: private-signal-build
+  cancel-in-progress: false
+
+jobs:
+  build-and-dispatch:
+    runs-on: ubuntu-latest
+    environment: private-signal-build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Prepare read-only env
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          READONLY_CREDENTIAL: ${{ secrets.READONLY_CREDENTIAL }}
+        run: |
+          set -euo pipefail
+          mkdir -p .runtime
+          test -n "${API_KEY}"
+          test -n "${READONLY_CREDENTIAL}"
+          printf '%s\n' "$READONLY_CREDENTIAL" > .runtime/bitget_ro.env
+          chmod 600 .runtime/bitget_ro.env
+          {
+            echo "BITGET_API_KEY=${API_KEY}"
+            grep -E '^(BITGET_API_SECRET|BITGET_PASSPHRASE|BITGET_API_PASSPHRASE)=' .runtime/bitget_ro.env || true
+          } > .runtime/build_private_signal.env
+          if ! grep -q '^BITGET_API_SECRET=' .runtime/build_private_signal.env; then
+            echo 'missing BITGET_API_SECRET in READONLY_CREDENTIAL' >&2
+            exit 1
+          fi
+          if grep -q '^BITGET_PASSPHRASE=' .runtime/build_private_signal.env && ! grep -q '^BITGET_API_PASSPHRASE=' .runtime/build_private_signal.env; then
+            passphrase="$(grep '^BITGET_PASSPHRASE=' .runtime/build_private_signal.env | sed 's/^BITGET_PASSPHRASE=//')"
+            echo "BITGET_API_PASSPHRASE=${passphrase}" >> .runtime/build_private_signal.env
+          fi
+          if ! grep -q '^BITGET_API_PASSPHRASE=' .runtime/build_private_signal.env; then
+            echo 'missing BITGET_API_PASSPHRASE in READONLY_CREDENTIAL' >&2
+            exit 1
+          fi
+
+      - name: Build private signal result
+        run: |
+          set -euo pipefail
+          set -a
+          . ./.runtime/build_private_signal.env
+          set +a
+          python scripts/build_private_signal_result.py --out .runtime/private_signal_result.json
+
+      - name: JSON sanity check
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('.runtime/private_signal_result.json')
+          j = json.loads(p.read_text(encoding='utf-8'))
+          for key in ('date', 'record_date', 'state', 'reason_public'):
+              if not str(j.get(key) or '').strip():
+                  raise SystemExit(f'missing:{key}')
+          if j.get('state') not in {'CASH', 'BTC'}:
+              raise SystemExit('invalid:state')
+          btc = j.get('btc_usd')
+          if btc is not None:
+              float(btc)
+          print('OK: private signal JSON sanity check')
+          PY
+
+      - name: Encode private result
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64
+          from pathlib import Path
+          src = Path('.runtime/private_signal_result.json')
+          out = Path('.runtime/private_result_b64.txt')
+          out.write_text(base64.b64encode(src.read_bytes()).decode('ascii'), encoding='utf-8')
+          print(f'OK: encoded private result ({len(out.read_text(encoding="utf-8"))} chars)')
+          PY
+
+      - name: Dispatch Daily Archive Update
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          payload = {
+              'ref': 'main',
+              'inputs': {
+                  'private_result_b64': Path('.runtime/private_result_b64.txt').read_text(encoding='utf-8').strip(),
+              },
+          }
+          Path('.runtime/daily_dispatch.json').write_text(json.dumps(payload), encoding='utf-8')
+          PY
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            repos/${{ github.repository }}/actions/workflows/daily.yml/dispatches \
+            --input .runtime/daily_dispatch.json
+          echo "OK: dispatched Daily Archive Update"
