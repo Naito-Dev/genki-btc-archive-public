@@ -68,7 +68,10 @@ def resolve_verified_btc_usd(state: object, expected_date: str) -> float:
     require(record_date == expected_date, 'stale_record_date')
 
     price_source = str(getattr(state, 'price_source', '') or '').strip().lower()
-    require(price_source == 'live', f'unverified_price_source:{price_source or "missing"}')
+    require(
+        price_source == 'live' or price_source.startswith('consensus:'),
+        f'unverified_price_source:{price_source or "missing"}',
+    )
 
     price_ts = str(getattr(state, 'price_ts', '') or '').strip()
     require(price_ts[:10] == expected_date, 'stale_price_ts')
