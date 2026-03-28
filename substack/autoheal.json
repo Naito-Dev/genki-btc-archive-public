@@ -1,6 +1,6 @@
 {
-  "last_autoheal_utc": "2026-03-26T13:15:10Z",
-  "triggered_by_run_id": "23596268510",
-  "reason": "stale>90589s",
+  "last_autoheal_utc": "2026-03-28T06:58:40Z",
+  "triggered_by_run_id": "23679836018",
+  "reason": "stale>96646s",
   "monitor_workflow": "Substack Status Monitor"
 }\n
