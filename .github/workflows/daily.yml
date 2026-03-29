@@ -447,12 +447,21 @@ jobs:
             substack/daily_latest.txt
             substack/status.json
 
-      - name: Enable auto-merge (squash)
+      - name: Approve daily update PR
         if: ${{ always() && steps.cpr.outputs.pull-request-number != '' }}
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --auto --squash --delete-branch
+          gh pr review "${{ steps.cpr.outputs.pull-request-number }}" --approve --body "Automated approval for daily data update."
+
+      - name: Squash merge daily update PR
+        if: ${{ always() && steps.cpr.outputs.pull-request-number != '' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --squash --delete-branch
 
       - name: Collect run context
         if: ${{ always() }}

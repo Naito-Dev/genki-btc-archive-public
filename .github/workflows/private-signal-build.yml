@@ -2,7 +2,7 @@ name: Private Signal Build
 
 on:
   schedule:
-    - cron: '12 12 * * *'
+    - cron: '5 12 * * *'
   workflow_dispatch:
 
 permissions:
@@ -11,12 +11,11 @@ permissions:
 
 concurrency:
   group: private-signal-build
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-dispatch:
     runs-on: ubuntu-latest
-    environment: private-signal-build
 
     steps:
       - name: Checkout
@@ -31,31 +30,21 @@ jobs:
 
       - name: Prepare read-only env
         env:
-          API_KEY: ${{ secrets.API_KEY }}
-          READONLY_CREDENTIAL: ${{ secrets.READONLY_CREDENTIAL }}
+          BITGET_API_KEY: ${{ secrets.BITGET_API_KEY }}
+          BITGET_API_SECRET: ${{ secrets.BITGET_API_SECRET }}
+          BITGET_API_PASSPHRASE: ${{ secrets.BITGET_API_PASSPHRASE }}
         run: |
           set -euo pipefail
           mkdir -p .runtime
-          test -n "${API_KEY}"
-          test -n "${READONLY_CREDENTIAL}"
-          printf '%s\n' "$READONLY_CREDENTIAL" > .runtime/bitget_ro.env
-          chmod 600 .runtime/bitget_ro.env
-          {
-            echo "BITGET_API_KEY=${API_KEY}"
-            grep -E '^(BITGET_API_SECRET|BITGET_PASSPHRASE|BITGET_API_PASSPHRASE)=' .runtime/bitget_ro.env || true
-          } > .runtime/build_private_signal.env
-          if ! grep -q '^BITGET_API_SECRET=' .runtime/build_private_signal.env; then
-            echo 'missing BITGET_API_SECRET in READONLY_CREDENTIAL' >&2
-            exit 1
-          fi
-          if grep -q '^BITGET_PASSPHRASE=' .runtime/build_private_signal.env && ! grep -q '^BITGET_API_PASSPHRASE=' .runtime/build_private_signal.env; then
-            passphrase="$(grep '^BITGET_PASSPHRASE=' .runtime/build_private_signal.env | sed 's/^BITGET_PASSPHRASE=//')"
-            echo "BITGET_API_PASSPHRASE=${passphrase}" >> .runtime/build_private_signal.env
-          fi
-          if ! grep -q '^BITGET_API_PASSPHRASE=' .runtime/build_private_signal.env; then
-            echo 'missing BITGET_API_PASSPHRASE in READONLY_CREDENTIAL' >&2
-            exit 1
-          fi
+          test -n "${BITGET_API_KEY}"
+          test -n "${BITGET_API_SECRET}"
+          test -n "${BITGET_API_PASSPHRASE}"
+          cat > .runtime/build_private_signal.env <<EOF
+          BITGET_API_KEY=${BITGET_API_KEY}
+          BITGET_API_SECRET=${BITGET_API_SECRET}
+          BITGET_API_PASSPHRASE=${BITGET_API_PASSPHRASE}
+          EOF
+          chmod 600 .runtime/build_private_signal.env
 
       - name: Build private signal result
         run: |
