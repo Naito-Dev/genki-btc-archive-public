@@ -449,7 +449,6 @@ jobs:
 
       - name: Approve daily update PR
         if: ${{ always() && steps.cpr.outputs.pull-request-number != '' }}
-        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -457,11 +456,20 @@ jobs:
 
       - name: Squash merge daily update PR
         if: ${{ always() && steps.cpr.outputs.pull-request-number != '' }}
-        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --squash --delete-branch
+
+      - name: Verify daily update PR merged
+        if: ${{ always() && steps.cpr.outputs.pull-request-number != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh pr view "${{ steps.cpr.outputs.pull-request-number }}" \
+            --json state,mergedAt,isDraft \
+            --jq 'if .state == "MERGED" and .mergedAt != null then "ok" else error("daily_pr_not_merged") end'
 
       - name: Collect run context
         if: ${{ always() }}
