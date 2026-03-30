@@ -1193,7 +1193,7 @@
       const auditHealthy = !chainIntegrity || chainIntegrity === "PASS";
       const snapshotSynced = snapshotStatus === "SYNCED";
       const equity = snapshotAvailable ? (usdt + btc * px) : null;
-      document.getElementById("liveEquity").textContent = equity === null ? "-" : fmtUsd(equity);
+      document.getElementById("liveEquity").textContent = "Snapshot paused";
 
       const balanceSourceEl = document.getElementById("balanceSource");
       if (balanceSourceEl) {
