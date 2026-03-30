@@ -209,25 +209,9 @@
       text-align: right;
       max-width: 100%;
     }
-    .hero-bottom {
-      margin-top: 14px;
-      background: rgba(7,14,30,.55);
-      border-radius: 18px;
-      padding: 14px 14px 12px;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 8px;
-      align-items: end;
-      overflow: visible;
-    }
-    .hero-bottom__left {
-      width: 100%;
-      display: grid;
-      justify-items: center;
-      text-align: center;
-      overflow: visible;
-    }
     .live-label {
+      margin-top: 8px;
+      text-align: center;
       font-size: 11px;
       letter-spacing: .14em;
       font-weight: 800;
@@ -505,7 +489,6 @@
         bottom: 10px;
         max-width: calc(100% - 28px);
       }
-      .hero-bottom { grid-template-columns: minmax(0,1fr); gap: 8px; padding: 12px 12px 10px; }
       .hero-cta-row { grid-template-columns: 1fr; gap: 0; }
       .hero-cta { width: 100%; }
       .audit-row { grid-template-columns: 1fr; gap: 2px; }
@@ -519,6 +502,7 @@
       <header class="hero-header">
         <h1>BTC SIGNAL</h1>
         <p class="hero-subtitle">BTC record and verification dashboard.</p>
+        <div id="liveLabel" class="live-label" style="display:none"></div>
       </header>
 
       <section class="action-panel">
@@ -535,21 +519,6 @@
           <div id="metaPrice" class="meta-pill meta-pill--price">Price temporarily hidden during verification.</div>
           <div id="metaUpdated" class="meta-pill meta-pill--updated" style="display:none"></div>
           <p class="meta-warning">Delayed record (not real-time). Not investment advice.</p>
-        </div>
-      </section>
-
-      <section class="hero-bottom">
-        <div class="hero-bottom__left">
-          <div class="live-header">
-            <img src="/favicon.svg" alt="Genki" class="live-avatar">
-            <div class="live-header__text">
-              <div id="liveLabel" class="live-label">LIVE TESTING</div>
-            </div>
-          </div>
-          <div id="liveEquity" class="live-equity">-</div>
-          <div id="pnlPct" class="pnl-pct" style="display:none"></div>
-          <div id="balanceSource" class="pnl-note" style="display:none;">Source: unavailable</div>
-          <div id="sinceStart" class="since-start">Since start: -</div>
         </div>
       </section>
 
@@ -1165,51 +1134,17 @@
       const staleEl = document.getElementById("dataPending");
       if (staleEl) staleEl.style.display = displayAction === "unavailable" ? "block" : "none";
 
-      let snapshot = null;
-      try {
-        snapshot = await fetchLivePortfolioSnapshot();
-      } catch (_) {
-        snapshot = null;
-      }
-      let baseline = null;
-      try {
-        baseline = await fetchLiveTestBaseline();
-      } catch (_) {
-        baseline = null;
-      }
-      let pnlCache = null;
-      try {
-        pnlCache = await fetchLivePnlCache();
-      } catch (_) {
-        pnlCache = null;
-      }
-
-      const usdt = parseFiniteNumber(snapshot?.usdtBalance);
-      const btc = parseFiniteNumber(snapshot?.btcBalance);
-      const px = parseFiniteNumber(snapshot?.priceAtSnapshot ?? latest?.btc_price);
-      const snapshotAvailable = usdt !== null && btc !== null && px !== null;
-      const snapshotStatus = String(snapshot?.status || latest?.snapshot_status || "SYNC_PENDING").toUpperCase();
-      const chainIntegrity = String(latest?.chain_integrity || "").toUpperCase();
-      const auditHealthy = !chainIntegrity || chainIntegrity === "PASS";
-      const snapshotSynced = snapshotStatus === "SYNCED";
-      const equity = snapshotAvailable ? (usdt + btc * px) : null;
-      document.getElementById("liveEquity").textContent = "Snapshot paused";
-
-      const balanceSourceEl = document.getElementById("balanceSource");
-      if (balanceSourceEl) {
-        const src = snapshotSynced ? String(snapshot?.source || latest?.balance_source || "unavailable") : "unavailable";
-        balanceSourceEl.textContent = `Source: ${src}`;
-      }
-
-      const sinceStartEl = document.getElementById("sinceStart");
-      sinceStartEl.textContent = `Since start: ${baseline?.startDateJst || TEST_START_DATE_JST}`;
-      sinceStartEl.style.display = "block";
-
       const liveLabelEl = document.getElementById("liveLabel");
       const dayN = cycleDate ? calcLiveDayN(TEST_START_DATE_JST, cycleDate) : null;
-      liveLabelEl.textContent = dayN ? `LIVE TESTING • Day ${dayN}` : "LIVE TESTING";
-
-      renderPnlFromBaseline(equity, baseline, snapshotAvailable, snapshotStatus, pnlCache, auditHealthy);
+      if (liveLabelEl) {
+        if (dayN) {
+          liveLabelEl.textContent = `LIVE TESTING • Day ${dayN}`;
+          liveLabelEl.style.display = "block";
+        } else {
+          liveLabelEl.textContent = "";
+          liveLabelEl.style.display = "none";
+        }
+      }
       renderAudit(log, latest, btLog);
     }
 
