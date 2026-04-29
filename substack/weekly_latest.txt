@@ -5,15 +5,14 @@ Body:
 Window: last 7 days (ending 2026-04-29)
 
 Delivery:
-Days published: 6/7
-Missing days: 1
-Missing: 2026-04-29
+Days published: 7/7
+Missing days: 0
 
 Timeliness:
 Delay: data unavailable
 
 Integrity:
-Chain integrity (VALID days): 6/7
+Chain integrity (VALID days): 7/7
 Last 30-day match report: unavailable
 
 Links:
