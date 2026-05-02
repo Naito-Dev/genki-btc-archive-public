@@ -53790,6 +53790,24 @@
         "delay_sec": 0,
         "status": "ok"
       }
+    },
+    {
+      "date": "2026-05-02",
+      "state": "CASH",
+      "close": 78126.0,
+      "reason": "private_current_signal",
+      "published_at_utc": "2026-05-02T12:05:00Z",
+      "signal_source": "private_btcsignal",
+      "schema_version": "1.0",
+      "proof": {
+        "logic_version": "current",
+        "input_hash": "sha256:d85ea5c2b13bc7579e99bd5ef59037e209b7193b10d2e7a6b233582fa0d22f3f",
+        "output_hash": "sha256:dad72d7280caaa90e8695ca8d0b0fb64be1a6c8b69845da02ecad886344651bc"
+      },
+      "ops": {
+        "delay_sec": 0,
+        "status": "ok"
+      }
     }
   ]
 }
