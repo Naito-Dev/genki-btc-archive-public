@@ -2,8 +2,8 @@ name: Private Signal Build
 
 on:
   schedule:
-    - cron: '5 12 * * *' # 21:05 JST
-    - cron: '12 12 * * *' # backup trigger if the primary schedule is delayed or dropped
+    - cron: '5 11 * * *' # 20:05 JST
+    - cron: '12 11 * * *' # backup trigger if the primary schedule is delayed or dropped
   workflow_dispatch:
 
 permissions:

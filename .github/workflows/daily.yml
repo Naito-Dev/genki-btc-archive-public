@@ -2,8 +2,8 @@ name: Daily Archive Update
 
 on:
   schedule:
-    - cron: "5 12 * * *" # 12:05 UTC daily prep; deterministic publish at 12:10 UTC
-    - cron: "32 12 * * *" # 12:32 UTC missed-run check
+    - cron: "5 11 * * *" # 11:05 UTC daily prep; deterministic publish at 11:10 UTC
+    - cron: "32 11 * * *" # 11:32 UTC missed-run check
   workflow_dispatch:
     inputs:
       private_result_b64:
@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   precheck-idempotency:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '5 12 * * *' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '5 11 * * *' }}
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
@@ -69,7 +69,7 @@ jobs:
 
   run-daily:
     needs: precheck-idempotency
-    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule == '5 12 * * *') && needs.precheck-idempotency.outputs.should_run == 'true' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule == '5 11 * * *') && needs.precheck-idempotency.outputs.should_run == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -84,7 +84,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Deterministic publish gate (12:10 UTC ±120s)
+      - name: Deterministic publish gate (11:10 UTC ±120s)
         run: |
           set -euo pipefail
           if [ "${GITHUB_EVENT_NAME}" != "schedule" ]; then
@@ -101,7 +101,7 @@ jobs:
           fi
 
           TODAY_UTC="$(date -u +%F)"
-          TARGET_UTC="${TODAY_UTC}T12:10:00Z"
+          TARGET_UTC="${TODAY_UTC}T11:10:00Z"
           TARGET_EPOCH="$(date -u -d "${TARGET_UTC}" +%s)"
           NOW_EPOCH="$(date -u +%s)"
           WAIT_SEC=$(( TARGET_EPOCH - NOW_EPOCH ))
@@ -535,7 +535,7 @@ jobs:
 
   run-daily-noop:
     needs: precheck-idempotency
-    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule == '5 12 * * *') && needs.precheck-idempotency.outputs.should_run != 'true' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule == '5 11 * * *') && needs.precheck-idempotency.outputs.should_run != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: No-op due to idempotency guard
@@ -543,7 +543,7 @@ jobs:
           echo "NOOP: daily run skipped (${{ needs.precheck-idempotency.outputs.skip_reason || 'idempotency_guard' }})"
 
   missed-run-check:
-    if: ${{ github.event_name == 'schedule' && github.event.schedule == '32 12 * * *' }}
+    if: ${{ github.event_name == 'schedule' && github.event.schedule == '32 11 * * *' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

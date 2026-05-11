@@ -2,7 +2,7 @@ name: Daily Publish Watchdog
 
 on:
   schedule:
-    - cron: "17 12 * * *" # 21:17 JST
+    - cron: "17 11 * * *" # 20:17 JST
   workflow_dispatch:
 
 permissions:
@@ -180,7 +180,7 @@ jobs:
           import os
 
           msg = (
-              "SLO_BREACH:dashboard_not_updated_by_21:17\n"
+              "SLO_BREACH:dashboard_not_updated_by_20:17\n"
               f"today_jst={os.environ.get('TODAY_JST','')}\n"
               f"latest_date={os.environ.get('LATEST_DATE','')}\n"
               f"live_url={os.environ.get('LIVE_URL','')}\n"
