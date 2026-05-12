@@ -2,8 +2,12 @@ name: Daily Archive Update
 
 on:
   schedule:
-    - cron: "5 11 * * *" # 11:05 UTC daily prep; deterministic publish at 11:10 UTC
-    - cron: "32 11 * * *" # 11:32 UTC missed-run check
+    - cron: "5 11 * * *" # 20:05 JST primary daily prep; deterministic publish at 20:10 JST
+    - cron: "8 11 * * *" # 20:08 JST retry if GitHub drops/delays the primary schedule
+    - cron: "12 11 * * *" # 20:12 JST retry
+    - cron: "16 11 * * *" # 20:16 JST retry
+    - cron: "20 11 * * *" # 20:20 JST final retry
+    - cron: "32 11 * * *" # 20:32 JST missed-run check
   workflow_dispatch:
     inputs:
       private_result_b64:
@@ -21,7 +25,7 @@ concurrency:
 
 jobs:
   precheck-idempotency:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '5 11 * * *' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule != '32 11 * * *' }}
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
@@ -69,7 +73,7 @@ jobs:
 
   run-daily:
     needs: precheck-idempotency
-    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule == '5 11 * * *') && needs.precheck-idempotency.outputs.should_run == 'true' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule != '32 11 * * *') && needs.precheck-idempotency.outputs.should_run == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -84,7 +88,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Deterministic publish gate (11:10 UTC ±120s)
+      - name: Deterministic publish gate (20:10 JST / 11:10 UTC ±120s)
         run: |
           set -euo pipefail
           if [ "${GITHUB_EVENT_NAME}" != "schedule" ]; then
@@ -535,7 +539,7 @@ jobs:
 
   run-daily-noop:
     needs: precheck-idempotency
-    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule == '5 11 * * *') && needs.precheck-idempotency.outputs.should_run != 'true' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.schedule != '32 11 * * *') && needs.precheck-idempotency.outputs.should_run != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: No-op due to idempotency guard

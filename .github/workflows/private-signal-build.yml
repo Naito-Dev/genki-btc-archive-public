@@ -2,8 +2,11 @@ name: Private Signal Build
 
 on:
   schedule:
-    - cron: '5 11 * * *' # 20:05 JST
-    - cron: '12 11 * * *' # backup trigger if the primary schedule is delayed or dropped
+    - cron: '5 11 * * *' # 20:05 JST primary
+    - cron: '8 11 * * *' # 20:08 JST retry if GitHub drops/delays the primary schedule
+    - cron: '12 11 * * *' # 20:12 JST retry
+    - cron: '16 11 * * *' # 20:16 JST retry
+    - cron: '20 11 * * *' # 20:20 JST final retry
   workflow_dispatch:
 
 permissions:
