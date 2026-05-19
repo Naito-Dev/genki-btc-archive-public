@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at_utc": "2026-05-18T10:32:33.172367+00:00",
+    "generated_at_utc": "2026-05-19T10:42:07.886401+00:00",
     "source": "btcsignal_log.json",
     "note": "warmup seed rows are excluded from this live decision log",
     "excluded_reason_patterns": [
@@ -12,7 +12,7 @@
     "contract_exceptions": [
       "2026-02-26: published_at_utc missing (bootstrap)"
     ],
-    "live_entries_count": 3178
+    "live_entries_count": 3179
   },
   "entries": [
     {
@@ -22260,6 +22260,13 @@
       "reason": "private_current_signal",
       "published_at_utc": "2026-05-18T10:32:14Z",
       "btc_usd": 76800.0
+    },
+    {
+      "date": "2026-05-19",
+      "state": "CASH",
+      "reason": "private_current_signal",
+      "published_at_utc": "2026-05-19T10:41:26Z",
+      "btc_usd": 76802.2
     }
   ]
 }
