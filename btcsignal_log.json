@@ -54334,15 +54334,15 @@
     {
       "date": "2026-06-01",
       "state": "CASH",
-      "close": 72607.1,
+      "close": 71263.26,
       "reason": "private_current_signal",
-      "published_at_utc": "2026-06-01T10:42:00Z",
+      "published_at_utc": "2026-06-01T16:45:35Z",
       "signal_source": "private_btcsignal",
       "schema_version": "1.0",
       "proof": {
         "logic_version": "current",
-        "input_hash": "sha256:dd80970c42ea0dcd12629722f754c11f2ff1a97d743444fc6907bc02dbbd2d59",
-        "output_hash": "sha256:e4d71ccb0b69f8171a208476a8d703d263620e869f64a02002041bfe70d9c8a6"
+        "input_hash": "sha256:923bb15d5568240af9ea5c5b0e4f5673b7f88a952410fe93389d1ab6eb13ae9d",
+        "output_hash": "sha256:d6e48c85a2a5c8eddb9c857688249775881feceff7eab4d06355945afb9a159a"
       },
       "ops": {
         "delay_sec": 0,
