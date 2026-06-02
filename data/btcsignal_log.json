@@ -54352,15 +54352,15 @@
     {
       "date": "2026-06-02",
       "state": "CASH",
-      "close": 67738.0,
+      "close": 67721.9,
       "reason": "private_current_signal",
-      "published_at_utc": "2026-06-02T15:12:40Z",
+      "published_at_utc": "2026-06-02T15:15:06Z",
       "signal_source": "private_btcsignal",
       "schema_version": "1.0",
       "proof": {
         "logic_version": "current",
         "input_hash": "sha256:f5e1aa5b726679381113470227ebb537016709ae593c227521be44dc2c188d3a",
-        "output_hash": "sha256:529b70952ce2d51c96ff55eda8dd4efc93d1976a9ae1785764f16a861667911e"
+        "output_hash": "sha256:c794e62c8664ae13d705a95c5bea3e6917a529cbcbe73c93748009a454d07655"
       },
       "ops": {
         "delay_sec": 0,
