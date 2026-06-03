@@ -54370,15 +54370,15 @@
     {
       "date": "2026-06-03",
       "state": "CASH",
-      "close": 67239.5,
+      "close": 66232.21,
       "reason": "private_current_signal",
-      "published_at_utc": "2026-06-03T10:35:47Z",
+      "published_at_utc": "2026-06-03T15:52:42Z",
       "signal_source": "private_btcsignal",
       "schema_version": "1.0",
       "proof": {
         "logic_version": "current",
-        "input_hash": "sha256:9e664774f619a64cd27e6423ed104f1b7af5b53d99acd817e007208e44383283",
-        "output_hash": "sha256:a98e0964cbc621fca3bceda6d423221db46a465141de3a7ca7d68f332dc485fc"
+        "input_hash": "sha256:ff569033c669d2c59d9ae5010e6362ba4071a6254552c48ac9c95428acdbd0d0",
+        "output_hash": "sha256:00a4e08fcf7d133420aea37e130b6260939eddbd883b368e424e7eab468c9341"
       },
       "ops": {
         "delay_sec": 0,
