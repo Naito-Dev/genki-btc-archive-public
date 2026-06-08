@@ -1,9 +1,9 @@
 {
-  "balance_ts_utc": "2026-06-07T00:10:23Z",
+  "balance_ts_utc": "2026-06-08T00:10:19Z",
   "btc_balance": null,
-  "price_at_snapshot": 60814.02,
+  "price_at_snapshot": 63171.5,
   "snapshot_status": "SYNC_PENDING",
   "source": "unavailable",
-  "updated_at_utc": "2026-06-07T00:00:00Z",
+  "updated_at_utc": "2026-06-08T00:00:00Z",
   "usdt_balance": null
 }
