@@ -2,11 +2,8 @@ name: Private Signal Build
 
 on:
   schedule:
-    - cron: '5 11 * * *' # 20:05 JST primary
-    - cron: '8 11 * * *' # 20:08 JST retry if GitHub drops/delays the primary schedule
-    - cron: '12 11 * * *' # 20:12 JST retry
-    - cron: '16 11 * * *' # 20:16 JST retry
-    - cron: '20 11 * * *' # 20:20 JST final retry
+    - cron: '5 10 * * *' # 19:05 JST early trigger; waits until 20:05 JST
+    - cron: '15 11 * * *' # 20:15 JST recovery trigger if the early schedule is dropped
   workflow_dispatch:
 
 permissions:
@@ -20,8 +17,21 @@ concurrency:
 jobs:
   build-and-dispatch:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
 
     steps:
+      - name: Wait for 20:05 JST target
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          set -euo pipefail
+          TARGET_EPOCH="$(date -u -d "$(date -u +%F)T11:05:00Z" +%s)"
+          NOW_EPOCH="$(date -u +%s)"
+          WAIT_SEC=$(( TARGET_EPOCH - NOW_EPOCH ))
+          if [ "${WAIT_SEC}" -gt 0 ]; then
+            echo "Waiting ${WAIT_SEC}s for the 20:05 JST build target."
+            sleep "${WAIT_SEC}"
+          fi
+
       - name: Checkout
         uses: actions/checkout@v5
         with:
