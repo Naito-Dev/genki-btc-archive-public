@@ -2,11 +2,7 @@ name: Daily Archive Update
 
 on:
   schedule:
-    - cron: "5 11 * * *" # 20:05 JST primary daily prep; deterministic publish at 20:10 JST
-    - cron: "8 11 * * *" # 20:08 JST retry if GitHub drops/delays the primary schedule
-    - cron: "12 11 * * *" # 20:12 JST retry
-    - cron: "16 11 * * *" # 20:16 JST retry
-    - cron: "20 11 * * *" # 20:20 JST final retry
+    - cron: "20 11 * * *" # 20:20 JST direct fallback if Private Signal Build does not dispatch
     - cron: "32 11 * * *" # 20:32 JST missed-run check
   workflow_dispatch:
     inputs:
@@ -450,13 +446,6 @@ jobs:
             btcsignal_log_live.json
             substack/daily_latest.txt
             substack/status.json
-
-      - name: Approve daily update PR
-        if: ${{ always() && steps.cpr.outputs.pull-request-number != '' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr review "${{ steps.cpr.outputs.pull-request-number }}" --approve --body "Automated approval for daily data update."
 
       - name: Squash merge daily update PR
         if: ${{ always() && steps.cpr.outputs.pull-request-number != '' }}
