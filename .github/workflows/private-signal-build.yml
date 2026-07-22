@@ -2,8 +2,12 @@ name: Private Signal Build
 
 on:
   schedule:
+    - cron: '35 9 * * *' # 18:35 JST early trigger; waits until 20:05 JST
     - cron: '5 10 * * *' # 19:05 JST early trigger; waits until 20:05 JST
-    - cron: '15 11 * * *' # 20:15 JST recovery trigger if the early schedule is dropped
+    - cron: '35 10 * * *' # 19:35 JST early trigger; waits until 20:05 JST
+    - cron: '5 11 * * *' # 20:05 JST target trigger
+    - cron: '15 11 * * *' # 20:15 JST recovery trigger
+    - cron: '35 11 * * *' # 20:35 JST recovery trigger
   workflow_dispatch:
 
 permissions:
@@ -12,12 +16,12 @@ permissions:
 
 concurrency:
   group: private-signal-build
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-and-dispatch:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
 
     steps:
       - name: Wait for 20:05 JST target
