@@ -2,8 +2,11 @@ name: Daily Archive Update
 
 on:
   schedule:
+    - cron: "45 10 * * *" # 19:45 JST direct fallback; waits until 20:10 JST
+    - cron: "5 11 * * *" # 20:05 JST direct fallback; waits until 20:10 JST
     - cron: "20 11 * * *" # 20:20 JST direct fallback if Private Signal Build does not dispatch
     - cron: "32 11 * * *" # 20:32 JST missed-run check
+    - cron: "50 11 * * *" # 20:50 JST late direct fallback
   workflow_dispatch:
     inputs:
       private_result_b64:
