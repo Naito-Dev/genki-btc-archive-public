@@ -1,0 +1,7 @@
+# btcsignal.org
+#
+# Archived sales pages are retained in the public git history only.
+# They are not served, and must not be re-published under /archive/.
+
+User-agent: *
+Disallow: /archive/
