@@ -250,7 +250,7 @@
       Rule-based, not predictive. No constant chart monitoring.
     </p>
     <div class="hero-cta">
-      <a href="#waitlist" class="btn-outline">Get notified when access opens (Free)</a>
+      <a href="#waitlist" class="btn-outline">Get notified of new records (Free)</a>
     </div>
   </section>
 </div>
@@ -305,7 +305,7 @@
 <div class="wrap">
   <section>
     <h2>Proof before outcomes</h2>
-    <p>We do not publish performance promises. We publish decision logs in real time. Entries are recorded before outcomes, so they cannot be rewritten later.</p>
+    <p>We do not publish performance promises. We publish decision logs in real time. Entries are recorded before outcomes, and every change remains visible in the public commit history.</p>
 
     <div class="proof-box">
       <div class="proof-row">
@@ -370,17 +370,17 @@
 
 <div class="wrap">
   <section class="cta-sec" id="waitlist">
-    <h2>Be first to know when access opens</h2>
+    <h2>Get notified of new records</h2>
     <p>
-      Paid access opens only after enough verification history is accumulated. Date and pricing are not announced yet.
-      Join the waitlist to receive the first notification.
+      This record feed is in its verification phase and is free to follow.
+      Join the list to receive updates.
     </p>
 
     <div class="form-box">
       <form action="#" method="post" onsubmit="return false;">
         <input id="waitlistEmail" type="email" name="email" placeholder="Email address" required>
         <input id="waitlistName" type="text" name="name" placeholder="Name (optional)">
-        <button id="waitlistSubmitBtn" type="button" class="btn-primary">Get notified when access opens (Free)</button>
+        <button id="waitlistSubmitBtn" type="button" class="btn-primary">Get notified of new records (Free)</button>
         <p id="waitlistStatus" class="reassure" aria-live="polite"></p>
       </form>
       <p class="reassure">
@@ -406,7 +406,7 @@
 
     <div class="faq-item">
       <p class="faq-q">What do I receive after signup?</p>
-      <p class="faq-a">During waitlist phase, launch notification only. After launch, one daily state record is published at 12:12 UTC.</p>
+      <p class="faq-a">Update notifications for this record feed. One daily state record is published at 12:12 UTC.</p>
     </div>
 
     <div class="faq-item">
@@ -576,7 +576,7 @@
           }
         }
         if (!out.accepted) throw new Error('submit_failed_' + out.status);
-        setStatus('Submitted. We will notify you before access opens.');
+        setStatus('Submitted. We will send you updates.');
         emailEl.value = '';
         if (nameEl) nameEl.value = '';
       } catch (e) {
