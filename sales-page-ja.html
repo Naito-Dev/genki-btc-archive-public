@@ -291,7 +291,7 @@
       予測ではなくルール。チャート常時監視は不要。
     </p>
     <div class="hero-cta">
-      <a href="#waitlist" class="btn-outline">提供開始の通知を受け取る（無料）</a>
+      <a href="#waitlist" class="btn-outline">新しい記録を通知で受け取る（無料）</a>
     </div>
   </section>
 </div>
@@ -349,7 +349,7 @@
 <div class="wrap">
   <section>
     <h2>後出しではない証拠</h2>
-    <p>パフォーマンス数値は一切掲載しません。代わりに、すべての判定ログをリアルタイムで公開しています。結果が出る前に記録されているため、後から書き換えることは構造的に不可能です。</p>
+    <p>パフォーマンス数値は一切掲載しません。代わりに、すべての判定ログをリアルタイムで公開しています。結果が出る前に記録されており、変更履歴はすべて公開のコミット履歴から確認できます。</p>
 
     <div class="proof-box">
       <div class="proof-row">
@@ -416,16 +416,16 @@
 <!-- ═══ WAITLIST CTA ═══ -->
 <div class="wrap">
   <section class="cta-sec" id="waitlist">
-    <h2>提供開始のとき、最初に知る</h2>
+    <h2>新しい記録をお知らせします</h2>
     <p>
-      有料提供を開始する条件は「十分な検証期間を終えること」のみです。日付も価格も未定。登録しておけば、条件が揃ったときに最初に通知が届きます。
+      この記録フィードは検証フェーズにあり、無料で購読できます。登録しておけば、更新のお知らせが届きます。
     </p>
 
     <div class="form-box">
       <form action="#" method="post" onsubmit="return false;">
         <input id="waitlistEmail" type="email" name="email" placeholder="メールアドレス" required>
         <input id="waitlistName" type="text" name="name" placeholder="ニックネーム（任意）">
-        <button id="waitlistSubmitBtn" type="button" class="btn-primary">提供開始を通知で受け取る（無料）</button>
+        <button id="waitlistSubmitBtn" type="button" class="btn-primary">新しい記録を通知で受け取る（無料）</button>
         <p id="waitlistStatus" class="reassure" aria-live="polite"></p>
       </form>
       <p class="reassure">
@@ -447,12 +447,12 @@
 
     <div class="faq-item">
       <p class="faq-q">なぜBTC/CASHの理由を説明しないのですか？</p>
-      <p class="faq-a">BTC SIGNALは「記録専用」です。確定した状態と改ざんできないログを公開しますが、理由説明・予測・売買推奨は行いません。解釈が必要な場合は各自の判断プロセスで行ってください。</p>
+      <p class="faq-a">BTC SIGNALは「記録専用」です。確定した状態と、変更履歴をすべて公開しているログを提供しますが、理由説明・予測・売買推奨は行いません。解釈が必要な場合は各自の判断プロセスで行ってください。</p>
     </div>
 
     <div class="faq-item">
       <p class="faq-q">登録後、何が届きますか？</p>
-      <p class="faq-a">現在はウェイトリスト段階のため、有料提供開始時の通知のみです。提供開始後は毎日21:12 JSTに状態記録を公開します。</p>
+      <p class="faq-a">この記録フィードの更新通知です。状態記録は毎日21:12 JSTに公開しています。</p>
     </div>
 
     <div class="faq-item">
@@ -623,7 +623,7 @@
           }
         }
         if (!out.accepted) throw new Error('submit_failed_' + out.status);
-        setStatus('登録しました。提供開始前に通知します。');
+        setStatus('登録しました。更新をお知らせします。');
         emailEl.value = '';
         if (nameEl) nameEl.value = '';
       } catch (e) {
