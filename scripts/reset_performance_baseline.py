@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reset performance baseline in log.json without touching trading logic/history."""
+"""Reset performance baseline in data/log.json without touching trading logic/history."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from pathlib import Path
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
-    p.add_argument("--log", default="log.json", help="Path to log.json")
+    p.add_argument("--log", default="data/log.json", help="Path to data/log.json")
     return p.parse_args()
 
 

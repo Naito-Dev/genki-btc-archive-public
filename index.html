@@ -567,8 +567,8 @@
     // Display source map (single-source integrity rules):
     // - Status label: btcsignal_log_live.json.entries[-1].state -> BTC/CASH
     // - Reason text: btcsignal_log_live.json.entries[-1].reason
-    // - Signal Updated timestamp: log.json.latest.published_at_utc (strict; no fallback)
-    // - LIVE TESTING Day N: TEST_START_DATE_JST + log.json.latest.date
+    // - Signal Updated timestamp: data/log.json.latest.published_at_utc (strict; no fallback)
+    // - LIVE TESTING Day N: TEST_START_DATE_JST + data/log.json.latest.date
     // - LIVE TESTING equity/P&L: data/live_portfolio_snapshot.json + data/live_test_baseline.json
     const TEST_START_DATE_JST = "2026-02-26";
     const RECENT_INITIAL_COUNT = 10;
@@ -1086,7 +1086,7 @@
 
     async function load() {
       const [logRes, btLogRes] = await Promise.all([
-        fetch(`log.json?ts=${Date.now()}`, { cache: "no-store" }),
+        fetch(`data/log.json?ts=${Date.now()}`, { cache: "no-store" }),
         fetch(`btcsignal_log_live.json?ts=${Date.now()}`, { cache: "no-store" }),
       ]);
       const log = await logRes.json();

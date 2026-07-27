@@ -1048,7 +1048,7 @@ def main() -> None:
         except Exception:
             pass
 
-    print("Updated: log.json")
+    print("Updated: data/log.json")
     print(msg)
 
 

@@ -478,7 +478,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path("log.json")
+          p = Path("data/log.json")
           latest_date = "UNAVAILABLE"
           latest_updated = "UNAVAILABLE"
           try:
@@ -558,7 +558,7 @@ jobs:
           import json, os
           from pathlib import Path
           expected = os.environ.get("EXPECTED_DATE_UTC", "").strip()
-          p = Path("log.json")
+          p = Path("data/log.json")
           latest_date = "UNAVAILABLE"
           latest_updated = "UNAVAILABLE"
           try:

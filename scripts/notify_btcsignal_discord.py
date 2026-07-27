@@ -39,7 +39,7 @@ def btcsignal_paths(cli_path: str) -> list[Path]:
 
 def load_log_latest() -> dict:
     root = Path(__file__).resolve().parent.parent
-    p = root / "log.json"
+    p = root / "data" / "log.json"
     data = load_json(p)
     if not isinstance(data, dict):
         return {}

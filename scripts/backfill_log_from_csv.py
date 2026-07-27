@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LOG_JSON = ROOT / "log.json"
+LOG_JSON = ROOT / "data" / "log.json"
 
 
 def _sha256_hex(s: str) -> str:

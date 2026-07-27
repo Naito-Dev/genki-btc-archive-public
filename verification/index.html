@@ -259,13 +259,13 @@
       <h3>Public Verification Links</h3>
       <div class="links">
         <a href="https://naito-dev.github.io/genki-btc-archive-public/">Public Dashboard</a>
-        <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json">Public proof records (log.json)</a>
+        <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/data/log.json">Public proof records (log.json)</a>
         <a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.md">Backtest methodology (reference)</a>
         <a href="https://github.com/Naito-Dev/genki-btc-archive-public">Project documentation index (public repository)</a>
       </div>
 
       <h3 style="margin-top:14px">Human-Readable Proof Log (Latest 20)</h3>
-      <p class="subtle">This is a readable view of public proof records from <code>log.json</code>. It does not expose proprietary strategy logic.</p>
+      <p class="subtle">This is a readable view of public proof records from <code>data/log.json</code>. It does not expose proprietary strategy logic.</p>
       <div class="proof-summary" aria-label="Proof log summary">
         <div class="summary-item"><div class="summary-label">Total Records</div><div class="summary-value" id="summaryTotalEn">UNAVAILABLE</div></div>
         <div class="summary-item"><div class="summary-label">Latest Proof Time (UTC)</div><div class="summary-value" id="summaryTimeEn">UNAVAILABLE</div></div>
@@ -358,13 +358,13 @@
       <h3>公開検証リンク</h3>
       <div class="links">
         <a href="https://naito-dev.github.io/genki-btc-archive-public/">公開ダッシュボード</a>
-        <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/log.json">公開証跡（log.json）</a>
+        <a href="https://raw.githubusercontent.com/Naito-Dev/genki-btc-archive-public/main/data/log.json">公開証跡（log.json）</a>
         <a href="https://github.com/Naito-Dev/genki-btc-archive-public/blob/main/README.md">バックテスト手法（参考）</a>
         <a href="https://github.com/Naito-Dev/genki-btc-archive-public">公開ドキュメント索引（リポジトリ）</a>
       </div>
 
       <h3 style="margin-top:14px">公開証跡ログ（読みやすい表示・最新20件）</h3>
-      <p class="subtle"><code>log.json</code> の公開証跡を人間向けに整形表示しています。戦略ロジック本体は公開しません。</p>
+      <p class="subtle"><code>data/log.json</code> の公開証跡を人間向けに整形表示しています。戦略ロジック本体は公開しません。</p>
       <div class="proof-summary" aria-label="公開証跡ログサマリー">
         <div class="summary-item"><div class="summary-label">公開記録の件数</div><div class="summary-value" id="summaryTotalJa">UNAVAILABLE</div></div>
         <div class="summary-item"><div class="summary-label">最新の公開記録時刻（UTC）</div><div class="summary-value" id="summaryTimeJa">UNAVAILABLE</div></div>
@@ -660,7 +660,7 @@
         if (!en && !ja) return;
 
         try {
-          const res = await fetch(`https://naito-dev.github.io/genki-btc-archive-public/log.json?ts=${Date.now()}`, { cache: 'no-store' });
+          const res = await fetch(`/data/log.json?ts=${Date.now()}`, { cache: 'no-store' });
           if (!res.ok) throw new Error(`log_fetch_${res.status}`);
           const log = await res.json();
           const entries = Array.isArray(log && log.entries) ? sortByUtcDesc(log.entries) : [];
