@@ -1,9 +1,9 @@
 {
-  "run_id": "31133665298",
-  "run_utc": "2026-08-07T00:10:25Z",
+  "run_id": "31172645368",
+  "run_utc": "2026-08-07T11:05:36Z",
   "workflow": "Daily Archive Update",
-  "last_known_record_date": "2026-08-06",
+  "last_known_record_date": "2026-08-07",
   "last_known_state": "CASH",
-  "status": "pipeline_failed",
-  "reason": "private_result_missing:/home/runner/work/genki-btc-archive-public/genki-btc-archive-public/.runtime/private_signal_result.json"
+  "status": "ok",
+  "reason": "none"
 }
