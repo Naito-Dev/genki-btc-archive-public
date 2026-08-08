@@ -1,8 +1,8 @@
 [SUBSTACK_WEEKLY]
-Subject: Weekly Ops • week ending 2026-07-22
+Subject: Weekly Ops • week ending 2026-07-29
 
 Body:
-Window: last 7 days (ending 2026-07-22)
+Window: last 7 days (ending 2026-07-29)
 
 Delivery:
 Days published: 7/7
@@ -17,7 +17,7 @@ Last 30-day match report: unavailable
 
 Links:
 Public log: https://btcsignal.org
-Verification: https://btcsignal.org/verification/last30_match_report_2026-07-22.txt
+Verification: https://btcsignal.org/verification/last30_match_report_2026-07-29.txt
 
 Record-only. No prediction. No reasoning. No advice. Not investment advice.
 [/SUBSTACK_WEEKLY]
