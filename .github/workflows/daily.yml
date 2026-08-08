@@ -421,8 +421,17 @@ jobs:
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Publish only when the signal data pipeline actually completed.
+      # Both of these steps run without `always()`, so a failed import leaves
+      # export_live skipped and btcsignal_log_live.json stale. Without this
+      # guard the later `always()` steps still opened and merged a PR, so a run
+      # that never obtained the private result published a partial update. On
+      # 2026-08-08 that partial merge (#482) became the base for the real
+      # dispatch run, whose PR (#483) then conflicted on substack/status.json
+      # and never merged -- leaving data/log.json at 08-08 while the dashboard's
+      # display file stayed at 08-07.
       - name: Create PR for daily update
-        if: ${{ always() && steps.changes.outputs.has_changes == 'true' }}
+        if: ${{ always() && steps.changes.outputs.has_changes == 'true' && steps.import_private.outcome == 'success' && steps.export_live.outcome == 'success' }}
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
