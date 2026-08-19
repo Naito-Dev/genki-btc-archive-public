@@ -1,23 +1,24 @@
 [SUBSTACK_WEEKLY]
-Subject: Weekly Ops • week ending 2026-08-12
+Subject: Weekly Ops • week ending 2026-08-19
 
 Body:
-Window: last 7 days (ending 2026-08-12)
+Window: last 7 days (ending 2026-08-19)
 
 Delivery:
-Days published: 7/7
-Missing days: 0
+Days published: 6/7
+Missing days: 1
+Missing: 2026-08-19
 
 Timeliness:
 Delay: data unavailable
 
 Integrity:
-Chain integrity (VALID days): 7/7
+Chain integrity (VALID days): 6/7
 Last 30-day match report: unavailable
 
 Links:
 Public log: https://btcsignal.org
-Verification: https://btcsignal.org/verification/last30_match_report_2026-08-12.txt
+Verification: https://btcsignal.org/verification/last30_match_report_2026-08-19.txt
 
 Record-only. No prediction. No reasoning. No advice. Not investment advice.
 [/SUBSTACK_WEEKLY]
