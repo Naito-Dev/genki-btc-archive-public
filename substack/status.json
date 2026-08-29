@@ -1,8 +1,8 @@
 {
-  "run_id": "33163906636",
-  "run_utc": "2026-08-28T10:35:19Z",
+  "run_id": "33248142809",
+  "run_utc": "2026-08-29T10:35:01Z",
   "workflow": "Daily Archive Update",
-  "last_known_record_date": "2026-08-28",
+  "last_known_record_date": "2026-08-29",
   "last_known_state": "CASH",
   "status": "ok",
   "reason": "none"
