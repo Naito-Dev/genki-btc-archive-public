@@ -56166,6 +56166,24 @@
         "delay_sec": 0,
         "status": "ok"
       }
+    },
+    {
+      "date": "2026-09-11",
+      "state": "CASH",
+      "close": 76956.93,
+      "reason": "private_current_signal",
+      "published_at_utc": "2026-09-11T10:33:03Z",
+      "signal_source": "private_btcsignal",
+      "schema_version": "1.0",
+      "proof": {
+        "logic_version": "current",
+        "input_hash": "sha256:a92f91392ca337a91a5e52250e44c7307085e85ccbe33bda276c31f398b91b08",
+        "output_hash": "sha256:b0ce681499006f7cca6a83651f3d8ed0d1785d30a5e9b6eb3f55f0dc3582dd6e"
+      },
+      "ops": {
+        "delay_sec": 0,
+        "status": "ok"
+      }
     }
   ]
 }
