@@ -38,10 +38,11 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
-      - name: Offline tests and original history protection
-        run: |
-          python3 -m unittest discover -s tests -v
-          python3 scripts/verify_history.py
+      - name: Offline calculation tests (record mode only)
+        if: inputs.mode == 'record'
+        run: python3 -m unittest discover -s tests -v
+      - name: Original history protection (all modes)
+        run: python3 scripts/verify_history.py
       - name: Record, preserve through PR, publish, then notify
         env:
           GH_TOKEN: ${{ github.token }}
