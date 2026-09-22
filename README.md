@@ -2,9 +2,9 @@
 
 決めたルールで BTC の確定日足を評価し、その結果と入力を保存する記録専用システムです。実売買・注文・口座残高の取得は行いません。`BTC` / `CASH` は計算上のラベルであり、実際の保有状態ではありません。
 
-**現在は自動更新停止中です。** 2026-09-22 に新ルールへ切り替える実装を導入しました。課金停止設定と本番経路の確認が終わるまで、定期実行を有効にしません。手動の単発検証と、自動運用の再開は別です。
+**日次自動更新を1本だけ再開しました。** 2026-09-22に保存・静的公開・Discord通知・課金停止制御を確認し、利用者の承認により毎日00:20 UTC（09:20 JST）の定期実行を有効にしました。再開設定後に手動計算は行わず、最初の定期実行を待ちます。
 
-[切替の実施結果・45件のテスト・本番確認](docs/implementation-report-2026-09-22.md): 初回対象日は2026-09-21 UTC、結果はBTC。保存と公開を確認し、DiscordはHTTP 404で未復旧です。
+[切替の実施結果・45件のテスト・本番確認](docs/implementation-report-2026-09-22.md): 初回対象日は2026-09-21 UTC、結果はBTC。当初のDiscord HTTP 404は通知専用run [35740146310](https://github.com/Naito-Dev/genki-btc-archive-public/actions/runs/35740146310)で復旧し、再計算なしの実投稿とmessage IDを確認しました。切替報告は当時の状態の原記録として残します。
 
 サイト: [www.btcsignal.org](https://www.btcsignal.org/)。[旧履歴の注意点](docs/history-notes.md)、[新ルール仕様](docs/rule-spec.md)を参照してください。
 
@@ -28,7 +28,7 @@ Web は HTML / CSS / 保存済み JSON だけです。ブラウザ用 JavaScript
 
 現在の唯一のルールは `SMA100_CLOSE_V1` です。対象日を含む連続100日分の終値の単純平均より、対象日の終値が厳密に上なら `BTC`、同じか下なら `CASH`。判定に表示用の丸め値は使いません。
 
-実行開始時点で直近の確定済み UTC 日足を対象とします。将来再開する場合の予定は **00:20 UTC / 09:20 JST に1日1回**です。例えば9月22日09:20 JSTに実行すると、対象は **9月21日 UTC**です。実際の取得・生成・公開時刻を別々に記録します。現在 Workflow に cron はありません。
+実行開始時点で直近の確定済み UTC 日足を対象とします。実行予定は **00:20 UTC / 09:20 JST に1日1回**（`20 0 * * *`）です。UTC日足確定から20分の余裕を設けます。例えば9月22日09:20 JSTに実行すると、対象は **9月21日 UTC**です。実際の取得・生成・公開時刻を別々に記録します。再開後の初回予定は2026-09-23 09:20 JST（00:20 UTC）で、2026-09-22 UTC日足を対象にします。GitHub側の混雑等で開始が遅れる可能性があります。対象日は実際の処理開始時点のUTC前日を使い、欠けた過去日を自動で埋め直しません。
 
 Model D の数式は残っていましたが、当時の価格系列には確定日足と実行時の価格取得が混在しており、入力元・日付・確定時刻まで忠実に復元できませんでした。承認された代替仕様として新ルールを採用し、旧記録とは別系列にします。採用日は2026-09-22、最初の判定対象日は実際に保存された `records/` の最初のファイルが根拠です。過去日を指定して正常ログを埋める本番 CLI はありません。
 
@@ -55,7 +55,7 @@ data/, logs/, archive/, verification/, proof/, output/
 
 ## Actions と必要な権限
 
-現行の独自 Workflow は **Record and publish BTC signal** (`record.yml`) 1本です。`workflow_dispatch` のみで、push、repository_dispatch、workflow_run、cron の起動条件はありません。手動実行は main に限定します。GitHub 管理の Pages build / deployment は静的公開のために残ります。旧6 Workflowは停止後に撤去しました。MacやOpenClawからの重複起動・監視・復旧は使いません。
+現行の独自 Workflow は **Record and publish BTC signal** (`record.yml`) 1本です。起動条件は毎日00:20 UTCの `schedule` 1件と、復旧用の `workflow_dispatch` だけです。push、repository_dispatch、workflow_runは使いません。両イベントともmainに限定し、scheduleは必ずrecordモードで直近確定日を処理します。通知だけの手動再送では計算用テストも起動しません。GitHub 管理の Pages build / deployment は静的公開のために残ります。旧6 Workflowは停止後に撤去しました。MacやOpenClawからの重複起動・監視・復旧は使いません。
 
 標準の `ubuntu-latest`、最大15分、同時実行1件、Python標準ライブラリのみです。市場GETは各15秒、最大3回。Pagesの待機も上限があり、失敗しても自己起動しません。Actions artifact と cache は使用しません。
 
@@ -95,7 +95,7 @@ python3 scripts/verify_history.py
 python3 scripts/build_site.py --root . --output _site
 ```
 
-これらのコマンドは取引・投稿・価格取得を行いません。本番の `operate.py` は指定したGitHubの手動実行コンテキスト外では拒否します。`record_daily.py` 単体は実データGETと保存を行うため、テスト代わりに実行しないでください。
+これらのコマンドは取引・投稿・価格取得を行いません。本番の `operate.py` は指定したGitHubのmain上のschedule/手動実行コンテキスト以外を拒否します。`record_daily.py` 単体は実データGETと保存を行うため、テスト代わりに実行しないでください。
 
 ## 過去ログの意味
 
@@ -113,6 +113,6 @@ python3 scripts/build_site.py --root . --output _site
 
 このWorkflowはartifact/cacheをアップロードしません。Gitで入力100本・結果・状態・静的ページを保存するため、Git容量は増加します。GitHubの既存のPages内部処理・ログ保持やアカウント全体の利用量までゼロと断定しません。大型ランナー・private実行・有料storageへ自動的に切り替える処理はありません。
 
-**アカウントの請求・予算・超過時停止設定は未確認です。** 通知予算だけでは利用は停止しません。所有者の Billing and licensing → Budgets and alerts で、Actions と該当storageの予算範囲および **Stop usage when budget limit is reached** を確認してください。他プロジェクト共通の設定は本作業で変更していません。[予算と停止設定](https://docs.github.com/en/billing/how-tos/set-up-budgets)
+**再開に必要なActions予算の上限到達時停止設定は、所有者の管理画面で確認済みです。** 既存の予算は変更していません。予算の詳細をこの公開資料に転載せず、確認記録を非公開の保全領域へ保存します。予算通知だけでは停止にならず、既存固定費や設定前の利用まで免除されるわけではありません。[予算と停止設定](https://docs.github.com/en/billing/how-tos/set-up-budgets)
 
-原本保護・判定・保存から公開までの実イベント検証・課金停止制御をすべて確認してから、新Workflowだけの00:20 UTC scheduleを通常のPRで追加し、`config/system.json` の運転モードを変更します。旧ジョブは再開しません。課金または判定に未確認がある間は自動運用を停止します。Discordだけ未復旧の場合は、日次記録と通知の復旧を分けて判断します。
+原本保護・判定・本番の保存/公開・Discord投稿・課金停止制御を確認後、新Workflowだけのscheduleを追加しました。旧Workflow・Mac・OpenClawは再開しません。監視・自動復旧・失敗後の自己起動はありません。障害時はActionsの失敗と保存されたstatus/deliveryを確認し、必要な手動復旧だけを行います。
