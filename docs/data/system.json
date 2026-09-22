@@ -1,5 +1,5 @@
 {
-  "operation_mode": "manual_only",
+  "operation_mode": "automatic",
   "rule_id": "SMA100_CLOSE_V1",
-  "built_at_utc": "2026-09-22T14:25:16.305274+00:00"
+  "built_at_utc": "2026-09-22T14:32:41.129776+00:00"
 }

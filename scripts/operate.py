@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bounded production orchestration. Only workflow_dispatch on main may run it."""
+"""Bounded production orchestration. Only daily schedule or manual dispatch on main."""
 from __future__ import annotations
 
 import argparse
@@ -47,7 +47,7 @@ def api(path, method="GET", data=None):
 
 def context():
     if (os.environ.get("GITHUB_ACTIONS") != "true"
-            or os.environ.get("GITHUB_EVENT_NAME") != "workflow_dispatch"
+            or os.environ.get("GITHUB_EVENT_NAME") not in {"workflow_dispatch", "schedule"}
             or os.environ.get("GITHUB_REF") != "refs/heads/main"
             or os.environ.get("GITHUB_REPOSITORY") != REPOSITORY):
         raise SignalError("production_workflow_context_required")
@@ -179,6 +179,8 @@ def verify_public(record_file):
 
 def operate(mode, record_file):
     run_id = context()
+    if os.environ.get("GITHUB_EVENT_NAME") == "schedule" and (mode != "record" or record_file):
+        raise SignalError("scheduled_run_must_record_latest_day")
     if mode not in {"record", "publish_only", "notify_only"}:
         raise SignalError("invalid_operation_mode")
     if open_record_prs():

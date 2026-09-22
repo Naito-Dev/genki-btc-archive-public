@@ -28,7 +28,7 @@
     "records/index.html",
     "status/latest.json"
   ],
-  "operation_mode": "manual_only",
+  "operation_mode": "automatic",
   "record_count": 1,
   "history_count": 3305
 }

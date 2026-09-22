@@ -1,8 +1,9 @@
 name: Record and publish BTC signal
 
-# No schedule, push, workflow_run or repository_dispatch trigger.
-# Enable a daily schedule only after the documented restart checks are complete.
+# One daily trigger, 20 minutes after UTC midnight. No push/watchdog triggers.
 on:
+  schedule:
+    - cron: '20 0 * * *'
   workflow_dispatch:
     inputs:
       mode:
@@ -39,7 +40,7 @@ jobs:
           ref: main
           fetch-depth: 1
       - name: Offline calculation tests (record mode only)
-        if: inputs.mode == 'record'
+        if: github.event_name == 'schedule' || inputs.mode == 'record'
         run: python3 -m unittest discover -s tests -v
       - name: Original history protection (all modes)
         run: python3 scripts/verify_history.py
@@ -47,6 +48,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          OPERATION_MODE: ${{ inputs.mode }}
+          OPERATION_MODE: ${{ github.event_name == 'schedule' && 'record' || inputs.mode }}
           RECORD_FILE: ${{ inputs.record_file }}
         run: python3 scripts/operate.py --mode "$OPERATION_MODE" --record-file "$RECORD_FILE"
