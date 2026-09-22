@@ -1,0 +1,30 @@
+{
+  "files": [
+    ".btc-signal-build",
+    ".nojekyll",
+    "CNAME",
+    "assets/style.css",
+    "data/history.json",
+    "data/records.json",
+    "data/system.json",
+    "history/2017.html",
+    "history/2018.html",
+    "history/2019.html",
+    "history/2020.html",
+    "history/2021.html",
+    "history/2022.html",
+    "history/2023.html",
+    "history/2024.html",
+    "history/2025.html",
+    "history/2026.html",
+    "history/index.html",
+    "history/notes.html",
+    "index.html",
+    "maintenance.html",
+    "records/index.html",
+    "status/latest.json"
+  ],
+  "operation_mode": "manual_only",
+  "record_count": 0,
+  "history_count": 3305
+}

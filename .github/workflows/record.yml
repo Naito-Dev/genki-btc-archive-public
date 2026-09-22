@@ -1,0 +1,51 @@
+name: Record and publish BTC signal
+
+# No schedule, push, workflow_run or repository_dispatch trigger.
+# Enable a daily schedule only after the documented restart checks are complete.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: record=前UTC日を記録 / publish_only=保存済み結果を公開 / notify_only=通知だけ
+        required: true
+        default: record
+        type: choice
+        options: [record, publish_only, notify_only]
+      record_file:
+        description: 再公開・再通知時だけ records/SMA100_CLOSE_V1/YYYY-MM-DD.json
+        type: string
+        default: ''
+
+permissions: {}
+
+concurrency:
+  group: btc-signal-record-production
+  cancel-in-progress: false
+
+jobs:
+  record:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      pages: write
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Offline tests and original history protection
+        run: |
+          python3 -m unittest discover -s tests -v
+          python3 scripts/verify_history.py
+      - name: Record, preserve through PR, publish, then notify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          OPERATION_MODE: ${{ inputs.mode }}
+          RECORD_FILE: ${{ inputs.record_file }}
+        run: python3 scripts/operate.py --mode "$OPERATION_MODE" --record-file "$RECORD_FILE"

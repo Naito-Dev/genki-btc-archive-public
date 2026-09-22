@@ -1,0 +1,9 @@
+[project]
+name = "btc-signal-archive"
+version = "1.0.0"
+description = "Immutable daily BTC rule records and static publication"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
