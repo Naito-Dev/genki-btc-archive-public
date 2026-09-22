@@ -1,0 +1,9 @@
+{
+  "operation_mode": "manual_only",
+  "rule_id": "SMA100_CLOSE_V1",
+  "switch_date_utc": "2026-09-22",
+  "automatic_schedule_enabled": false,
+  "billing_control_verified": false,
+  "proposed_daily_time_utc": "00:20",
+  "note": "課金停止設定と本番経路の確認完了まで自動実行しない。新ルールの単発検証のみ。"
+}

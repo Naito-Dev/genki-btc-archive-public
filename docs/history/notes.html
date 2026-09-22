@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; img-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="BTCの判定結果と検証用の記録を保存する静的アーカイブ。売買は行いません。">
+<title>記録の区分 — BTC SIGNAL</title><link rel="stylesheet" href="../assets/style.css"></head>
+<body><a class="skip" href="#main">本文へ</a><header><div class="shell header-inner">
+<a class="brand" href="../index.html">BTC SIGNAL</a><nav aria-label="メイン"><a href="../records/index.html">新方式の記録</a><a href="../history/index.html">過去ログ</a><a href="../history/notes.html">記録の区分</a></nav></div></header>
+<main id="main" class="shell"><div class="eyebrow">履歴の読み方</div><h1>記録の区分</h1>
+<p class="lead">旧原本を保存したうえで、当時の公開表示と、後から確認できた事実を分けて表示します。</p>
+<dl class="facts"><dt>新方式の固定記録</dt><dd>入力・ルール・実装・結果のハッシュを確認した、新方式の保存済み判定です。</dd>
+<dt>旧方式の計算履歴</dt><dd>旧モデルの理由を持つ記録です。再計算された履歴を含み、その日に公開されたことを保証しません。</dd>
+<dt>生成根拠未確認</dt><dd>private_current_signalなど、公開元の計算理由が失われた記録です。CASHだけで計算失敗と扱いません。</dd>
+<dt>計算失敗時の代入値</dt><dd>詳細原本にMINIMAL_MODE: regime unavailableと入力元unavailableが明記されています。公開記録とは別実行のため同一結果とは断定しません。</dd>
+<dt>後付け価格データ</dt><dd>HISTORICAL_BACKFILLと明記された、入力のための過去データです。当日判定ではありません。</dd>
+<dt>CSV計算記録</dt><dd>計算経路の理由が残っています。入力鮮度の保証がなく、新方式による正常記録とは区別します。</dd></dl>
+<section class="section"><h2>詳細原本の内訳</h2><p>後付け価格データ 3,090件 / 計算失敗時の代入値 212件 / CSV計算記録 3件。</p>
+<p>集約と日次で内容差がある日：2026-02-19、2026-02-25、2026-02-26、2026-02-27。違いを自動修正せず、それぞれの原本を維持しています。</p>
+<p>旧版data/btcsignal_log_live.jsonは、ルートの公開ログとは別の原本です。公開ログの欠日や、詳細記録との状態の不一致も、過去の再計算で埋めていません。</p></section>
+<section class="section"><h2>保存原本</h2><p>旧方式の原本は、記録日や判定を書き換えずGit履歴に保存しています。このサイトには口座残高・損益を含めない表示用データを掲載しています。</p>
+<p><a href="https://github.com/Naito-Dev/genki-btc-archive-public/tree/f60194683fbf7c92ba50e6ddcd519aa38883c807">点検開始時の保存原本をGitHubで確認</a></p><p class="small muted">保存基準コミット：<code>f60194683fbf7c92ba50e6ddcd519aa38883c807</code></p></section></main><footer><div class="shell"><p>判定結果を保存する記録システムです。売買・注文は行いません。</p>
+<p>ページ生成時刻：2026-09-22 13:47:18 UTC。表示は保存済みの記録です。</p></div></footer></body></html>
