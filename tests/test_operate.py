@@ -1,5 +1,6 @@
 """Production orchestration tests with every service and git mutation mocked."""
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -14,6 +15,11 @@ from stage_site import stage
 
 class OperateTests(unittest.TestCase):
     def setUp(self):
+        # These scenarios model manual recovery as well as recording. Do not
+        # inherit the outer Actions event; schedule guards have dedicated tests.
+        event = patch.dict(os.environ, {"GITHUB_EVENT_NAME": "workflow_dispatch"})
+        event.start()
+        self.addCleanup(event.stop)
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
