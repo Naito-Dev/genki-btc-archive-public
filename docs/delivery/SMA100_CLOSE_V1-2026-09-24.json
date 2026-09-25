@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "record_id": "SMA100_CLOSE_V1-2026-09-24",
+  "result_sha256": "fda71c50490502343e26aec11afce488a090ca32bcb36154c81360945e2c12bb",
+  "target_date": "2026-09-24",
+  "published_at_utc": "2026-09-25T05:02:37.910096Z",
+  "notification_state": "sent",
+  "attempted_at_utc": "2026-09-25T05:02:38.223742Z",
+  "send_started_at_utc": "2026-09-25T05:02:47.199709Z",
+  "sent_at_utc": "2026-09-25T05:02:48.445578Z"
+}
