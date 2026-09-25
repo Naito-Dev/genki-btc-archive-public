@@ -24,15 +24,18 @@
     "index.html",
     "inputs/SMA100_CLOSE_V1/2026-09-21.json",
     "inputs/SMA100_CLOSE_V1/2026-09-23.json",
+    "inputs/SMA100_CLOSE_V1/2026-09-24.json",
     "maintenance.html",
     "records/SMA100_CLOSE_V1/2026-09-21.html",
     "records/SMA100_CLOSE_V1/2026-09-21.json",
     "records/SMA100_CLOSE_V1/2026-09-23.html",
     "records/SMA100_CLOSE_V1/2026-09-23.json",
+    "records/SMA100_CLOSE_V1/2026-09-24.html",
+    "records/SMA100_CLOSE_V1/2026-09-24.json",
     "records/index.html",
     "status/latest.json"
   ],
   "operation_mode": "automatic",
-  "record_count": 2,
+  "record_count": 3,
   "history_count": 3305
 }
