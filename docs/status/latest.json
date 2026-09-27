@@ -1,8 +1,8 @@
 {
   "state": "recorded",
-  "target_date": "2026-09-25",
-  "record_id": "SMA100_CLOSE_V1-2026-09-25",
-  "result_file": "records/SMA100_CLOSE_V1/2026-09-25.json",
-  "result_sha256": "a50f97454b15a0864f961ac7dffa58b34f812949d51fe654252e3918348cfaad",
+  "target_date": "2026-09-26",
+  "record_id": "SMA100_CLOSE_V1-2026-09-26",
+  "result_file": "records/SMA100_CLOSE_V1/2026-09-26.json",
+  "result_sha256": "e3413b24f55653e44801e6079de7fd9c04bdaf08ae65bb6491674bcfe323f7fe",
   "label": "記録済み"
 }
