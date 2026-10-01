@@ -102,5 +102,18 @@
     "generated_at_utc": "2026-09-30T05:37:41.594057Z",
     "result_sha256": "1bad74a6e22908d7a349ab13543f70dd8c3adb49fa404608ba5fdf30dccae42e",
     "input_ref": "inputs/SMA100_CLOSE_V1/2026-09-29.json"
+  },
+  {
+    "record_id": "SMA100_CLOSE_V1-2026-09-30",
+    "target_date": "2026-09-30",
+    "rule_id": "SMA100_CLOSE_V1",
+    "decision": "BTC",
+    "close": "83556.14",
+    "sma100": "70293.8488",
+    "source": "coinbase_exchange",
+    "product": "BTC-USD",
+    "generated_at_utc": "2026-10-01T06:01:31.271589Z",
+    "result_sha256": "633afe3aee38d5c1a7ea355f18e86838e8dc591b04034ac6c28d57073d6da5e1",
+    "input_ref": "inputs/SMA100_CLOSE_V1/2026-09-30.json"
   }
 ]
