@@ -35,6 +35,7 @@
     "inputs/SMA100_CLOSE_V1/2026-09-28.json",
     "inputs/SMA100_CLOSE_V1/2026-09-29.json",
     "inputs/SMA100_CLOSE_V1/2026-09-30.json",
+    "inputs/SMA100_CLOSE_V1/2026-10-01.json",
     "maintenance.html",
     "records/SMA100_CLOSE_V1/2026-09-21.html",
     "records/SMA100_CLOSE_V1/2026-09-21.json",
@@ -54,10 +55,12 @@
     "records/SMA100_CLOSE_V1/2026-09-29.json",
     "records/SMA100_CLOSE_V1/2026-09-30.html",
     "records/SMA100_CLOSE_V1/2026-09-30.json",
+    "records/SMA100_CLOSE_V1/2026-10-01.html",
+    "records/SMA100_CLOSE_V1/2026-10-01.json",
     "records/index.html",
     "status/latest.json"
   ],
   "operation_mode": "automatic",
-  "record_count": 9,
+  "record_count": 10,
   "history_count": 3305
 }
